@@ -1,12 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, PenTool, Shirt, Heart } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
 
 const About: React.FC = () => {
     const images = [
-    "https://i.postimg.cc/cJk6R4gv/48d225ce96001f9fea2d9d8aa144e6c0.jpg", // Fashion/Street style
-    "https://i.postimg.cc/rFsW33cm/resizedcrop-4e12ae0d97e764b44e55881caebf4edd-840x630.jpg", // Smoke/Atmosphere
-  ];
+        "https://i.postimg.cc/zDPXXSV0/Cosa_vedere_a_Milano.jpg", 
+        "https://i.postimg.cc/SQtNN7Jv/Stadio_San_Siro_interno_Meazza_lapresse_2.jpg"
+    ];
 
   const [curr, setCurr] = useState(0);
 
@@ -25,11 +26,10 @@ const About: React.FC = () => {
   };
 
   return (
-    // NOTA: pt-64 allinea questo componente con l'header delle altre pagine
     <section id="about" className="pt-64 pb-24 bg-white border-t border-slate-100 overflow-hidden">
       <div className="container mx-auto px-6 max-w-6xl">
         
-        {/* HEADER: Stesso stile di Contatti e FAQ */}
+        {/* HEADER */}
         <motion.div 
           initial="hidden"
           whileInView="visible"
@@ -57,7 +57,6 @@ const About: React.FC = () => {
               className="space-y-8"
             >
                 <div>
-                
                     <p className="text-slate-600 leading-loose mb-4">
                         Tacalabala nasce per riempire il vuoto tra la curva e la passerella. 
                         <strong> Non vendiamo divise ufficiali da gara.</strong> Creiamo visioni: maglie <i>custom</i> e concept kit che fondono l'estetica calcistica con il design urbano.
@@ -105,23 +104,31 @@ const About: React.FC = () => {
                 <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#0066b2]/10 rounded-full blur-3xl"></div>
                 <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-slate-200/50 rounded-full blur-3xl"></div>
 
-                <div className="relative overflow-hidden rounded-[2.5rem] shadow-2xl shadow-blue-900/5 aspect-[4/3] group bg-white border border-slate-100">
-                    <div className="flex transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] h-full" style={{ transform: `translateX(-${curr * 100}%)` }}>
+                <div className="relative rounded-[2.5rem] shadow-2xl shadow-blue-900/5 group bg-white border border-slate-100 p-3">
+                    
+                    {/* Maschera interna - Changed to relative + absolute images and 3/2 aspect ratio */}
+                    <div className="relative w-full aspect-[3/2] overflow-hidden rounded-[2rem]">
                         {images.map((img, i) => (
-                            <img key={i} src={img} alt="Tacalabala Lifestyle" className="w-full h-full object-cover flex-shrink-0" />
+                            <img 
+                                key={i} 
+                                src={img} 
+                                alt="Tacalabala Lifestyle" 
+                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]" 
+                                style={{ transform: `translateX(${(i - curr) * 100}%)` }}
+                            />
                         ))}
                     </div>
                     
                     {/* Navigation Buttons */}
-                    <div className="absolute inset-0 flex items-center justify-between p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <button onClick={prev} className="p-3 rounded-full bg-white/90 text-slate-900 shadow-xl hover:scale-110 transition-transform backdrop-blur-sm"><ChevronLeft size={20} /></button>
-                        <button onClick={next} className="p-3 rounded-full bg-white/90 text-slate-900 shadow-xl hover:scale-110 transition-transform backdrop-blur-sm"><ChevronRight size={20} /></button>
+                    <div className="absolute inset-0 flex items-center justify-between p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                        <button onClick={prev} className="pointer-events-auto p-3 rounded-full bg-white/90 text-slate-900 shadow-xl hover:scale-110 transition-transform backdrop-blur-sm"><ChevronLeft size={20} /></button>
+                        <button onClick={next} className="pointer-events-auto p-3 rounded-full bg-white/90 text-slate-900 shadow-xl hover:scale-110 transition-transform backdrop-blur-sm"><ChevronRight size={20} /></button>
                     </div>
 
                     {/* Dots */}
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
                         {images.map((_, i) => (
-                            <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${curr === i ? "w-6 bg-white" : "w-1.5 bg-white/50"}`} />
+                            <div key={i} className={`h-1.5 rounded-full transition-all duration-300 shadow-sm ${curr === i ? "w-6 bg-white" : "w-1.5 bg-white/60"}`} />
                         ))}
                     </div>
                 </div>
@@ -134,3 +141,4 @@ const About: React.FC = () => {
 };
 
 export default About;
+    
