@@ -26,8 +26,9 @@ const About: React.FC = () => {
   };
 
   return (
-    <section id="about" className="pt-64 pb-24 bg-white border-t border-slate-100 overflow-hidden">
-      <div className="container mx-auto px-6 max-w-6xl">
+    <section id="about" className="pt-64 pb-24 bg-white border-t border-slate-100 overflow-hidden relative">
+      
+      <div className="container mx-auto px-6 max-w-6xl relative z-10">
         
         {/* HEADER */}
         <motion.div 
@@ -57,37 +58,43 @@ const About: React.FC = () => {
               className="space-y-8"
             >
                 <div>
-                    <p className="text-slate-600 leading-loose mb-4">
+                    <p className="text-slate-600 leading-loose mb-4 text-lg">
                         Tacalabala nasce per riempire il vuoto tra la curva e la passerella. 
                         <strong> Non vendiamo divise ufficiali da gara.</strong> Creiamo visioni: maglie <i>custom</i> e concept kit che fondono l'estetica calcistica con il design urbano.
                     </p>
-                    <p className="text-slate-600 leading-loose">
+                    <p className="text-slate-600 leading-loose text-lg">
                         Ogni pezzo è ispirato all'anima di Milano e ai colori nerazzurri, reinterpretati per chi vuole indossare la propria fede calcistica con uno stile unico, lontano dalle repliche commerciali.
                     </p>
                 </div>
 
-                {/* Features Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-slate-100 mt-6">
-                    <div className="flex flex-col gap-2 pt-6">
-                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#0066b2]">
-                            <PenTool size={20} />
+                {/* Features Grid - ICONE E TESTI INGRANDITI */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 pt-8 border-t border-slate-100 mt-8">
+                    <div className="flex flex-col gap-4">
+                        <div className="w-20 h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm">
+                            <PenTool size={40} />
                         </div>
-                        <h4 className="font-bold text-sm uppercase mt-2">Design Unico</h4>
-                        <p className="text-xs text-slate-500">Grafiche esclusive create dai nostri designer.</p>
+                        <div>
+                            <h4 className="font-bold text-lg uppercase text-slate-900">Design Unico</h4>
+                            <p className="text-sm text-slate-500 leading-relaxed mt-1">Grafiche esclusive create dai nostri designer.</p>
+                        </div>
                     </div>
-                    <div className="flex flex-col gap-2 pt-6">
-                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#0066b2]">
-                            <Shirt size={20} />
+                    <div className="flex flex-col gap-4">
+                        <div className="w-20 h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm">
+                            <Shirt size={40} />
                         </div>
-                        <h4 className="font-bold text-sm uppercase mt-2">Fit Moderno</h4>
-                        <p className="text-xs text-slate-500">Taglio streetwear perfetto per l'outfit quotidiano.</p>
+                        <div>
+                            <h4 className="font-bold text-lg uppercase text-slate-900">Fit Moderno</h4>
+                            <p className="text-sm text-slate-500 leading-relaxed mt-1">Taglio streetwear perfetto per l'outfit quotidiano.</p>
+                        </div>
                     </div>
-                    <div className="flex flex-col gap-2 pt-6">
-                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#0066b2]">
-                            <Heart size={20} />
+                    <div className="flex flex-col gap-4">
+                        <div className="w-20 h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm">
+                            <Heart size={40} />
                         </div>
-                        <h4 className="font-bold text-sm uppercase mt-2">Ispirazione</h4>
-                        <p className="text-xs text-slate-500">Tributo indipendente alla Milano nerazzurra.</p>
+                        <div>
+                            <h4 className="font-bold text-lg uppercase text-slate-900">Ispirazione</h4>
+                            <p className="text-sm text-slate-500 leading-relaxed mt-1">Tributo indipendente alla Milano nerazzurra.</p>
+                        </div>
                     </div>
                 </div>
             </motion.div>
@@ -106,7 +113,7 @@ const About: React.FC = () => {
 
                 <div className="relative rounded-[2.5rem] shadow-2xl shadow-blue-900/5 group bg-white border border-slate-100 p-3">
                     
-                    {/* Maschera interna - Changed to relative + absolute images and 3/2 aspect ratio */}
+                    {/* Maschera interna - Aspect Ratio 3:2 */}
                     <div className="relative w-full aspect-[3/2] overflow-hidden rounded-[2rem]">
                         {images.map((img, i) => (
                             <img 
@@ -141,4 +148,3 @@ const About: React.FC = () => {
 };
 
 export default About;
-    

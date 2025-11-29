@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { ArrowLeft, CreditCard, CheckCircle, Loader2, FileText, Globe, Lock, AlertCircle } from 'lucide-react';
-import { FaApplePay } from "react-icons/fa";
+import { FaApplePay, FaGooglePay, FaPaypal } from "react-icons/fa";
 
 interface CheckoutProps {
   onBack: () => void;
@@ -28,6 +29,11 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
   
   const [countryCode, setCountryCode] = useState('IT');
   const [wantInvoice, setWantInvoice] = useState(false);
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
 
   // --- STATI CARTA DI CREDITO ---
   const [cardData, setCardData] = useState({ number: '', expiry: '', cvc: '' });
@@ -250,10 +256,18 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                 <div className="space-y-6">
                     <label className={`${labelClass} mb-2 text-center w-full`}>Metodo di Pagamento</label>
                     
-                    {/* APPLE PAY BUTTON (ALTEZZA h-16 = 64px) */}
-                    <button type="button" className="w-full h-16 bg-black text-white rounded-full flex items-center justify-center gap-2 font-bold hover:opacity-90 transition-opacity shadow-md">
-                        <FaApplePay size={42} />
-                    </button>
+                    {/* BOTTONI DI PAGAMENTO RAPIDO (GRIGLIA) */}
+                    <div className="grid grid-cols-3 gap-3">
+                        <button type="button" className="h-14 bg-black text-white rounded-xl flex items-center justify-center hover:opacity-80 transition-opacity shadow-sm">
+                            <FaApplePay size={36} />
+                        </button>
+                        <button type="button" className="h-14 bg-white border border-slate-200 text-slate-900 rounded-xl flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm">
+                            <FaGooglePay size={36} />
+                        </button>
+                         <button type="button" className="h-14 bg-[#003087] text-white rounded-xl flex items-center justify-center hover:opacity-90 transition-opacity shadow-sm">
+                            <FaPaypal size={28} />
+                        </button>
+                    </div>
 
                     <div className="relative flex py-2 items-center"><div className="flex-grow border-t border-slate-200"></div><span className="flex-shrink-0 mx-4 text-slate-300 text-[10px] uppercase font-bold">Oppure carta</span><div className="flex-grow border-t border-slate-200"></div></div>
 
@@ -299,7 +313,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                     )}
                 </div>
 
-                {/* BOTTONE FINALE (ALTEZZA h-16 = 64px, identica a Apple Pay) */}
+                {/* BOTTONE FINALE (ALTEZZA h-16 = 64px) */}
                 <button 
                     disabled={isProcessing} 
                     type="submit" 
