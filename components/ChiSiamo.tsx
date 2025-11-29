@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, PenTool, Shirt, Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-const ChiSiamo: React.FC = () => {
-  const images = [
-    "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=1200", // Stadium vibe
-    "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?q=80&w=1200", // Texture
-    "https://images.unsplash.com/photo-1579952363873-27f3bde9be2b?q=80&w=1200"  // Football
+const About: React.FC = () => {
+    const images = [
+    "https://i.postimg.cc/cJk6R4gv/48d225ce96001f9fea2d9d8aa144e6c0.jpg", // Fashion/Street style
+    "https://i.postimg.cc/rFsW33cm/resizedcrop-4e12ae0d97e764b44e55881caebf4edd-840x630.jpg", // Smoke/Atmosphere
   ];
 
   const [curr, setCurr] = useState(0);
@@ -19,60 +19,119 @@ const ChiSiamo: React.FC = () => {
     return () => clearInterval(slideInterval);
   }, []);
 
+  // Varianti per l'animazione fluida
+  const fadeIn = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+  };
+
   return (
-    <section className="pt-64 pb-24 bg-white border-t border-slate-100">
-      <div className="container mx-auto px-6 max-w-5xl">
+    // NOTA: pt-64 allinea questo componente con l'header delle altre pagine
+    <section id="about" className="pt-64 pb-24 bg-white border-t border-slate-100 overflow-hidden">
+      <div className="container mx-auto px-6 max-w-6xl">
         
-        {/* Header */}
-        <div className="text-center mb-16">
+        {/* HEADER: Stesso stile di Contatti e FAQ */}
+        <motion.div 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={fadeIn}
+          className="text-center mb-16"
+        >
              <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase mb-4 text-slate-900">
-                La Nostra <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Storia</span>
+                In trasferta e <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">giù in Città</span>
              </h2>
-             <p className="text-slate-500 max-w-2xl mx-auto leading-relaxed">
-                Nati dalla passione per i colori nerazzurri, siamo un collettivo di designer e tifosi che vuole portare lo stile di San Siro nelle strade di tutto il mondo.
+             <p className="text-slate-500 max-w-2xl mx-auto leading-relaxed text-lg">
+                Non seguiamo le regole del merchandising. Le riscriviamo.
              </p>
-        </div>
+        </motion.div>
 
-        {/* Content Split */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
-            <div className="space-y-6">
-                <h3 className="font-oswald text-3xl font-bold uppercase text-slate-900">Oltre il 90° minuto</h3>
-                <p className="text-slate-600 leading-loose">
-                    Tacalabala non è solo un negozio, è un tributo alla cultura calcistica milanese. Ogni maglia che disegniamo o selezioniamo racconta una storia di gloria, sofferenza e trionfo.
-                </p>
-                <p className="text-slate-600 leading-loose">
-                    Crediamo che la maglia da calcio sia l'ultimo vero vessillo tribale moderno. Per questo la trattiamo con il rispetto di un'opera d'arte e la grinta dello streetwear contemporaneo.
-                </p>
-                <div className="pt-4">
-                    <span className="inline-block bg-slate-100 text-slate-800 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-lg">
-                        Est. 2024 • Milano
-                    </span>
+        {/* CONTENT SPLIT */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            
+            {/* Text Column */}
+            <motion.div 
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeIn}
+              className="space-y-8"
+            >
+                <div>
+                
+                    <p className="text-slate-600 leading-loose mb-4">
+                        Tacalabala nasce per riempire il vuoto tra la curva e la passerella. 
+                        <strong> Non vendiamo divise ufficiali da gara.</strong> Creiamo visioni: maglie <i>custom</i> e concept kit che fondono l'estetica calcistica con il design urbano.
+                    </p>
+                    <p className="text-slate-600 leading-loose">
+                        Ogni pezzo è ispirato all'anima di Milano e ai colori nerazzurri, reinterpretati per chi vuole indossare la propria fede calcistica con uno stile unico, lontano dalle repliche commerciali.
+                    </p>
                 </div>
-            </div>
 
-            {/* Custom Carousel */}
-            <div className="relative overflow-hidden rounded-[2rem] shadow-2xl shadow-blue-900/10 aspect-[4/3] group">
-                <div className="flex transition-transform duration-700 ease-out h-full" style={{ transform: `translateX(-${curr * 100}%)` }}>
-                    {images.map((img, i) => (
-                        <img key={i} src={img} alt="" className="w-full h-full object-cover flex-shrink-0" />
-                    ))}
+                {/* Features Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-slate-100 mt-6">
+                    <div className="flex flex-col gap-2 pt-6">
+                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#0066b2]">
+                            <PenTool size={20} />
+                        </div>
+                        <h4 className="font-bold text-sm uppercase mt-2">Design Unico</h4>
+                        <p className="text-xs text-slate-500">Grafiche esclusive create dai nostri designer.</p>
+                    </div>
+                    <div className="flex flex-col gap-2 pt-6">
+                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#0066b2]">
+                            <Shirt size={20} />
+                        </div>
+                        <h4 className="font-bold text-sm uppercase mt-2">Fit Moderno</h4>
+                        <p className="text-xs text-slate-500">Taglio streetwear perfetto per l'outfit quotidiano.</p>
+                    </div>
+                    <div className="flex flex-col gap-2 pt-6">
+                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#0066b2]">
+                            <Heart size={20} />
+                        </div>
+                        <h4 className="font-bold text-sm uppercase mt-2">Ispirazione</h4>
+                        <p className="text-xs text-slate-500">Tributo indipendente alla Milano nerazzurra.</p>
+                    </div>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-between p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={prev} className="p-2 rounded-full bg-white/80 hover:bg-white text-slate-900 shadow-lg"><ChevronLeft size={24} /></button>
-                    <button onClick={next} className="p-2 rounded-full bg-white/80 hover:bg-white text-slate-900 shadow-lg"><ChevronRight size={24} /></button>
-                </div>
-                <div className="absolute bottom-4 right-0 left-0">
-                    <div className="flex items-center justify-center gap-2">
+            </motion.div>
+
+            {/* Carousel Column */}
+            <motion.div 
+               initial={{ opacity: 0, x: 50 }}
+               whileInView={{ opacity: 1, x: 0 }}
+               viewport={{ once: true }}
+               transition={{ duration: 0.8 }}
+               className="relative"
+            >
+                {/* Decorative Element Behind */}
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#0066b2]/10 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-slate-200/50 rounded-full blur-3xl"></div>
+
+                <div className="relative overflow-hidden rounded-[2.5rem] shadow-2xl shadow-blue-900/5 aspect-[4/3] group bg-white border border-slate-100">
+                    <div className="flex transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] h-full" style={{ transform: `translateX(-${curr * 100}%)` }}>
+                        {images.map((img, i) => (
+                            <img key={i} src={img} alt="Tacalabala Lifestyle" className="w-full h-full object-cover flex-shrink-0" />
+                        ))}
+                    </div>
+                    
+                    {/* Navigation Buttons */}
+                    <div className="absolute inset-0 flex items-center justify-between p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <button onClick={prev} className="p-3 rounded-full bg-white/90 text-slate-900 shadow-xl hover:scale-110 transition-transform backdrop-blur-sm"><ChevronLeft size={20} /></button>
+                        <button onClick={next} className="p-3 rounded-full bg-white/90 text-slate-900 shadow-xl hover:scale-110 transition-transform backdrop-blur-sm"><ChevronRight size={20} /></button>
+                    </div>
+
+                    {/* Dots */}
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
                         {images.map((_, i) => (
-                            <div key={i} className={`transition-all w-2 h-2 rounded-full ${curr === i ? "p-1 bg-white" : "bg-white/50"}`} />
+                            <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${curr === i ? "w-6 bg-white" : "w-1.5 bg-white/50"}`} />
                         ))}
                     </div>
                 </div>
-            </div>
+            </motion.div>
+
         </div>
       </div>
     </section>
   );
 };
 
-export default ChiSiamo;
+export default About;
