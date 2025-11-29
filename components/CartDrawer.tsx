@@ -126,9 +126,12 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ onCheckout }) => {
 
             <button 
               onClick={() => { toggleCart(); onCheckout(); }}
-              className="w-full bg-black text-white py-5 rounded-full font-bold uppercase tracking-widest hover:bg-[#0066b2] transition-all shadow-xl hover:shadow-blue-900/20 flex items-center justify-center gap-3 text-base"
+              className="w-full relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white py-5 rounded-full font-bold uppercase tracking-widest transition-all duration-300 shadow-xl hover:shadow-blue-900/20 flex items-center justify-center gap-3 text-base active:scale-95 transform-gpu"
             >
-              <CreditCard size={20} /> Procedi al Checkout
+               <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+               <span className="relative z-10 flex items-center gap-2">
+                  <CreditCard size={20} /> Procedi al Checkout
+               </span>
             </button>
           </div>
         )}

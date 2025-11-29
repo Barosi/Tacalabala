@@ -37,6 +37,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const stockCount = currentVariant ? currentVariant.stock : 0;
   const isSizeSoldOut = stockCount === 0;
 
+  // Stati del bottone per gestire classi condizionali complesse
+  const isDisabled = product.isSoldOut || isSizeSoldOut || isAdding || isAdded || isComingSoon;
+  const showHoverEffect = !isDisabled;
+
   return (
     <div className="group relative bg-white border border-slate-100 overflow-hidden hover:border-[#0066b2] transition-all duration-500 shadow-sm hover:shadow-2xl hover:shadow-blue-900/10 rounded-2xl h-full flex flex-col">
       
@@ -86,13 +90,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 <div className="flex gap-1">
                     {(['S', 'M', 'L', 'XL'] as Size[]).map((s) => {
                         const variant = product.variants?.find(v => v.size === s);
-                        const isDisabled = !variant || variant.stock === 0;
+                        const sizeDisabled = !variant || variant.stock === 0;
                         return (
                             <button
                                 key={s}
-                                disabled={isDisabled}
+                                disabled={sizeDisabled}
                                 onClick={(e) => { e.preventDefault(); setSelectedSize(s); }}
-                                className={`w-6 h-6 text-[10px] font-bold rounded flex items-center justify-center transition-all ${selectedSize === s ? 'bg-black text-white scale-110 shadow-md' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'} ${isDisabled ? 'opacity-30 cursor-not-allowed line-through' : ''}`}
+                                className={`w-6 h-6 text-[10px] font-bold rounded flex items-center justify-center transition-all ${selectedSize === s ? 'bg-black text-white scale-110 shadow-md' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'} ${sizeDisabled ? 'opacity-30 cursor-not-allowed line-through' : ''}`}
                             >
                                 {s}
                             </button>
@@ -129,26 +133,44 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                  )}
             </div>
             
+            {/* NEW BUTTON DESIGN: Modern Liquid Fill */}
             <button 
                 onClick={handleAddToCart}
-                disabled={product.isSoldOut || isSizeSoldOut || isAdding || isAdded || isComingSoon}
-                className={`px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all duration-300 min-w-[120px] justify-center ${
-                    product.isSoldOut || isSizeSoldOut || isComingSoon
-                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-                    : isAdded ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-black text-white hover:bg-[#0066b2] hover:shadow-lg'
-                }`}
+                disabled={isDisabled}
+                className={`
+                    relative overflow-hidden group/btn
+                    px-6 py-3 rounded-full 
+                    text-xs font-bold uppercase tracking-wider 
+                    flex items-center justify-center gap-2 
+                    transition-all duration-300 min-w-[130px] transform-gpu active:scale-95
+                    border
+                    ${product.isSoldOut || isSizeSoldOut || isComingSoon
+                        ? 'bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed' 
+                        : isAdded 
+                            ? 'bg-green-500 border-green-500 text-white shadow-md' 
+                            : 'bg-white border-slate-200 text-slate-900 shadow-sm hover:border-[#0066b2] hover:text-white hover:shadow-lg hover:shadow-blue-900/20'
+                    }
+                `}
             >
-                {isComingSoon ? (
-                    <><Lock size={14} /> Locked</>
-                ) : product.isSoldOut || isSizeSoldOut ? (
-                    'Esaurita'
-                ) : isAdding ? (
-                    <Loader2 size={18} className="animate-spin" />
-                ) : isAdded ? (
-                    <><Check size={16} /> Aggiunto</>
-                ) : (
-                    <>Aggiungi <ShoppingBag size={14} /></>
+                {/* Sliding Background Effect (Only visible if enabled and not added) */}
+                {showHoverEffect && !isAdded && (
+                    <span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
                 )}
+
+                {/* Content (z-10 to stay on top of background) */}
+                <span className="relative z-10 flex items-center gap-2">
+                    {isComingSoon ? (
+                        <><Lock size={14} /> Locked</>
+                    ) : product.isSoldOut || isSizeSoldOut ? (
+                        'Esaurita'
+                    ) : isAdding ? (
+                        <Loader2 size={18} className="animate-spin" />
+                    ) : isAdded ? (
+                        <><Check size={16} /> Aggiunto</>
+                    ) : (
+                        <><ShoppingBag size={14} className="order-first" /> Aggiungi</>
+                    )}
+                </span>
             </button>
         </div>
       </div>

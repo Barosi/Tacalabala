@@ -88,9 +88,12 @@ const Footer: React.FC = () => {
             
             <button 
                 onClick={scrollToTop}
-                className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-[#0066b2] transition-colors group"
+                className="relative overflow-hidden group/btn bg-slate-800 border border-slate-700 text-slate-400 hover:text-white px-6 py-3 rounded-full font-bold uppercase tracking-widest text-[10px] transition-all duration-300 flex items-center justify-center gap-2"
             >
-                Torna su <ArrowUp size={14} className="group-hover:-translate-y-1 transition-transform" />
+                <span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                <span className="relative z-10 flex items-center gap-2">
+                    <ArrowUp size={14} className="group-hover:-translate-y-1 transition-transform" /> Torna su 
+                </span>
             </button>
         </div>
       </div>

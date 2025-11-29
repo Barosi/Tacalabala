@@ -13,7 +13,7 @@ import Admin from './components/Admin';
 import Checkout from './components/Checkout';
 import CartDrawer from './components/CartDrawer';
 import InfoBar from './components/InfoBar';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, LogIn } from 'lucide-react';
 import { useStore } from './store/useStore';
 
 const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = ({ onLogin, onCancel }) => {
@@ -46,7 +46,13 @@ const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = (
                     <input type="text" placeholder="Username" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 focus:border-[#0066b2] outline-none" value={user} onChange={e => setUser(e.target.value)}/>
                     <input type="password" placeholder="Password" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 focus:border-[#0066b2] outline-none" value={pass} onChange={e => setPass(e.target.value)}/>
                     {error && <div className="bg-red-50 text-red-500 p-3 rounded-lg text-center text-xs font-bold uppercase tracking-wide border border-red-100">Credenziali Errate</div>}
-                    <button type="submit" className="w-full bg-black text-white py-4 rounded-full font-bold uppercase tracking-widest hover:bg-[#0066b2] transition-colors mt-2">Accedi</button>
+                    
+                    <button type="submit" className="w-full relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white py-4 rounded-full font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-blue-900/20 active:scale-95 transform-gpu mt-2">
+                         <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                         <span className="relative z-10 flex items-center gap-2">
+                             <LogIn size={16} /> Accedi
+                         </span>
+                    </button>
                 </div>
             </form>
         </section>

@@ -83,9 +83,12 @@ const SupportSection: React.FC = () => {
                 </div>
                 <button 
                     onClick={handleWhatsapp}
-                    className="w-full md:w-auto px-8 py-4 bg-black text-white rounded-full font-bold uppercase tracking-widest text-xs hover:bg-[#25D366] transition-colors shadow-lg flex items-center justify-center gap-2"
+                    className="w-full md:w-auto relative overflow-hidden group/btn bg-white border border-[#25D366] text-[#25D366] hover:text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-lg flex items-center justify-center gap-2 active:scale-95 transform-gpu"
                 >
-                    Apri Chat <MessageCircle size={16} />
+                    <span className="absolute inset-0 bg-[#25D366] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                    <span className="relative z-10 flex items-center gap-2">
+                        <MessageCircle size={16} /> Apri Chat
+                    </span>
                 </button>
             </div>
 
@@ -125,9 +128,12 @@ const SupportSection: React.FC = () => {
                         <button 
                             type="submit" 
                             disabled={loading}
-                            className="w-full md:w-auto px-10 py-4 bg-black text-white rounded-full font-bold uppercase tracking-widest text-xs hover:bg-[#0066b2] transition-colors shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                            className="w-full md:w-auto relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95 transform-gpu"
                         >
-                            {loading ? <Loader2 className="animate-spin" /> : <>Invia <Send size={16} /></>}
+                            <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                            <span className="relative z-10 flex items-center gap-2">
+                                {loading ? <Loader2 className="animate-spin" /> : <><Send size={16} /> Invia</>}
+                            </span>
                         </button>
                     </div>
                 </form>

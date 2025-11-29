@@ -68,7 +68,7 @@ const Contact: React.FC = () => {
             <div className="bg-white p-8 md:p-12 rounded-[2rem] border border-slate-100 shadow-lg flex flex-col justify-between h-full">
                 <div>
                      <h3 className="font-oswald text-2xl uppercase text-slate-900 mb-6 flex items-center gap-2">
-                        Chatta con noi <MessageCircle size={24} className="text-[#25D366]" />
+                        <MessageCircle size={24} className="text-[#25D366]" /> Chatta con noi 
                      </h3>
                      <p className="text-slate-500 mb-8 leading-relaxed">
                         Hai bisogno di una risposta veloce su taglie, spedizioni o dettagli dei prodotti? Il modo più rapido è scriverci su WhatsApp.
@@ -97,9 +97,12 @@ const Contact: React.FC = () => {
                 <div className="pt-2">
                     <button 
                         onClick={handleWhatsapp}
-                        className="w-full bg-[#25D366] text-white hover:bg-[#128C7E] font-bold uppercase tracking-widest py-4 rounded-full transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-green-500/20"
+                        className="w-full relative overflow-hidden group/btn bg-white border border-[#25D366] text-[#25D366] hover:text-white font-bold uppercase tracking-widest py-4 rounded-full transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-green-500/20 active:scale-95 transform-gpu"
                     >
-                        Apri Chat WhatsApp <MessageCircle size={16} />
+                        <span className="absolute inset-0 bg-[#25D366] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                        <span className="relative z-10 flex items-center gap-2">
+                             <MessageCircle size={18} /> Apri Chat WhatsApp
+                        </span>
                     </button>
                 </div>
             </div>
@@ -109,7 +112,7 @@ const Contact: React.FC = () => {
                  
                  <div className="w-full">
                      <h3 className="font-oswald text-2xl uppercase text-slate-900 mb-6 flex items-center gap-2">
-                        Inviaci un messaggio <Send size={24} className="text-[#0066b2]" />
+                         <Send size={24} className="text-[#0066b2]" /> Inviaci un messaggio
                      </h3>
                      
                      {/* Il form è collegato alla funzione sendEmail */}
@@ -154,9 +157,12 @@ const Contact: React.FC = () => {
                         // Importante: onClick triggera il submit del form esterno se non è dentro
                         onClick={() => formRef.current?.requestSubmit()} 
                         disabled={loading}
-                        className="w-full bg-black text-white hover:bg-[#0066b2] disabled:bg-slate-400 font-bold uppercase tracking-widest py-4 rounded-full transition-all flex items-center justify-center gap-2 shadow-lg"
+                        className="w-full relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 font-bold uppercase tracking-widest py-4 rounded-full transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-blue-900/20 active:scale-95 transform-gpu"
                     >
-                        {loading ? <Loader2 className="animate-spin" /> : <>Invia Messaggio <Send size={16} /></>}
+                        <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                        <span className="relative z-10 flex items-center gap-2">
+                             {loading ? <Loader2 className="animate-spin" /> : <><Send size={16} /> Invia Messaggio</>}
+                        </span>
                     </button>
                  </div>
             </div>

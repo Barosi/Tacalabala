@@ -12,7 +12,19 @@ const headerSubtitleClass = "text-slate-500 text-sm font-medium mt-1";
 const sectionHeaderClass = "font-bold text-slate-900 flex items-center gap-2 uppercase text-sm tracking-wider mb-6 pb-2 border-b border-slate-100";
 const inputClass = "w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-base placeholder:text-slate-400";
 const labelClass = "block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2 pl-1";
-const actionButtonClass = "bg-black text-white py-4 px-12 rounded-full font-bold uppercase tracking-widest hover:bg-[#0066b2] hover:shadow-lg hover:shadow-[#0066b2]/30 transition-all duration-300 flex items-center justify-center gap-3 transform active:scale-95 cursor-pointer";
+
+// UPDATED BUTTON STYLE: Icon Left, Rounded Full, Smooth Hover
+const actionButtonClass = "relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white py-4 px-12 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 flex items-center justify-center gap-3 transform-gpu active:scale-95 cursor-pointer shadow-sm hover:shadow-lg";
+
+// Helper for button content to allow liquid fill
+const ActionButtonContent = ({ icon: Icon, text }: { icon: any, text: string }) => (
+    <>
+        <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+        <span className="relative z-10 flex items-center gap-3">
+            <Icon size={18} /> {text}
+        </span>
+    </>
+);
 
 // Stile Pulsante Eliminazione (Neutro -> Rosso)
 const deleteBtnClass = "w-10 h-10 bg-white text-slate-400 border border-slate-200 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white hover:border-red-500 transition-all shadow-sm z-10";
@@ -386,7 +398,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         
                         {/* BOTTONE CENTRALE */}
                         <div className="flex justify-center border-t border-slate-100 pt-8">
-                             <button type="submit" className={actionButtonClass}><Plus size={18} /> Pubblica Articolo</button>
+                             <button type="submit" className={actionButtonClass}>
+                                 <ActionButtonContent icon={Plus} text="Pubblica Articolo" />
+                             </button>
                         </div>
                     </form>
                 </div>
@@ -589,7 +603,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                             </div>
                         </div>
                         <div className="flex justify-center pt-4">
-                            <button type="submit" className={actionButtonClass}><Save size={18} /> Salva Regole</button>
+                            <button type="submit" className={actionButtonClass}>
+                                <ActionButtonContent icon={Save} text="Salva Regole" />
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -617,7 +633,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                             </div>
                         </div>
                          <div className="flex justify-center pt-4">
-                            <button type="submit" className={actionButtonClass}><Save size={18} /> Salva Configurazione</button>
+                            <button type="submit" className={actionButtonClass}>
+                                <ActionButtonContent icon={Save} text="Salva Configurazione" />
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -639,7 +657,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                             <input type="text" className={inputClass} value={whatsappNum} onChange={e => setWhatsappNum(e.target.value)} placeholder="393331234567" />
                         </div>
                         <div className="flex justify-center pt-4">
-                             <button type="submit" className={actionButtonClass}><Save size={18} /> Salva</button>
+                             <button type="submit" className={actionButtonClass}>
+                                 <ActionButtonContent icon={Save} text="Salva" />
+                             </button>
                         </div>
                     </form>
                  </div>
@@ -658,7 +678,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         </div>
                         <div><label className={labelClass}>Public Key</label><input type="password" className={inputClass} value={mailForm.publicKey} onChange={e => setMailForm({...mailForm, publicKey: e.target.value})} /></div>
                         <div className="flex justify-center pt-4">
-                            <button type="submit" className={actionButtonClass}><Save size={18} /> Salva</button>
+                            <button type="submit" className={actionButtonClass}>
+                                <ActionButtonContent icon={Save} text="Salva" />
+                            </button>
                         </div>
                     </form>
                  </div>
@@ -680,7 +702,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                             <div><label className={labelClass}>Domanda</label><input type="text" className={`${inputClass} bg-white`} value={newFaq.question} onChange={e => setNewFaq({...newFaq, question: e.target.value})} /></div>
                             <div><label className={labelClass}>Risposta</label><textarea rows={3} className={`${inputClass} bg-white`} value={newFaq.answer} onChange={e => setNewFaq({...newFaq, answer: e.target.value})} /></div>
                             <div className="flex justify-center">
-                                <button onClick={handleAddFaq} className={actionButtonClass}><Plus size={18} /> Aggiungi</button>
+                                <button onClick={handleAddFaq} className={actionButtonClass}>
+                                    <ActionButtonContent icon={Plus} text="Aggiungi" />
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -735,7 +759,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                             )}
                         </div>
                         <div className="flex justify-center pt-4">
-                             <button type="submit" className={actionButtonClass}><Save size={18} /> Salva</button>
+                             <button type="submit" className={actionButtonClass}>
+                                 <ActionButtonContent icon={Save} text="Salva" />
+                             </button>
                         </div>
                     </form>
                 </div>

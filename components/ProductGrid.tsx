@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import ProductCard from './ProductCard';
 import { Product } from '../types';
 import { INSTAGRAM_URL } from '../constants';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Instagram } from 'lucide-react';
 import { motion, useMotionValue, animate } from 'framer-motion';
 
 interface ProductGridProps {
@@ -70,11 +70,24 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
                 </h2>
             </div>
 
-            {/* Bottone Gallery Sotto il Titolo */}
-            <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="group flex items-center gap-3 text-slate-500 hover:text-black transition-colors text-xs uppercase tracking-[0.2em] font-bold py-3 bg-white/60 backdrop-blur-sm px-6 rounded-full border border-transparent hover:border-slate-200 hover:bg-white hover:shadow-lg transition-all">
-                Vedi Gallery
-                <span className="bg-white border border-slate-200 p-1.5 rounded-full group-hover:bg-[#0066b2] group-hover:border-[#0066b2] group-hover:text-white transition-all shadow-sm">
-                    <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            {/* Bottone Gallery NEW DESIGN */}
+            <a 
+                href={INSTAGRAM_URL} 
+                target="_blank" 
+                rel="noreferrer" 
+                className="
+                    relative overflow-hidden group/btn
+                    bg-white text-slate-900 border border-slate-200 
+                    py-3 px-8 rounded-full 
+                    text-xs uppercase tracking-[0.2em] font-bold 
+                    flex items-center gap-3 
+                    shadow-sm hover:shadow-xl hover:shadow-blue-900/20 hover:border-[#0066b2] hover:text-white
+                    transition-all duration-300 transform-gpu active:scale-95
+                "
+            >
+                <span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out z-0"></span>
+                <span className="relative z-10 flex items-center gap-3">
+                    <Instagram size={16} /> Vedi Gallery
                 </span>
             </a>
         </div>

@@ -127,7 +127,12 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
         <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-8 shadow-xl shadow-green-100"><CheckCircle size={48} /></div>
         <h2 className="font-oswald text-4xl font-bold uppercase mb-4 text-slate-900">Ordine Confermato!</h2>
         <p className="text-slate-500 max-w-md mx-auto mb-8 leading-relaxed">Grazie per il tuo acquisto. Abbiamo inviato una ricevuta a <span className="font-bold text-slate-900">{form.email}</span>.</p>
-        <button onClick={onBack} className="bg-black text-white px-8 py-4 rounded-full uppercase font-bold tracking-widest hover:bg-[#0066b2] transition-all shadow-lg hover:shadow-blue-500/30">Torna alla Home</button>
+        <button onClick={onBack} className="relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white px-8 py-4 rounded-full uppercase font-bold tracking-widest transition-all duration-300 shadow-lg hover:shadow-blue-500/30 active:scale-95 transform-gpu flex items-center gap-2">
+            <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+            <span className="relative z-10 flex items-center gap-2">
+                <ArrowLeft size={16} /> Torna alla Home
+            </span>
+        </button>
       </div>
     );
   }
@@ -205,7 +210,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                  </h2>
                  
                  {/* Toggle Switch Sotto il Header */}
-                 <div className="mb-6 flex items-center">
+                 <div className="mb-6 flex flex-col items-start w-full">
                      <div 
                         className="inline-flex items-center gap-3 cursor-pointer group p-2 rounded-xl hover:bg-slate-50 transition-colors" 
                         onClick={() => setWantInvoice(!wantInvoice)}
@@ -276,13 +281,13 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                     
                     {/* BOTTONI DI PAGAMENTO RAPIDO (GRIGLIA) */}
                     <div className="grid grid-cols-3 gap-3">
-                        <button type="button" className="h-14 bg-black text-white rounded-xl flex items-center justify-center hover:opacity-80 transition-opacity shadow-sm">
+                        <button type="button" className="h-14 bg-black text-white rounded-2xl flex items-center justify-center hover:opacity-80 transition-all duration-300 shadow-sm active:scale-95 transform-gpu">
                             <FaApplePay size={36} />
                         </button>
-                        <button type="button" className="h-14 bg-white border border-slate-200 text-slate-900 rounded-xl flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm">
+                        <button type="button" className="h-14 bg-white border border-slate-200 text-slate-900 rounded-2xl flex items-center justify-center hover:bg-slate-50 transition-all duration-300 shadow-sm active:scale-95 transform-gpu">
                             <FaGooglePay size={36} />
                         </button>
-                         <button type="button" className="h-14 bg-[#003087] text-white rounded-xl flex items-center justify-center hover:opacity-90 transition-opacity shadow-sm">
+                         <button type="button" className="h-14 bg-[#003087] text-white rounded-2xl flex items-center justify-center hover:opacity-90 transition-all duration-300 shadow-sm active:scale-95 transform-gpu">
                             <FaPaypal size={28} />
                         </button>
                     </div>
@@ -335,9 +340,12 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                 <button 
                     disabled={isProcessing} 
                     type="submit" 
-                    className="w-full h-16 mt-8 bg-[#0066b2] text-white rounded-full font-bold uppercase tracking-widest hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-900/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-sm transform active:scale-95"
+                    className="w-full h-16 mt-8 relative overflow-hidden group/btn bg-white border border-[#0066b2] text-[#0066b2] hover:text-white rounded-full font-bold uppercase tracking-widest transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-sm transform-gpu active:scale-95"
                 >
-                    {isProcessing ? <Loader2 className="animate-spin" /> : 'Paga Ora'}
+                    <span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                    <span className="relative z-10 flex items-center gap-2">
+                        {isProcessing ? <Loader2 className="animate-spin" /> : <><CreditCard size={18} /> Paga Ora</>}
+                    </span>
                 </button>
                 
                 <div className="mt-6 flex justify-center">
