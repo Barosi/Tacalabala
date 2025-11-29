@@ -8,12 +8,16 @@ export interface ProductVariant {
 
 export interface Product {
   id: string;
+  articleCode?: string; // SKU / Codice interno
   title: string;
-  season: string;
+  brand?: string; // Nike, Adidas, Umbro, Custom...
+  kitType?: string; // Home, Away, Third, Training...
+  year?: string; // 1997/98, 2024, etc.
+  season: string; // Visual label (es. "Streetwear Edition")
   price: string; // es. "€45"
   imageUrl: string;
   size: string; 
-  condition: string;
+  condition: string; // BNIB, Excellent, Good...
   description: string;
   isSoldOut: boolean;
   tags: string[];
@@ -58,6 +62,11 @@ export interface Order {
   items: CartItem[];
   date: string;
   status: OrderStatus;
+  invoiceDetails?: {
+      taxId: string;
+      vatNumber: string;
+      sdiCode: string;
+  };
 }
 
 export interface NavItem {
