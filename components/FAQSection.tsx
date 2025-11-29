@@ -41,7 +41,7 @@ const FAQSection: React.FC = () => {
 
     return (
         <section className="pt-32 md:pt-48 pb-16 md:pb-20 bg-white border-t border-slate-100">
-            <div className="container mx-auto px-6 max-w-4xl">
+            <div className="container mx-auto px-6 max-w-3xl">
                 <motion.div
                     initial="hidden"
                     whileInView="visible"
@@ -49,20 +49,23 @@ const FAQSection: React.FC = () => {
                     variants={fadeIn}
                 >
                     <div className="text-center mb-12 md:mb-16">
-                        <h2 className="font-oswald text-4xl md:text-6xl font-bold uppercase mb-4 text-slate-900 leading-tight">
+                        <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase mb-4 text-slate-900 leading-none">
                         Domande <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Frequenti</span>
                         </h2>
-                        <p className="text-slate-500 text-sm md:text-base px-4">Tutto quello che devi sapere su ordini, spedizioni e resi.</p>
+                        <p className="text-slate-500 text-base md:text-lg px-4 max-w-xl mx-auto font-light">
+                            Tutto quello che devi sapere su ordini, spedizioni e resi.
+                        </p>
                     </div>
 
-                    <div className="bg-white rounded-3xl p-4 md:p-8 border border-slate-100/50 shadow-sm">
+                    <div className="bg-white rounded-[2rem] p-6 md:p-10 border border-slate-100 shadow-xl shadow-blue-900/5">
                         {supportConfig.faqs.length > 0 ? (
                             supportConfig.faqs.map(faq => (
                                 <FAQItem key={faq.id} question={faq.question} answer={faq.answer} />
                             ))
                         ) : (
-                            <div className="text-center py-10 text-slate-400">
-                                <p>Nessuna domanda frequente disponibile al momento.</p>
+                            <div className="text-center py-12 text-slate-400">
+                                <HelpCircle size={48} className="mx-auto mb-4 opacity-20" />
+                                <p className="uppercase tracking-widest font-bold text-sm">Nessuna domanda disponibile</p>
                             </div>
                         )}
                     </div>

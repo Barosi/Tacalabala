@@ -38,10 +38,10 @@ const About: React.FC = () => {
           variants={fadeIn}
           className="text-center mb-12 md:mb-16"
         >
-             <h2 className="font-oswald text-4xl md:text-6xl font-bold uppercase mb-4 text-slate-900 leading-tight">
-                In trasferta e <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">giù in Città</span>
+             <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase mb-6 text-slate-900 leading-none tracking-tight">
+                In trasferta e <br className="md:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">giù in Città</span>
              </h2>
-             <p className="text-slate-500 max-w-2xl mx-auto leading-relaxed text-base md:text-lg px-2">
+             <p className="text-slate-500 max-w-2xl mx-auto leading-relaxed text-base md:text-lg px-2 font-light">
                 Non seguiamo le regole del merchandising. Le riscriviamo.
              </p>
         </motion.div>
@@ -55,10 +55,10 @@ const About: React.FC = () => {
               whileInView="visible"
               viewport={{ once: true }}
               variants={fadeIn}
-              className="space-y-8 text-center lg:text-left"
+              className="space-y-8 text-center lg:text-left order-2 lg:order-1"
             >
                 <div className="px-2">
-                    <p className="text-slate-600 leading-loose mb-4 text-base md:text-lg">
+                    <p className="text-slate-600 leading-loose mb-6 text-base md:text-lg">
                         Tacalabala nasce per riempire il vuoto tra la curva e la passerella. 
                         <strong> Non vendiamo divise ufficiali da gara.</strong> Creiamo visioni: maglie <i>custom</i> e concept kit che fondono l'estetica calcistica con il design urbano.
                     </p>
@@ -70,7 +70,7 @@ const About: React.FC = () => {
                 {/* Features Grid - ICONE E TESTI INGRANDITI */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 pt-8 border-t border-slate-100 mt-8">
                     <div className="flex flex-col items-center lg:items-start gap-4">
-                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm">
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm transform hover:scale-105 transition-transform">
                             <PenTool size={32} className="md:w-10 md:h-10" />
                         </div>
                         <div>
@@ -79,7 +79,7 @@ const About: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex flex-col items-center lg:items-start gap-4">
-                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm">
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm transform hover:scale-105 transition-transform">
                             <Shirt size={32} className="md:w-10 md:h-10" />
                         </div>
                         <div>
@@ -88,7 +88,7 @@ const About: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex flex-col items-center lg:items-start gap-4">
-                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm">
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm transform hover:scale-105 transition-transform">
                             <Heart size={32} className="md:w-10 md:h-10" />
                         </div>
                         <div>
@@ -105,7 +105,7 @@ const About: React.FC = () => {
                whileInView={{ opacity: 1, x: 0 }}
                viewport={{ once: true }}
                transition={{ duration: 0.8 }}
-               className="relative px-2 lg:px-0"
+               className="relative px-2 lg:px-0 order-1 lg:order-2"
             >
                 {/* Decorative Element Behind */}
                 <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#0066b2]/10 rounded-full blur-3xl hidden md:block"></div>

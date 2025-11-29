@@ -167,7 +167,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
              
              <div className="bg-white p-8 md:p-10 rounded-[2rem] shadow-sm border border-slate-200">
                  <h2 className="font-oswald text-2xl font-bold uppercase mb-8 flex items-center gap-3 text-slate-900">
-                    <span className="w-8 h-8 bg-[#0066b2] text-white flex items-center justify-center rounded-full text-sm font-sans shadow-lg shadow-blue-500/30">1</span> 
+                    <span className="w-8 h-8 bg-[#0066b2] text-white flex items-center justify-center rounded-full text-sm font-sans shadow-lg shadow-blue-500/30 flex-shrink-0">1</span> 
                     Dati di Spedizione
                  </h2>
                  
@@ -198,15 +198,30 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
              </div>
 
              <div className="bg-white p-8 md:p-10 rounded-[2rem] shadow-sm border border-slate-200">
-                 <div className="flex justify-between items-center mb-6">
-                     <h2 className="font-oswald text-2xl font-bold uppercase flex items-center gap-3 text-slate-900"><span className="w-8 h-8 bg-slate-900 text-white flex items-center justify-center rounded-full text-sm font-sans">2</span> Dati Fatturazione</h2>
-                     <div className="flex items-center gap-3 cursor-pointer" onClick={() => setWantInvoice(!wantInvoice)}>
-                         <span className={`text-xs font-bold uppercase ${wantInvoice ? 'text-[#0066b2]' : 'text-slate-400'}`}>Richiedi Fattura</span>
-                         <div className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${wantInvoice ? 'bg-[#0066b2]' : 'bg-slate-200'}`}><div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${wantInvoice ? 'translate-x-6' : 'translate-x-0'}`} /></div>
+                 {/* Header Separato */}
+                 <h2 className="font-oswald text-2xl font-bold uppercase flex items-center gap-3 text-slate-900 mb-6">
+                    <span className="w-8 h-8 bg-slate-900 text-white flex items-center justify-center rounded-full text-sm font-sans flex-shrink-0">2</span> 
+                    Dati Fatturazione
+                 </h2>
+                 
+                 {/* Toggle Switch Sotto il Header */}
+                 <div className="mb-6 flex items-center">
+                     <div 
+                        className="inline-flex items-center gap-3 cursor-pointer group p-2 rounded-xl hover:bg-slate-50 transition-colors" 
+                        onClick={() => setWantInvoice(!wantInvoice)}
+                     >
+                         <div className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 flex items-center ${wantInvoice ? 'bg-[#0066b2]' : 'bg-slate-200'}`}>
+                             <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${wantInvoice ? 'translate-x-6' : 'translate-x-0'}`} />
+                         </div>
+                         <span className={`text-xs font-bold uppercase tracking-wider transition-colors ${wantInvoice ? 'text-[#0066b2]' : 'text-slate-500 group-hover:text-slate-800'}`}>
+                             Richiedi Fattura
+                         </span>
                      </div>
                  </div>
-                 <div className={`transition-all duration-500 overflow-hidden ${wantInvoice ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                     <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+
+                 {/* Form Fatturazione con Animazione */}
+                 <div className={`transition-all duration-500 ease-in-out overflow-hidden ${wantInvoice ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                     <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4 mb-2">
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                              <div><label className={labelClass}>Codice Fiscale</label><input type="text" className={inputClass} value={form.taxId} onChange={e => setForm({...form, taxId: e.target.value})} placeholder="CF..." /></div>
                              <div><label className={labelClass}>Partita IVA (Opzionale)</label><input type="text" className={inputClass} value={form.vatNumber} onChange={e => setForm({...form, vatNumber: e.target.value})} placeholder="P.IVA..." /></div>
@@ -220,7 +235,10 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
           {/* COLONNA DESTRA: RIEPILOGO AMPIO + PAGAMENTO */}
           <div className="space-y-8">
              <div className="bg-white p-8 md:p-10 rounded-[2rem] shadow-xl border border-slate-200 sticky top-32">
-                <h3 className="font-oswald text-2xl font-bold uppercase mb-8 text-slate-900 border-b border-slate-100 pb-4">Il tuo Ordine</h3>
+                <h3 className="font-oswald text-2xl font-bold uppercase mb-8 text-slate-900 border-b border-slate-100 pb-4 flex items-center gap-3">
+                    <span className="w-8 h-8 bg-slate-900 text-white flex items-center justify-center rounded-full text-sm font-sans shadow-lg shadow-blue-500/30 flex-shrink-0">3</span>
+                    Il tuo Ordine
+                </h3>
                 
                 {/* LISTA PRODOTTI */}
                 <div className="space-y-6 mb-8">

@@ -27,24 +27,27 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
     setIsMobileMenuOpen(false);
   };
 
-  // Calcola le classi della navbar per gestire stati diversi (scroll, menu aperto, pagina interna)
   const getNavbarClasses = () => {
-      // 1. Se il menu mobile è aperto, la navbar deve "fondersi" con il menu (bianco, senza bordo)
+      // Detect compact state (scrolled or inner page)
+      const isCompact = isScrolled || currentPage !== 'home';
+
       if (isMobileMenuOpen) {
-          return 'bg-white border-transparent py-4 shadow-none'; 
+          // Mobile Menu Open: Solid white, no border, no shadow.
+          // IMPORTANT: Maintain existing padding to prevent layout jump.
+          return `bg-white border-transparent shadow-none ${isCompact ? 'py-2' : 'py-6'}`;
       }
       
-      // 2. Se siamo scrollati O se siamo in una pagina interna, navbar bianca "sticky"
-      if (isScrolled || currentPage !== 'home') {
-          return 'bg-white/95 backdrop-blur-xl border-slate-200 py-2 shadow-sm';
+      if (isCompact) {
+          // Compact State: Solid white (no blur for performance), light border.
+          return 'bg-white border-slate-200 shadow-sm py-2';
       }
 
-      // 3. Default (Home in cima): trasparente
+      // Default (Home Top): Transparent
       return 'bg-transparent border-transparent py-6';
   };
 
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 border-b ${getNavbarClasses()}`}>
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-out border-b ${getNavbarClasses()}`}>
       <div className="container mx-auto px-6 flex justify-between items-center">
         <button onClick={() => handleLinkClick('home')} className="relative z-50 focus:outline-none flex items-center justify-center mx-4">
              <img src={LOGO_URL} alt="Tacalabala Milano" className="h-20 md:h-36 w-auto object-contain drop-shadow-md" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
@@ -80,8 +83,8 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
         </div>
       </div>
       
-      {/* Mobile Menu Content (Simplified for brevity) */}
-      <div className={`fixed inset-0 bg-white z-40 transition-transform duration-500 ease-in-out md:hidden flex items-center justify-center ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      {/* Mobile Menu Content */}
+      <div className={`fixed inset-0 bg-white z-40 transition-transform duration-300 ease-out md:hidden flex items-center justify-center ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col space-y-8 text-center p-6 w-full max-w-sm">
           <button onClick={() => handleLinkClick('home')} className="text-4xl font-oswald text-slate-900 hover:text-[#0066b2] uppercase tracking-widest font-bold">Home</button>
           <button onClick={() => handleLinkClick('chi-siamo')} className="text-4xl font-oswald text-slate-900 hover:text-[#0066b2] uppercase tracking-widest font-bold">Chi Siamo</button>

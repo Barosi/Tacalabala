@@ -132,7 +132,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <button 
                 onClick={handleAddToCart}
                 disabled={product.isSoldOut || isSizeSoldOut || isAdding || isAdded || isComingSoon}
-                className={`px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all duration-300 ${
+                className={`px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all duration-300 min-w-[120px] justify-center ${
                     product.isSoldOut || isSizeSoldOut || isComingSoon
                     ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
                     : isAdded ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-black text-white hover:bg-[#0066b2] hover:shadow-lg'
@@ -143,7 +143,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 ) : product.isSoldOut || isSizeSoldOut ? (
                     'Esaurita'
                 ) : isAdding ? (
-                    <><Loader2 size={14} className="animate-spin" /> Adding...</>
+                    <Loader2 size={18} className="animate-spin" />
                 ) : isAdded ? (
                     <><Check size={16} /> Aggiunto</>
                 ) : (
