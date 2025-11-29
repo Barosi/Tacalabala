@@ -27,8 +27,24 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
     setIsMobileMenuOpen(false);
   };
 
+  // Calcola le classi della navbar per gestire stati diversi (scroll, menu aperto, pagina interna)
+  const getNavbarClasses = () => {
+      // 1. Se il menu mobile è aperto, la navbar deve "fondersi" con il menu (bianco, senza bordo)
+      if (isMobileMenuOpen) {
+          return 'bg-white border-transparent py-4 shadow-none'; 
+      }
+      
+      // 2. Se siamo scrollati O se siamo in una pagina interna, navbar bianca "sticky"
+      if (isScrolled || currentPage !== 'home') {
+          return 'bg-white/95 backdrop-blur-xl border-slate-200 py-2 shadow-sm';
+      }
+
+      // 3. Default (Home in cima): trasparente
+      return 'bg-transparent border-transparent py-6';
+  };
+
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 border-b ${isScrolled || currentPage !== 'home' ? 'bg-white/95 backdrop-blur-xl border-slate-200 py-2 shadow-sm' : 'bg-transparent border-transparent py-6'}`}>
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 border-b ${getNavbarClasses()}`}>
       <div className="container mx-auto px-6 flex justify-between items-center">
         <button onClick={() => handleLinkClick('home')} className="relative z-50 focus:outline-none flex items-center justify-center mx-4">
              <img src={LOGO_URL} alt="Tacalabala Milano" className="h-20 md:h-36 w-auto object-contain drop-shadow-md" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />

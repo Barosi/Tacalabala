@@ -26,7 +26,7 @@ const About: React.FC = () => {
   };
 
   return (
-    <section id="about" className="pt-64 pb-24 bg-white border-t border-slate-100 overflow-hidden relative">
+    <section id="about" className="pt-32 md:pt-48 pb-16 md:pb-24 bg-white border-t border-slate-100 overflow-hidden relative">
       
       <div className="container mx-auto px-6 max-w-6xl relative z-10">
         
@@ -36,18 +36,18 @@ const About: React.FC = () => {
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={fadeIn}
-          className="text-center mb-16"
+          className="text-center mb-12 md:mb-16"
         >
-             <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase mb-4 text-slate-900">
+             <h2 className="font-oswald text-4xl md:text-6xl font-bold uppercase mb-4 text-slate-900 leading-tight">
                 In trasferta e <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">giù in Città</span>
              </h2>
-             <p className="text-slate-500 max-w-2xl mx-auto leading-relaxed text-lg">
+             <p className="text-slate-500 max-w-2xl mx-auto leading-relaxed text-base md:text-lg px-2">
                 Non seguiamo le regole del merchandising. Le riscriviamo.
              </p>
         </motion.div>
 
         {/* CONTENT SPLIT */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             
             {/* Text Column */}
             <motion.div 
@@ -55,41 +55,41 @@ const About: React.FC = () => {
               whileInView="visible"
               viewport={{ once: true }}
               variants={fadeIn}
-              className="space-y-8"
+              className="space-y-8 text-center lg:text-left"
             >
-                <div>
-                    <p className="text-slate-600 leading-loose mb-4 text-lg">
+                <div className="px-2">
+                    <p className="text-slate-600 leading-loose mb-4 text-base md:text-lg">
                         Tacalabala nasce per riempire il vuoto tra la curva e la passerella. 
                         <strong> Non vendiamo divise ufficiali da gara.</strong> Creiamo visioni: maglie <i>custom</i> e concept kit che fondono l'estetica calcistica con il design urbano.
                     </p>
-                    <p className="text-slate-600 leading-loose text-lg">
+                    <p className="text-slate-600 leading-loose text-base md:text-lg">
                         Ogni pezzo è ispirato all'anima di Milano e ai colori nerazzurri, reinterpretati per chi vuole indossare la propria fede calcistica con uno stile unico, lontano dalle repliche commerciali.
                     </p>
                 </div>
 
                 {/* Features Grid - ICONE E TESTI INGRANDITI */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 pt-8 border-t border-slate-100 mt-8">
-                    <div className="flex flex-col gap-4">
-                        <div className="w-20 h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm">
-                            <PenTool size={40} />
+                    <div className="flex flex-col items-center lg:items-start gap-4">
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm">
+                            <PenTool size={32} className="md:w-10 md:h-10" />
                         </div>
                         <div>
                             <h4 className="font-bold text-lg uppercase text-slate-900">Design Unico</h4>
                             <p className="text-sm text-slate-500 leading-relaxed mt-1">Grafiche esclusive create dai nostri designer.</p>
                         </div>
                     </div>
-                    <div className="flex flex-col gap-4">
-                        <div className="w-20 h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm">
-                            <Shirt size={40} />
+                    <div className="flex flex-col items-center lg:items-start gap-4">
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm">
+                            <Shirt size={32} className="md:w-10 md:h-10" />
                         </div>
                         <div>
                             <h4 className="font-bold text-lg uppercase text-slate-900">Fit Moderno</h4>
                             <p className="text-sm text-slate-500 leading-relaxed mt-1">Taglio streetwear perfetto per l'outfit quotidiano.</p>
                         </div>
                     </div>
-                    <div className="flex flex-col gap-4">
-                        <div className="w-20 h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm">
-                            <Heart size={40} />
+                    <div className="flex flex-col items-center lg:items-start gap-4">
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm">
+                            <Heart size={32} className="md:w-10 md:h-10" />
                         </div>
                         <div>
                             <h4 className="font-bold text-lg uppercase text-slate-900">Ispirazione</h4>
@@ -105,16 +105,16 @@ const About: React.FC = () => {
                whileInView={{ opacity: 1, x: 0 }}
                viewport={{ once: true }}
                transition={{ duration: 0.8 }}
-               className="relative"
+               className="relative px-2 lg:px-0"
             >
                 {/* Decorative Element Behind */}
-                <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#0066b2]/10 rounded-full blur-3xl"></div>
-                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-slate-200/50 rounded-full blur-3xl"></div>
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#0066b2]/10 rounded-full blur-3xl hidden md:block"></div>
+                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-slate-200/50 rounded-full blur-3xl hidden md:block"></div>
 
-                <div className="relative rounded-[2.5rem] shadow-2xl shadow-blue-900/5 group bg-white border border-slate-100 p-3">
+                <div className="relative rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl shadow-blue-900/5 group bg-white border border-slate-100 p-2 md:p-3">
                     
                     {/* Maschera interna - Aspect Ratio 3:2 */}
-                    <div className="relative w-full aspect-[3/2] overflow-hidden rounded-[2rem]">
+                    <div className="relative w-full aspect-[4/3] md:aspect-[3/2] overflow-hidden rounded-[1rem] md:rounded-[2rem]">
                         {images.map((img, i) => (
                             <img 
                                 key={i} 
@@ -127,13 +127,13 @@ const About: React.FC = () => {
                     </div>
                     
                     {/* Navigation Buttons */}
-                    <div className="absolute inset-0 flex items-center justify-between p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                        <button onClick={prev} className="pointer-events-auto p-3 rounded-full bg-white/90 text-slate-900 shadow-xl hover:scale-110 transition-transform backdrop-blur-sm"><ChevronLeft size={20} /></button>
-                        <button onClick={next} className="pointer-events-auto p-3 rounded-full bg-white/90 text-slate-900 shadow-xl hover:scale-110 transition-transform backdrop-blur-sm"><ChevronRight size={20} /></button>
+                    <div className="absolute inset-0 flex items-center justify-between p-4 md:p-6 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                        <button onClick={prev} className="pointer-events-auto p-2 md:p-3 rounded-full bg-white/90 text-slate-900 shadow-xl hover:scale-110 transition-transform backdrop-blur-sm"><ChevronLeft size={20} /></button>
+                        <button onClick={next} className="pointer-events-auto p-2 md:p-3 rounded-full bg-white/90 text-slate-900 shadow-xl hover:scale-110 transition-transform backdrop-blur-sm"><ChevronRight size={20} /></button>
                     </div>
 
                     {/* Dots */}
-                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+                    <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
                         {images.map((_, i) => (
                             <div key={i} className={`h-1.5 rounded-full transition-all duration-300 shadow-sm ${curr === i ? "w-6 bg-white" : "w-1.5 bg-white/60"}`} />
                         ))}

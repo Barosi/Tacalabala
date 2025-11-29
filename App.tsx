@@ -31,7 +31,7 @@ const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = (
     };
 
     return (
-        <section className="min-h-screen flex flex-col items-center bg-slate-50 px-4 pt-64 pb-24">
+        <section className="min-h-screen flex flex-col items-center bg-slate-50 px-4 t-32 md:pt-48 pb-16 md:pb-24">
             <div className="text-center mb-12">
                 <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase mb-4 text-slate-900">
                     Area <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Riservata</span>

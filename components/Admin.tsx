@@ -268,7 +268,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
   };
 
   return (
-    <section className="pt-64 pb-24 bg-slate-50 min-h-screen relative">
+    <section className="pt-32 md:pt-48 pb-16 md:pb-24 bg-slate-50 min-h-screen relative">
       <Toast message={toast.msg} show={toast.show} />
       <ConfirmationModal 
         isOpen={modalConfig.isOpen} title={modalConfig.title} message={modalConfig.message}

@@ -145,7 +145,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
   const labelClass = "block text-[10px] uppercase font-bold text-slate-400 mb-1 tracking-wider";
 
   return (
-    <section className="pt-64 pb-24 bg-slate-50 min-h-screen">
+    <section className="pt-32 md:pt-48 pb-16 md:pb-24 bg-slate-50 min-h-screen">
       <div className="container mx-auto px-6 max-w-7xl"> {/* max-w-7xl per dare spazio al layout a 2 colonne larghe */}
         
         <div className="text-center mb-16">
