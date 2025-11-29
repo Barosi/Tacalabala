@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Plus, Minus, HelpCircle } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { motion, Variants } from 'framer-motion';
 
 interface FAQItemProps {
     question: string;
@@ -33,27 +34,39 @@ const FAQItem: React.FC<FAQItemProps> = ({ question, answer }) => {
 const FAQSection: React.FC = () => {
     const { supportConfig } = useStore();
 
+    const fadeIn: Variants = {
+        hidden: { opacity: 0, y: 30 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+    };
+
     return (
         <section className="pt-64 pb-20 bg-white border-t border-slate-100">
             <div className="container mx-auto px-6 max-w-4xl">
-                <div className="text-center mb-16">
-                     <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase mb-4 text-slate-900">
-                      Domande <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Frequenti</span>
-                   </h2>
-                     <p className="text-slate-500">Tutto quello che devi sapere su ordini, spedizioni e resi.</p>
-                </div>
+                <motion.div
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-100px" }}
+                    variants={fadeIn}
+                >
+                    <div className="text-center mb-16">
+                        <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase mb-4 text-slate-900">
+                        Domande <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Frequenti</span>
+                        </h2>
+                        <p className="text-slate-500">Tutto quello che devi sapere su ordini, spedizioni e resi.</p>
+                    </div>
 
-                <div className="bg-white rounded-3xl p-2 md:p-8">
-                    {supportConfig.faqs.length > 0 ? (
-                        supportConfig.faqs.map(faq => (
-                            <FAQItem key={faq.id} question={faq.question} answer={faq.answer} />
-                        ))
-                    ) : (
-                        <div className="text-center py-10 text-slate-400">
-                            <p>Nessuna domanda frequente disponibile al momento.</p>
-                        </div>
-                    )}
-                </div>
+                    <div className="bg-white rounded-3xl p-2 md:p-8">
+                        {supportConfig.faqs.length > 0 ? (
+                            supportConfig.faqs.map(faq => (
+                                <FAQItem key={faq.id} question={faq.question} answer={faq.answer} />
+                            ))
+                        ) : (
+                            <div className="text-center py-10 text-slate-400">
+                                <p>Nessuna domanda frequente disponibile al momento.</p>
+                            </div>
+                        )}
+                    </div>
+                </motion.div>
             </div>
         </section>
     );

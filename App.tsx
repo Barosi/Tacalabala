@@ -7,10 +7,12 @@ import About from './components/About';
 import Contact from './components/Contact';
 import FAQSection from './components/FAQSection';
 import ChiSiamo from './components/ChiSiamo';
+import SupportSection from './components/SupportSection';
 import Footer from './components/Footer';
 import Admin from './components/Admin';
 import Checkout from './components/Checkout';
 import CartDrawer from './components/CartDrawer';
+import InfoBar from './components/InfoBar';
 import { ArrowLeft } from 'lucide-react';
 import { useStore } from './store/useStore';
 
@@ -79,6 +81,8 @@ const App: React.FC = () => {
             <Hero />
             <div id="products"><ProductGrid products={products} /></div>
             <About />
+            <SupportSection />
+            <InfoBar />
           </>
         )}
         {currentPage === 'contact' && <Contact />}

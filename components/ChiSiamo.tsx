@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, PenTool, Shirt, Heart } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 
 const About: React.FC = () => {
     const images = [
@@ -20,7 +19,7 @@ const About: React.FC = () => {
   }, []);
 
   // Varianti per l'animazione fluida
-  const fadeIn = {
+  const fadeIn: Variants = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
   };

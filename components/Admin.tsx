@@ -477,7 +477,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         <div><label className={labelClass}>URL Immagine</label><input type="text" className={inputClass} value={newProduct.imageUrl} onChange={e => setNewProduct({...newProduct, imageUrl: e.target.value})} placeholder="https://..." /></div>
                         <div><label className={labelClass}>Link Instagram</label><input type="text" className={inputClass} value={newProduct.instagramUrl} onChange={e => setNewProduct({...newProduct, instagramUrl: e.target.value})} /></div>
                         <div><label className={labelClass}>Descrizione</label><textarea className={inputClass} rows={4} value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} /></div>
-                        <button type="submit" className={actionButtonClass}>Aggiungi Prodotto</button>
+                        <button type="submit" className={actionButtonClass}><Plus size={18} />Aggiungi maglia</button>
                     </form>
                 </div>
                 <div className="lg:col-span-2">

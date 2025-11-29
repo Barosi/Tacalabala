@@ -54,7 +54,6 @@ const Hero: React.FC = () => {
 
         {/* Kick Off Trigger */}
         <a 
-            href="#products"
             className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4 group cursor-pointer"
         >
             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 group-hover:text-[#0066b2] transition-colors">

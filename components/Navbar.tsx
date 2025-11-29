@@ -42,9 +42,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
              <button onClick={() => handleLinkClick('chi-siamo')} className={`text-xs font-bold uppercase tracking-[0.2em] hover:text-[#0066b2] transition-all duration-300 relative group text-slate-800`}>
               Chi Siamo <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-[#0066b2] transition-all duration-300 group-hover:w-full ${currentPage === 'chi-siamo' ? 'w-full' : ''}`}></span>
             </button>
-            <button onClick={() => handleLinkClick('contact')} className={`text-xs font-bold uppercase tracking-[0.2em] hover:text-[#0066b2] transition-all duration-300 relative group text-slate-800`}>
-              Contatti <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-[#0066b2] transition-all duration-300 group-hover:w-full ${currentPage === 'contact' ? 'w-full' : ''}`}></span>
-            </button>
             <button onClick={() => handleLinkClick('faq')} className={`text-xs font-bold uppercase tracking-[0.2em] hover:text-[#0066b2] transition-all duration-300 relative group text-slate-800`}>
               FAQ <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-[#0066b2] transition-all duration-300 group-hover:w-full ${currentPage === 'faq' ? 'w-full' : ''}`}></span>
             </button>
@@ -72,7 +69,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
         <div className="flex flex-col space-y-8 text-center p-6 w-full max-w-sm">
           <button onClick={() => handleLinkClick('home')} className="text-4xl font-oswald text-slate-900 hover:text-[#0066b2] uppercase tracking-widest font-bold">Home</button>
           <button onClick={() => handleLinkClick('chi-siamo')} className="text-4xl font-oswald text-slate-900 hover:text-[#0066b2] uppercase tracking-widest font-bold">Chi Siamo</button>
-          <button onClick={() => handleLinkClick('contact')} className="text-4xl font-oswald text-slate-900 hover:text-[#0066b2] uppercase tracking-widest font-bold">Contatti</button>
           <button onClick={() => handleLinkClick('faq')} className="text-4xl font-oswald text-slate-900 hover:text-[#0066b2] uppercase tracking-widest font-bold">FAQ</button>
         </div>
       </div>
