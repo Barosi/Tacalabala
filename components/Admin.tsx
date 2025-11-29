@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Product, ProductVariant, Size, FAQ, Discount, OrderStatus, ShippingConfig } from '../types';
-import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, HelpCircle, Tag, Calendar, ShoppingBag, Truck, CheckCircle, XCircle, AlertCircle, Clock, Mail, Plane, AlertTriangle, Check, Search, Shirt, Layers, Globe, Smartphone, PenTool, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, HelpCircle, Tag, Calendar, ShoppingBag, Truck, CheckCircle, XCircle, AlertCircle, Clock, Mail, Plane, AlertTriangle, Check, Search, Shirt, Layers, Globe, Smartphone, PenTool, FileText } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
 // --- STILI CONDIVISI PER UNIFORMITÀ ---
@@ -13,6 +13,11 @@ const sectionHeaderClass = "font-bold text-slate-900 flex items-center gap-2 upp
 const inputClass = "w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-base placeholder:text-slate-400";
 const labelClass = "block text-xs font-bold uppercase tracking-widest text-slate-400 mb-2 pl-1";
 const actionButtonClass = "bg-black text-white py-4 px-12 rounded-full font-bold uppercase tracking-widest hover:bg-[#0066b2] hover:shadow-lg hover:shadow-[#0066b2]/30 transition-all duration-300 flex items-center justify-center gap-3 transform active:scale-95 cursor-pointer";
+
+// Stile Pulsante Eliminazione (Neutro -> Rosso)
+const deleteBtnClass = "w-10 h-10 bg-white text-slate-400 border border-slate-200 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white hover:border-red-500 transition-all shadow-sm z-10";
+// Stile Pulsante Fattura (Neutro -> Viola)
+const invoiceBtnClass = "w-10 h-10 bg-white text-slate-400 border border-slate-200 rounded-xl flex items-center justify-center hover:bg-purple-600 hover:text-white hover:border-purple-600 transition-all shadow-sm z-10";
 
 // --- COMPONENTE MODALE CONFERMA ---
 interface ConfirmationModalProps {
@@ -429,7 +434,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     >
                                         {/* Riga Cliccabile */}
                                         <div 
-                                            className="p-4 md:p-6 flex flex-col md:flex-row items-center gap-6 cursor-pointer"
+                                            className="p-4 md:p-6 flex flex-col md:flex-row items-center gap-6 cursor-pointer group"
                                             onClick={() => toggleExpandProduct(product.id)}
                                         >
                                             <div className="w-20 h-24 bg-slate-50 rounded-2xl overflow-hidden flex-shrink-0 relative border border-slate-200">
@@ -437,7 +442,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             </div>
                                             
                                             <div className="flex-1 text-center md:text-left">
-                                                <h4 className="font-bold text-slate-900 text-lg leading-tight mb-1">{product.title}</h4>
+                                                <h4 className="font-bold text-slate-900 text-lg leading-tight mb-1 group-hover:text-[#0066b2] transition-colors">{product.title}</h4>
                                                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wide">{product.kitType} • {product.year}</p>
                                             </div>
                                             
@@ -454,13 +459,11 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                 <div className="flex items-center gap-2">
                                                     <button 
                                                         onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product.id); }} 
-                                                        className="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm z-10"
+                                                        className={deleteBtnClass}
+                                                        title="Elimina Prodotto"
                                                     >
                                                         <Trash2 size={18} />
                                                     </button>
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isExpanded ? 'bg-[#0066b2] text-white' : 'bg-slate-100 text-slate-400'}`}>
-                                                        {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -532,9 +535,27 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                         <div className="space-y-2 mb-4 max-h-32 overflow-y-auto pr-2">{order.items.map((item, idx) => (<div key={idx} className="flex justify-between items-center text-sm"><span className="text-slate-600"><span className="font-bold">{item.quantity}x</span> {item.title} ({item.selectedSize})</span></div>))}</div>
                                         <div className="flex justify-between items-center pt-3 border-t border-slate-200"><span className="font-bold uppercase text-xs">Totale</span><span className="font-oswald font-bold text-xl text-[#0066b2]">€{order.total.toFixed(2)}</span></div>
                                     </div>
-                                    <div className="flex flex-col justify-between gap-3 min-w-[180px]">
-                                        <div><label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block">Aggiorna Stato</label><select value={order.status} onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)} className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold uppercase outline-none focus:border-[#0066b2]"><option value="pending">In Attesa</option><option value="paid">Pagato</option><option value="shipped">Spedito</option><option value="delivered">Consegnato</option><option value="cancelled">Annullato</option></select></div>
-                                        <button onClick={() => handleDeleteOrder(order.id)} className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors text-xs font-bold uppercase"><Trash2 size={14} /> Elimina Ordine</button>
+                                    <div className="flex flex-col justify-between items-end gap-3 min-w-[180px]">
+                                        <div className="w-full">
+                                            <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block text-right">Aggiorna Stato</label>
+                                            <select value={order.status} onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)} className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold uppercase outline-none focus:border-[#0066b2] text-right">
+                                                <option value="paid">Pagato</option>
+                                                <option value="shipped">Spedito</option>
+                                                <option value="delivered">Consegnato</option>
+                                                <option value="cancelled">Annullato</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div className="flex items-center gap-2 mt-2">
+                                            {order.invoiceDetails && (
+                                                <button onClick={() => showToast('Generazione fattura non ancora disponibile')} className={invoiceBtnClass} title="Genera Fattura">
+                                                    <FileText size={18} />
+                                                </button>
+                                            )}
+                                            <button onClick={() => handleDeleteOrder(order.id)} className={deleteBtnClass} title="Elimina Ordine">
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -675,7 +696,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                         <h4 className="font-bold text-lg text-slate-900 mb-2">{faq.question}</h4>
                                         <p className="text-slate-500 leading-relaxed text-sm">{faq.answer}</p>
                                     </div>
-                                    <button onClick={() => handleDeleteFaq(faq.id)} className="p-3 bg-slate-50 text-slate-400 rounded-full hover:bg-red-50 hover:text-red-500 transition-all flex-shrink-0"><Trash2 size={18} /></button>
+                                    <button onClick={() => handleDeleteFaq(faq.id)} className={deleteBtnClass}><Trash2 size={18} /></button>
                                 </div>
                             ))
                         )}
@@ -731,7 +752,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                 <div key={d.id} className={`p-6 border rounded-3xl relative ${isActive ? 'bg-blue-50 border-[#0066b2]' : 'bg-slate-50 border-slate-200 opacity-60'}`}>
                                     <div className="flex justify-between items-start">
                                         <div><h4 className="font-oswald font-bold text-xl uppercase">{d.name}</h4><div className="flex items-center gap-2 mt-1"><span className="text-2xl font-bold text-[#0066b2]">-{d.percentage}%</span><span className="text-[10px] uppercase font-bold text-slate-400 bg-white px-2 py-1 rounded border border-slate-200">{d.targetType === 'all' ? 'Tutto il sito' : 'Prodotti Selezionati'}</span></div><p className="text-xs text-slate-500 mt-2 font-mono">{start.toLocaleDateString()} - {end.toLocaleDateString()}</p></div>
-                                        <button onClick={() => handleDeleteDiscount(d.id)} className="p-2 bg-white text-red-500 rounded-full shadow-sm hover:bg-red-500 hover:text-white transition-colors"><Trash2 size={18} /></button>
+                                        <button onClick={() => handleDeleteDiscount(d.id)} className={deleteBtnClass}><Trash2 size={18} /></button>
                                     </div>
                                     {!isActive && <div className="absolute top-4 right-14 text-[10px] font-bold uppercase text-slate-400 bg-slate-200 px-2 py-1 rounded">{now > end ? 'Scaduta' : 'Programmata'}</div>}
                                 </div>
