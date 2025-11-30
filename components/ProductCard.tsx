@@ -11,8 +11,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [imgSrc, setImgSrc] = useState(product.imageUrl);
   const [selectedSize, setSelectedSize] = useState<Size>('M');
-  const [isAdding, setIsAdding] = useState(false);
-  const [isAdded, setIsAdded] = useState(false);
+  const [buttonState, setButtonState] = useState<'idle' | 'loading' | 'success'>('idle');
   
   const { addToCart, calculatePrice } = useStore();
   
@@ -24,22 +23,26 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const handleAddToCart = async (e: React.MouseEvent) => {
       e.preventDefault();
-      setIsAdding(true);
+      setButtonState('loading');
+      
+      // Ritardo leggermente aumentato per una transizione più fluida e percepibile
       setTimeout(() => {
           addToCart(product, selectedSize);
-          setIsAdding(false);
-          setIsAdded(true);
-          setTimeout(() => { setIsAdded(false); }, 2000);
-      }, 500);
+          setButtonState('success');
+          
+          setTimeout(() => { 
+              setButtonState('idle'); 
+          }, 2000);
+      }, 600); 
   };
 
   const currentVariant = product.variants?.find(v => v.size === selectedSize);
   const stockCount = currentVariant ? currentVariant.stock : 0;
   const isSizeSoldOut = stockCount === 0;
 
-  // Stati del bottone per gestire classi condizionali complesse
-  const isDisabled = product.isSoldOut || isSizeSoldOut || isAdding || isAdded || isComingSoon;
-  const showHoverEffect = !isDisabled;
+  // Stato disabilitato logico (per l'attributo disabled del button)
+  const isPermanentlyDisabled = product.isSoldOut || isSizeSoldOut || isComingSoon;
+  const isDisabled = isPermanentlyDisabled || buttonState !== 'idle';
 
   return (
     <div className="group relative bg-white border border-slate-100 overflow-hidden hover:border-[#0066b2] transition-all duration-500 shadow-sm hover:shadow-2xl hover:shadow-blue-900/10 rounded-2xl h-full flex flex-col">
@@ -133,7 +136,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                  )}
             </div>
             
-            {/* NEW BUTTON DESIGN: Modern Liquid Fill */}
+            {/* NEW BUTTON DESIGN: Modern Liquid Fill with OPTIMIZED TRANSITIONS */}
             <button 
                 onClick={handleAddToCart}
                 disabled={isDisabled}
@@ -143,18 +146,24 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     text-xs font-bold uppercase tracking-wider 
                     flex items-center justify-center gap-2 
                     transition-all duration-300 min-w-[130px] transform-gpu active:scale-95
-                    border
-                    ${product.isSoldOut || isSizeSoldOut || isComingSoon
+                    border 
+                    ${isPermanentlyDisabled
                         ? 'bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed' 
-                        : isAdded 
+                        : buttonState === 'success'
                             ? 'bg-green-500 border-green-500 text-white shadow-md' 
-                            : 'bg-white border-slate-200 text-slate-900 shadow-sm hover:border-[#0066b2] hover:text-white hover:shadow-lg hover:shadow-blue-900/20'
+                            : buttonState === 'loading'
+                                ? 'bg-white border-[#0066b2] text-white shadow-md' // Mantieni bordo blu e testo bianco
+                                : 'bg-white border-slate-200 text-slate-900 shadow-sm hover:border-[#0066b2] hover:text-white hover:shadow-lg hover:shadow-blue-900/20'
                     }
                 `}
             >
-                {/* Sliding Background Effect (Only visible if enabled and not added) */}
-                {showHoverEffect && !isAdded && (
-                    <span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                {/* Sliding Background Effect */}
+                {/* Renderizzato se non disabilitato permanentemente e non successo. Se loading, forziamo translate-y-0 */}
+                {!isPermanentlyDisabled && buttonState !== 'success' && (
+                    <span className={`
+                        absolute inset-0 bg-[#0066b2] transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0
+                        ${buttonState === 'loading' ? 'translate-y-0' : 'translate-y-full group-hover/btn:translate-y-0'}
+                    `}></span>
                 )}
 
                 {/* Content (z-10 to stay on top of background) */}
@@ -163,9 +172,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         <><Lock size={14} /> Locked</>
                     ) : product.isSoldOut || isSizeSoldOut ? (
                         'Esaurita'
-                    ) : isAdding ? (
+                    ) : buttonState === 'loading' ? (
                         <Loader2 size={18} className="animate-spin" />
-                    ) : isAdded ? (
+                    ) : buttonState === 'success' ? (
                         <><Check size={16} /> Aggiunto</>
                     ) : (
                         <><ShoppingBag size={14} className="order-first" /> Aggiungi</>

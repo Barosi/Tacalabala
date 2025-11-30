@@ -83,7 +83,7 @@ const SupportSection: React.FC = () => {
                 </div>
                 <button 
                     onClick={handleWhatsapp}
-                    className="w-full md:w-auto relative overflow-hidden group/btn bg-white border border-[#25D366] text-[#25D366] hover:text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-lg flex items-center justify-center gap-2 active:scale-95 transform-gpu"
+                    className="w-auto min-w-[200px] relative overflow-hidden group/btn bg-white border border-[#25D366] text-[#25D366] hover:text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-lg flex items-center justify-center gap-2 active:scale-95 transform-gpu"
                 >
                     <span className="absolute inset-0 bg-[#25D366] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
                     <span className="relative z-10 flex items-center gap-2">
@@ -123,18 +123,20 @@ const SupportSection: React.FC = () => {
                             <div className={`flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-lg w-full md:w-auto ${feedback.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                                 {feedback.type === 'success' ? <CheckCircle2 size={16}/> : null} {feedback.msg}
                             </div>
-                        ) : <div></div>}
+                        ) : <div className="hidden md:block"></div>}
                         
-                        <button 
-                            type="submit" 
-                            disabled={loading}
-                            className="w-full md:w-auto relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95 transform-gpu"
-                        >
-                            <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
-                            <span className="relative z-10 flex items-center gap-2">
-                                {loading ? <Loader2 className="animate-spin" /> : <><Send size={16} /> Invia</>}
-                            </span>
-                        </button>
+                        <div className="flex justify-center w-full md:w-auto">
+                            <button 
+                                type="submit" 
+                                disabled={loading}
+                                className="w-auto min-w-[200px] relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95 transform-gpu"
+                            >
+                                <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                                <span className="relative z-10 flex items-center gap-2">
+                                    {loading ? <Loader2 className="animate-spin" /> : <><Send size={16} /> Invia</>}
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

@@ -82,8 +82,17 @@ export const useStore = create<StoreState>()(
       supportConfig: {
           whatsappNumber: '', 
           faqs: [
-              { id: '1', question: 'Quali sono i tempi di spedizione?', answer: 'Spediamo in 24/48 ore lavorative in tutta Italia.' },
-              { id: '2', question: 'Le maglie sono originali?', answer: 'Trattiamo concept kit custom e maglie vintage autentiche.' }
+              { id: '1', question: 'Tempi di spedizione?', answer: 'Spediamo in 24/48 ore lavorative in tutta Italia tramite corriere espresso tracciato.' },
+              { id: '2', question: 'Politica di Reso?', answer: 'Hai 14 giorni dalla ricezione per effettuare il reso. Il prodotto deve essere intatto e con etichetta.' },
+              { id: '3', question: 'Materiali utilizzati?', answer: 'Utilizziamo cotone premium 100% organico e tessuti tecnici traspiranti per i kit performance.' },
+              { id: '4', question: 'Come scelgo la taglia?', answer: 'Le nostre maglie hanno un fit "Boxy" moderno. Consigliamo la tua taglia abituale per un look regolare, una in più per oversize.' },
+              { id: '5', question: 'Metodi di pagamento?', answer: 'Accettiamo Carte di Credito, PayPal, Apple Pay, Google Pay e Bonifico Bancario.' },
+              { id: '6', question: 'Posso richiedere fattura?', answer: 'Certamente. In fase di checkout puoi selezionare "Richiedi Fattura" e inserire SDI o PEC.' },
+              { id: '7', question: 'Come traccio l\'ordine?', answer: 'Appena spedito riceverai una mail con il link di tracking del corriere.' },
+              { id: '8', question: 'Istruzioni lavaggio?', answer: 'Lavare al rovescio a max 30°C. Non utilizzare asciugatrice per preservare le stampe.' },
+              { id: '9', question: 'Spedite all\'estero?', answer: 'Sì, spediamo in tutta Europa. I costi vengono calcolati al checkout in base alla zona.' },
+              { id: '10', question: 'Prodotti esauriti?', answer: 'I nostri drop sono limitati. Iscriviti alla newsletter o seguici su IG per sapere quando torneranno.' },
+              { id: '11', question: 'Chi produce i kit?', answer: 'Tacalabala è un brand indipendente. Realizziamo Concept Kit e abbigliamento ispirato alla cultura calcistica.' }
           ]
       },
 
@@ -192,6 +201,6 @@ export const useStore = create<StoreState>()(
       deleteFaq: (id) => set((state) => ({ supportConfig: { ...state.supportConfig, faqs: state.supportConfig.faqs.filter(f => f.id !== id) } })),
       setMailConfig: (config) => set({ mailConfig: config }),
     }),
-    { name: 'tacalabala-store', storage: createJSONStorage(() => localStorage), version: 3 }
+    { name: 'tacalabala-store', storage: createJSONStorage(() => localStorage), version: 4 }
   )
 );

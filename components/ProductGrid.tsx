@@ -42,7 +42,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
   };
   
   return (
-    <section id="collection" className="py-24 md:py-32 bg-white relative overflow-hidden">
+    <section id="collection" className="pt-24 md:pt-32 pb-12 bg-white relative overflow-hidden">
       
       {/* Central Axis Continuity */}
       <div className="absolute inset-0 flex justify-center pointer-events-none z-0">

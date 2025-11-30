@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { MapPin, Palette, Trophy, PenTool } from 'lucide-react';
+import { MapPin, Trophy, Layers } from 'lucide-react';
 
 const About: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -20,8 +20,11 @@ const About: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
+  // Blue Card Style matching ChiSiamo.tsx
+  const cardClass = "bg-[#0066b2] text-white p-8 md:p-12 rounded-[2rem] shadow-xl shadow-blue-900/10 border border-[#0066b2] relative overflow-hidden transition-all duration-500 hover:-translate-y-2 group reveal-hidden transition-reveal";
+
   return (
-    <section id="about" ref={sectionRef} className="py-24 md:py-32 bg-white relative overflow-hidden">
+    <section id="about" ref={sectionRef} className="pt-12 md:pt-20 pb-24 md:pb-32 bg-white relative overflow-hidden">
       
       {/* Central Axis Continuity */}
       <div className="absolute inset-0 flex justify-center pointer-events-none z-0">
@@ -47,36 +50,43 @@ const About: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            <div className="bg-white border border-slate-100 p-8 md:p-12 rounded-[2rem] hover:border-[#0066b2] transition-all duration-500 group shadow-sm hover:shadow-xl hover:shadow-blue-900/5 relative overflow-hidden reveal-hidden transition-reveal" style={{ transitionDelay: '0ms' }}>
-                <div className="absolute -right-6 -top-6 text-slate-100 opacity-50 group-hover:text-blue-50 group-hover:opacity-100 transition-colors duration-500"><Trophy size={180} strokeWidth={1} /></div>
+            
+            {/* CARD 1 */}
+            <div className={cardClass} style={{ transitionDelay: '0ms' }}>
+                <div className="absolute -right-6 -top-6 text-white opacity-10 transition-transform duration-500 group-hover:scale-110 pointer-events-none"><Trophy size={180} strokeWidth={1} /></div>
                 <div className="relative z-10 flex flex-col items-center text-center">
-                    <div className="w-24 h-24 bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-10 group-hover:scale-110 transition-transform duration-300 group-hover:border-[#0066b2] rounded-3xl">
-                        <Trophy size={40} className="text-[#0066b2]" />
+                    <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-10 shadow-inner">
+                        <Trophy size={40} className="text-white" />
                     </div>
-                    <h3 className="text-slate-900 font-oswald text-3xl uppercase mb-6 group-hover:text-[#0066b2] transition-colors">DNA Vincente</h3>
-                    <p className="text-slate-500 text-lg leading-relaxed">Ispirati dalle notti europee e dagli scudetti. Ogni dettaglio racconta una vittoria, ogni cucitura una leggenda.</p>
+                    <h3 className="text-white font-oswald text-3xl uppercase mb-6">DNA Vincente</h3>
+                    <p className="text-blue-100 text-lg leading-relaxed font-light">Ispirati dalle notti europee e dagli scudetti. Ogni dettaglio racconta una vittoria, ogni cucitura una leggenda.</p>
                 </div>
             </div>
-            <div className="bg-white border border-slate-100 p-8 md:p-12 rounded-[2rem] hover:border-[#0066b2] transition-all duration-500 group shadow-sm hover:shadow-xl hover:shadow-blue-900/5 relative overflow-hidden reveal-hidden transition-reveal" style={{ transitionDelay: '150ms' }}>
-                <div className="absolute -right-6 -top-6 text-slate-100 opacity-50 group-hover:text-blue-50 group-hover:opacity-100 transition-colors duration-500"><PenTool size={180} strokeWidth={1} /></div>
+
+            {/* CARD 2 - Replaced PenTool with Layers for uniform look */}
+            <div className={cardClass} style={{ transitionDelay: '150ms' }}>
+                <div className="absolute -right-6 -top-6 text-white opacity-10 transition-transform duration-500 group-hover:scale-110 pointer-events-none"><Layers size={180} strokeWidth={1} /></div>
                 <div className="relative z-10 flex flex-col items-center text-center">
-                    <div className="w-24 h-24 bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-10 group-hover:scale-110 transition-transform duration-300 group-hover:border-[#0066b2] rounded-3xl">
-                        <Palette size={40} className="text-black" />
+                    <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-10 shadow-inner">
+                        <Layers size={40} className="text-white" />
                     </div>
-                    <h3 className="text-slate-900 font-oswald text-3xl uppercase mb-6 group-hover:text-[#0066b2] transition-colors">Design Custom</h3>
-                    <p className="text-slate-500 text-lg leading-relaxed">Grafiche concettuali che rompono gli schemi. Non facciamo repliche, creiamo pezzi unici da collezione.</p>
+                    <h3 className="text-white font-oswald text-3xl uppercase mb-6">Design Custom</h3>
+                    <p className="text-blue-100 text-lg leading-relaxed font-light">Grafiche concettuali che rompono gli schemi. Non facciamo repliche, creiamo pezzi unici da collezione.</p>
                 </div>
             </div>
-            <div className="bg-white border border-slate-100 p-8 md:p-12 rounded-[2rem] hover:border-[#0066b2] transition-all duration-500 group shadow-sm hover:shadow-xl hover:shadow-blue-900/5 relative overflow-hidden reveal-hidden transition-reveal" style={{ transitionDelay: '300ms' }}>
-                <div className="absolute -right-6 -top-6 text-slate-100 opacity-50 group-hover:text-blue-50 group-hover:opacity-100 transition-colors duration-500"><MapPin size={180} strokeWidth={1} /></div>
+
+            {/* CARD 3 */}
+            <div className={cardClass} style={{ transitionDelay: '300ms' }}>
+                <div className="absolute -right-6 -top-6 text-white opacity-10 transition-transform duration-500 group-hover:scale-110 pointer-events-none"><MapPin size={180} strokeWidth={1} /></div>
                 <div className="relative z-10 flex flex-col items-center text-center">
-                    <div className="w-24 h-24 bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-10 group-hover:scale-110 transition-transform duration-300 group-hover:border-[#0066b2] rounded-3xl">
-                        <MapPin size={40} className="text-[#0066b2]" />
+                    <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-10 shadow-inner">
+                        <MapPin size={40} className="text-white" />
                     </div>
-                    <h3 className="text-slate-900 font-oswald text-3xl uppercase mb-6 group-hover:text-[#0066b2] transition-colors">Made in Milano</h3>
-                    <p className="text-slate-500 text-lg leading-relaxed">Dalla Madonnina ai quartieri popolari. Portiamo l'eleganza e la grinta di Milano in ogni design.</p>
+                    <h3 className="text-white font-oswald text-3xl uppercase mb-6">Made in Milano</h3>
+                    <p className="text-blue-100 text-lg leading-relaxed font-light">Dalla Madonnina ai quartieri popolari. Portiamo l'eleganza e la grinta di Milano in ogni design.</p>
                 </div>
             </div>
+            
         </div>
       </div>
     </section>

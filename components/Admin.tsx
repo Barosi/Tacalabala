@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Product, ProductVariant, Size, FAQ, Discount, OrderStatus, ShippingConfig } from '../types';
-import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, HelpCircle, Tag, Calendar, ShoppingBag, Truck, CheckCircle, XCircle, AlertCircle, Clock, Mail, Plane, AlertTriangle, Check, Search, Shirt, Layers, Globe, Smartphone, PenTool, FileText } from 'lucide-react';
+import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, HelpCircle, Tag, Calendar, ShoppingBag, Truck, CheckCircle, XCircle, AlertCircle, Clock, Mail, Plane, AlertTriangle, Check, Search, Shirt, Layers, Globe, Smartphone, PenTool, FileText, ChevronDown, User, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
 // --- STILI CONDIVISI PER UNIFORMITÀ ---
@@ -111,6 +111,10 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
       });
   };
 
+  // --- STATE PAGINAZIONE ORDINI ---
+  const [currentOrderPage, setCurrentOrderPage] = useState(1);
+  const ORDERS_PER_PAGE = 10;
+
   // --- STATE PRODOTTI ---
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedProductId, setExpandedProductId] = useState<string | null>(null);
@@ -148,6 +152,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
   useEffect(() => { if (shippingConfig) setShippingForm(shippingConfig); }, [shippingConfig]);
   useEffect(() => { if (supportConfig.whatsappNumber) setWhatsappNum(supportConfig.whatsappNumber); }, [supportConfig.whatsappNumber]);
   useEffect(() => { if (mailConfig) setMailForm(mailConfig); }, [mailConfig]);
+  
+  // Reset pagination when tab changes or search/filter changes (future proof)
+  useEffect(() => { setCurrentOrderPage(1); }, [activeTab]);
 
   const [newFaq, setNewFaq] = useState({ question: '', answer: '' });
   const today = new Date().toISOString().split('T')[0];
@@ -269,13 +276,14 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
 
   const tabLabels: Record<string, string> = { products: 'Prodotti', orders: 'Ordini', shipping: 'Spedizioni', payments: 'Pagamenti', support: 'Supporto', faq: 'FAQ', promotions: 'Promozioni' };
   
-  const getStatusBadge = (status: OrderStatus) => {
+  // Funzione per ottenere il colore del badge in base allo stato
+  const getStatusColor = (status: OrderStatus) => {
       switch(status) {
-          case 'paid': return <span className="flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase"><CheckCircle size={12}/> Pagato</span>;
-          case 'shipped': return <span className="flex items-center gap-1 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase"><Truck size={12}/> Spedito</span>;
-          case 'delivered': return <span className="flex items-center gap-1 bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase"><Package size={12}/> Consegnato</span>;
-          case 'cancelled': return <span className="flex items-center gap-1 bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase"><XCircle size={12}/> Annullato</span>;
-          default: return <span className="flex items-center gap-1 bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase"><Clock size={12}/> In Attesa</span>;
+          case 'paid': return 'text-green-700 bg-green-50 border-green-200';
+          case 'shipped': return 'text-blue-700 bg-blue-50 border-blue-200';
+          case 'delivered': return 'text-purple-700 bg-purple-50 border-purple-200';
+          case 'cancelled': return 'text-red-700 bg-red-50 border-red-200';
+          default: return 'text-yellow-700 bg-yellow-50 border-yellow-200';
       }
   };
 
@@ -321,7 +329,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
         {/* ================= PRODUCTS TAB ================= */}
         {activeTab === 'products' && (
             <div className="space-y-16 animate-in fade-in duration-500">
-                
                 {/* 1. SEZIONE INSERIMENTO (NUOVO LAYOUT) */}
                 <div className={cardClass}>
                     <div className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-100">
@@ -524,57 +531,153 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             </div>
         )}
 
-        {/* --- ORDERS TAB --- */}
+        {/* --- ORDERS TAB (COMPLETELY REDESIGNED & PAGINATED) --- */}
         {activeTab === 'orders' && (
             <div className={cardClass}>
                 <div className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-100">
                     <div className={headerIconClass}><ShoppingBag size={32} /></div>
                     <div><h3 className={headerTitleClass}>Ordini Recenti</h3><p className={headerSubtitleClass}>Gestisci gli ordini ricevuti.</p></div>
                 </div>
+                
                 <div className="space-y-6">
-                    {orders.length === 0 ? (<div className="text-center py-12 text-slate-400 bg-slate-50 rounded-3xl border border-slate-100 border-dashed"><ShoppingBag size={48} className="mx-auto mb-4 opacity-20" /><p className="font-bold uppercase tracking-wider">Nessun ordine ricevuto</p></div>) : (
-                        orders.map(order => (
-                            <div key={order.id} className="border border-slate-100 rounded-3xl p-8 hover:shadow-lg transition-shadow bg-slate-50/50">
-                                <div className="flex flex-col md:flex-row justify-between gap-8">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-2"><span className="font-oswald font-bold text-xl">#{order.id}</span>{getStatusBadge(order.status)}</div>
-                                        <p className="text-xs text-slate-400 font-mono mb-4">{new Date(order.date).toLocaleString()}</p>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                            <div><p className="text-[10px] font-bold uppercase text-slate-400">Cliente</p><p className="font-bold text-slate-800">{order.customerName}</p><p className="text-slate-500">{order.customerEmail}</p></div>
-                                            <div><p className="text-[10px] font-bold uppercase text-slate-400">Spedizione</p><p className="text-slate-600">{order.shippingAddress}</p></div>
-                                        </div>
-                                    </div>
-                                    <div className="flex-1 border-t md:border-t-0 md:border-l border-slate-200 pt-4 md:pt-0 md:pl-8">
-                                        <p className="text-[10px] font-bold uppercase text-slate-400 mb-2">Articoli</p>
-                                        <div className="space-y-2 mb-4 max-h-32 overflow-y-auto pr-2">{order.items.map((item, idx) => (<div key={idx} className="flex justify-between items-center text-sm"><span className="text-slate-600"><span className="font-bold">{item.quantity}x</span> {item.title} ({item.selectedSize})</span></div>))}</div>
-                                        <div className="flex justify-between items-center pt-3 border-t border-slate-200"><span className="font-bold uppercase text-xs">Totale</span><span className="font-oswald font-bold text-xl text-[#0066b2]">€{order.total.toFixed(2)}</span></div>
-                                    </div>
-                                    <div className="flex flex-col justify-between items-end gap-3 min-w-[180px]">
-                                        <div className="w-full">
-                                            <label className="text-[10px] font-bold uppercase text-slate-400 mb-1 block text-right">Aggiorna Stato</label>
-                                            <select value={order.status} onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)} className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold uppercase outline-none focus:border-[#0066b2] text-right">
-                                                <option value="paid">Pagato</option>
-                                                <option value="shipped">Spedito</option>
-                                                <option value="delivered">Consegnato</option>
-                                                <option value="cancelled">Annullato</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div className="flex items-center gap-2 mt-2">
-                                            {order.invoiceDetails && (
-                                                <button onClick={() => showToast('Generazione fattura non ancora disponibile')} className={invoiceBtnClass} title="Genera Fattura">
-                                                    <FileText size={18} />
-                                                </button>
-                                            )}
-                                            <button onClick={() => handleDeleteOrder(order.id)} className={deleteBtnClass} title="Elimina Ordine">
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    </div>
+                    {(() => {
+                        const totalOrderPages = Math.ceil(orders.length / ORDERS_PER_PAGE);
+                        const startOrderIdx = (currentOrderPage - 1) * ORDERS_PER_PAGE;
+                        const currentOrders = orders.slice(startOrderIdx, startOrderIdx + ORDERS_PER_PAGE);
+
+                        if (orders.length === 0) {
+                            return (
+                                <div className="text-center py-20 text-slate-400 bg-slate-50 rounded-[2rem] border border-slate-200 border-dashed">
+                                    <ShoppingBag size={48} className="mx-auto mb-4 opacity-20" />
+                                    <p className="font-bold uppercase tracking-wider text-sm">Nessun ordine in archivio</p>
                                 </div>
-                            </div>
-                        ))
-                    )}
+                            );
+                        }
+
+                        return (
+                            <>
+                                {currentOrders.map(order => (
+                                    <div key={order.id} className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
+                                        
+                                        {/* 1. HEADER: ID & DATE */}
+                                        <div className="bg-slate-50 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400">
+                                                    <ShoppingBag size={18} />
+                                                </div>
+                                                <div>
+                                                    <span className="font-oswald font-bold text-xl text-slate-900 tracking-wide">#{order.id}</span>
+                                                    <p className="text-xs text-slate-400 font-mono mt-0.5">{new Date(order.date).toLocaleString('it-IT', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute:'2-digit' })}</p>
+                                                </div>
+                                            </div>
+                                            <div className={`px-4 py-2 rounded-full border text-[10px] font-bold uppercase tracking-widest ${getStatusColor(order.status)}`}>
+                                                {order.status === 'paid' && 'Pagato'}
+                                                {order.status === 'shipped' && 'Spedito'}
+                                                {order.status === 'delivered' && 'Consegnato'}
+                                                {order.status === 'cancelled' && 'Annullato'}
+                                            </div>
+                                        </div>
+
+                                        {/* 2. BODY: DETAILS GRID */}
+                                        <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+                                            
+                                            {/* Column 1: Customer */}
+                                            <div>
+                                                <h5 className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400 mb-3 tracking-widest"><User size={12}/> Cliente</h5>
+                                                <p className="font-bold text-slate-900 text-sm mb-1">{order.customerName}</p>
+                                                <p className="text-slate-500 text-sm">{order.customerEmail}</p>
+                                            </div>
+
+                                            {/* Column 2: Shipping */}
+                                            <div>
+                                                <h5 className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400 mb-3 tracking-widest"><MapPin size={12}/> Spedizione</h5>
+                                                <p className="text-slate-600 text-sm leading-relaxed max-w-xs">{order.shippingAddress}</p>
+                                            </div>
+
+                                            {/* Column 3: Total */}
+                                            <div className="md:text-right">
+                                                <h5 className="text-[10px] font-bold uppercase text-slate-400 mb-3 tracking-widest">Totale Ordine</h5>
+                                                <p className="font-oswald font-bold text-2xl text-[#0066b2]">€{order.total.toFixed(2)}</p>
+                                                <p className="text-xs text-slate-400 mt-1">{order.items.length} Articoli</p>
+                                            </div>
+                                        </div>
+
+                                        {/* 3. ITEMS LIST (Compact) */}
+                                        <div className="px-6 md:px-8 pb-6">
+                                            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
+                                                {order.items.map((item, idx) => (
+                                                    <div key={idx} className="flex justify-between items-center text-sm border-b border-slate-200 last:border-0 pb-2 last:pb-0">
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="font-bold text-slate-400 font-mono text-xs">{item.quantity}x</span>
+                                                            <span className="text-slate-700 font-medium">{item.title}</span>
+                                                        </div>
+                                                        <span className="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded">{item.selectedSize}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* 4. FOOTER: ACTIONS & STATUS SELECTOR */}
+                                        <div className="bg-slate-50/50 p-6 md:p-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                                            
+                                            {/* Left: Quick Actions */}
+                                            <div className="flex items-center gap-3 w-full md:w-auto">
+                                                {order.invoiceDetails && (
+                                                    <button onClick={() => showToast('Generazione fattura non ancora disponibile')} className={invoiceBtnClass} title="Genera Fattura">
+                                                        <FileText size={18} />
+                                                    </button>
+                                                )}
+                                                <button onClick={() => handleDeleteOrder(order.id)} className={deleteBtnClass} title="Elimina Ordine">
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
+
+                                            {/* Right: Modern Status Selector (No Labels, Clean Pill) */}
+                                            <div className="relative group w-full md:w-auto">
+                                                <select 
+                                                    value={order.status} 
+                                                    onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)} 
+                                                    className="appearance-none w-full md:w-48 bg-white border border-slate-200 hover:border-[#0066b2] rounded-full py-3 pl-5 pr-12 text-xs font-bold uppercase tracking-widest outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer shadow-sm text-slate-700"
+                                                >
+                                                    <option value="paid">Pagato</option>
+                                                    <option value="shipped">Spedito</option>
+                                                    <option value="delivered">Consegnato</option>
+                                                    <option value="cancelled">Annullato</option>
+                                                </select>
+                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-[#0066b2] transition-colors" size={16} />
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {/* PAGINATION CONTROLS */}
+                                {orders.length > ORDERS_PER_PAGE && (
+                                    <div className="flex justify-center items-center gap-6 mt-10 pt-6 border-t border-slate-100">
+                                        <button 
+                                            disabled={currentOrderPage === 1}
+                                            onClick={() => setCurrentOrderPage(p => p - 1)}
+                                            className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-200 text-slate-500 font-bold uppercase text-xs hover:border-[#0066b2] hover:text-[#0066b2] transition-colors disabled:opacity-30 disabled:cursor-not-allowed bg-white shadow-sm"
+                                        >
+                                            <ChevronLeft size={16} /> Precedente
+                                        </button>
+                                        
+                                        <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                                            Pagina <span className="text-slate-900 text-sm">{currentOrderPage}</span> di {totalOrderPages}
+                                        </span>
+
+                                        <button 
+                                            disabled={currentOrderPage === totalOrderPages}
+                                            onClick={() => setCurrentOrderPage(p => p + 1)}
+                                            className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-200 text-slate-500 font-bold uppercase text-xs hover:border-[#0066b2] hover:text-[#0066b2] transition-colors disabled:opacity-30 disabled:cursor-not-allowed bg-white shadow-sm"
+                                        >
+                                            Successivo <ChevronRight size={16} />
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        );
+                    })()}
                 </div>
             </div>
         )}

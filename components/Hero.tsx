@@ -6,8 +6,8 @@ const Hero: React.FC = () => {
   return (
     <section className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-white">
       
-      {/* Background: Light Clean Theme */}
-      <div className="absolute inset-0 bg-slate-50 z-0"></div>
+      {/* Background: Subtle Premium Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-slate-50 z-0"></div>
       
       {/* Central Axis Line (The visual anchor for all sections) */}
       <div className="absolute inset-0 flex justify-center pointer-events-none z-0">
@@ -54,9 +54,9 @@ const Hero: React.FC = () => {
 
         {/* Kick Off Trigger */}
         <a 
-            className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4 group cursor-pointer"
+            className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4 group"
         >
-            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 group-hover:text-[#0066b2] transition-colors">
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#0066b2]">
                 Kick Off
             </span>
             

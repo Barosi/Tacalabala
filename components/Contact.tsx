@@ -52,8 +52,15 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <section id="contact" className="pt-64 pb-24 bg-white border-t border-slate-100">
-      <div className="container mx-auto px-6 max-w-5xl">
+    <section id="contact" className="pt-64 pb-24 bg-white border-t border-slate-100 relative overflow-hidden">
+      
+       {/* Background Pattern */}
+       <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style={{
+          backgroundImage: `radial-gradient(#0066b2 1px, transparent 1px)`,
+          backgroundSize: '32px 32px'
+      }}></div>
+
+      <div className="container mx-auto px-6 max-w-5xl relative z-10">
         
          <div className="text-center mb-16">
             <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase mb-4 text-slate-900">
@@ -94,10 +101,10 @@ const Contact: React.FC = () => {
                         </div>
                      </div>
                 </div>
-                <div className="pt-2">
+                <div className="pt-2 flex justify-center">
                     <button 
                         onClick={handleWhatsapp}
-                        className="w-full relative overflow-hidden group/btn bg-white border border-[#25D366] text-[#25D366] hover:text-white font-bold uppercase tracking-widest py-4 rounded-full transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-green-500/20 active:scale-95 transform-gpu"
+                        className="w-auto min-w-[260px] relative overflow-hidden group/btn bg-white border border-[#25D366] text-[#25D366] hover:text-white font-bold uppercase tracking-widest py-4 px-10 rounded-full transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-green-500/20 active:scale-95 transform-gpu"
                     >
                         <span className="absolute inset-0 bg-[#25D366] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
                         <span className="relative z-10 flex items-center gap-2">
@@ -151,13 +158,13 @@ const Contact: React.FC = () => {
                      </form>
                  </div>
 
-                 <div className="pt-8">
+                 <div className="pt-8 flex justify-center">
                     <button 
                         type="button" 
                         // Importante: onClick triggera il submit del form esterno se non è dentro
                         onClick={() => formRef.current?.requestSubmit()} 
                         disabled={loading}
-                        className="w-full relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 font-bold uppercase tracking-widest py-4 rounded-full transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-blue-900/20 active:scale-95 transform-gpu"
+                        className="w-auto min-w-[260px] relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 font-bold uppercase tracking-widest py-4 px-10 rounded-full transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-blue-900/20 active:scale-95 transform-gpu"
                     >
                         <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
                         <span className="relative z-10 flex items-center gap-2">

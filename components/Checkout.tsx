@@ -100,9 +100,14 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
 
     setIsProcessing(true);
     
+    // GENERAZIONE ID ORDINE SEQUENZIALE (Basato su Timestamp)
+    // Usiamo gli ultimi 6 digit del timestamp per avere un numero crescente e corto
+    const uniqueId = Date.now().toString().slice(-6);
+    const orderId = `ORD-${uniqueId}`;
+
     setTimeout(() => {
       const newOrder = {
-        id: `ORD-${Math.floor(Math.random() * 100000)}`,
+        id: orderId,
         customerEmail: form.email,
         customerName: `${form.firstName} ${form.lastName}`,
         total: grandTotal,
@@ -127,7 +132,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
         <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-8 shadow-xl shadow-green-100"><CheckCircle size={48} /></div>
         <h2 className="font-oswald text-4xl font-bold uppercase mb-4 text-slate-900">Ordine Confermato!</h2>
         <p className="text-slate-500 max-w-md mx-auto mb-8 leading-relaxed">Grazie per il tuo acquisto. Abbiamo inviato una ricevuta a <span className="font-bold text-slate-900">{form.email}</span>.</p>
-        <button onClick={onBack} className="relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white px-8 py-4 rounded-full uppercase font-bold tracking-widest transition-all duration-300 shadow-lg hover:shadow-blue-500/30 active:scale-95 transform-gpu flex items-center gap-2">
+        <button onClick={onBack} className="relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white px-10 py-4 rounded-full uppercase font-bold tracking-widest transition-all duration-300 shadow-lg hover:shadow-blue-500/30 active:scale-95 transform-gpu flex items-center gap-2 min-w-[240px] justify-center">
             <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
             <span className="relative z-10 flex items-center gap-2">
                 <ArrowLeft size={16} /> Torna alla Home
@@ -336,17 +341,19 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                     )}
                 </div>
 
-                {/* BOTTONE FINALE (ALTEZZA h-16 = 64px) */}
-                <button 
-                    disabled={isProcessing} 
-                    type="submit" 
-                    className="w-full h-16 mt-8 relative overflow-hidden group/btn bg-white border border-[#0066b2] text-[#0066b2] hover:text-white rounded-full font-bold uppercase tracking-widest transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-sm transform-gpu active:scale-95"
-                >
-                    <span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
-                    <span className="relative z-10 flex items-center gap-2">
-                        {isProcessing ? <Loader2 className="animate-spin" /> : <><CreditCard size={18} /> Paga Ora</>}
-                    </span>
-                </button>
+                {/* BOTTONE FINALE (ALTEZZA h-16 = 64px) - Centrato e non full width */}
+                <div className="mt-8 flex justify-center">
+                    <button 
+                        disabled={isProcessing} 
+                        type="submit" 
+                        className="w-auto min-w-[320px] h-16 relative overflow-hidden group/btn bg-white border border-[#0066b2] text-[#0066b2] hover:text-white rounded-full font-bold uppercase tracking-widest transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-sm transform-gpu active:scale-95 px-8 shadow-lg hover:shadow-blue-900/10"
+                    >
+                        <span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                        <span className="relative z-10 flex items-center gap-2">
+                            {isProcessing ? <Loader2 className="animate-spin" /> : <><CreditCard size={18} /> Paga Ora</>}
+                        </span>
+                    </button>
+                </div>
                 
                 <div className="mt-6 flex justify-center">
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">

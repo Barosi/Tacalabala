@@ -1,150 +1,162 @@
 
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, PenTool, Shirt, Heart } from 'lucide-react';
+import React from 'react';
+import { PenTool, Shirt, Heart, User } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
 
-const About: React.FC = () => {
-    const images = [
-        "https://i.postimg.cc/zDPXXSV0/Cosa_vedere_a_Milano.jpg", 
-        "https://i.postimg.cc/SQtNN7Jv/Stadio_San_Siro_interno_Meazza_lapresse_2.jpg"
-    ];
-
-  const [curr, setCurr] = useState(0);
-
-  const prev = () => setCurr((curr) => (curr === 0 ? images.length - 1 : curr - 1));
-  const next = () => setCurr((curr) => (curr === images.length - 1 ? 0 : curr + 1));
-
-  useEffect(() => {
-    const slideInterval = setInterval(next, 5000);
-    return () => clearInterval(slideInterval);
-  }, []);
-
+const ChiSiamo: React.FC = () => {
   // Varianti per l'animazione fluida
   const fadeIn: Variants = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
   };
 
+  // Blue Card Style matching About.tsx
+  const cardClass = "bg-[#0066b2] text-white border border-[#0066b2] p-8 md:p-12 rounded-[2rem] shadow-xl shadow-blue-900/10 hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden";
+  const bgIconClass = "absolute -right-6 -top-6 text-white opacity-10 group-hover:scale-110 transition-transform duration-500 pointer-events-none";
+
   return (
-    <section id="about" className="pt-32 md:pt-48 pb-16 md:pb-24 bg-white border-t border-slate-100 overflow-hidden relative">
+    <section id="about" className="pt-32 md:pt-48 pb-16 md:pb-24 overflow-hidden relative">
       
+      {/* Background: Gradient matching Hero + Mesh Texture */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-slate-50 z-0"></div>
+      
+      {/* Decorative Geometry for Depth (Breaks Uniformity) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Big Faded Circle Top Left */}
+          <div className="absolute -top-[10%] -left-[10%] w-[60vw] h-[60vw] rounded-full border border-slate-200 opacity-40"></div>
+          {/* Big Faded Circle Bottom Right */}
+          <div className="absolute -bottom-[20%] -right-[10%] w-[70vw] h-[70vw] rounded-full border border-[#0066b2]/10 opacity-30"></div>
+           {/* Center Axis */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-px bg-slate-200 border-l border-dashed border-slate-300"></div>
+      </div>
+      
+      {/* Mesh Pattern Overlay - Slightly larger for better visibility */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-0" style={{
+          backgroundImage: `radial-gradient(#0066b2 1.5px, transparent 1.5px)`,
+          backgroundSize: '24px 24px'
+      }}></div>
+
       <div className="container mx-auto px-6 max-w-6xl relative z-10">
         
-        {/* HEADER */}
+        {/* --- HEADER & STORYTELLING --- */}
         <motion.div 
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={fadeIn}
-          className="text-center mb-12 md:mb-16"
+          className="text-center max-w-3xl mx-auto mb-20"
         >
-             <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase mb-6 text-slate-900 leading-none tracking-tight">
-                In trasferta e <br className="md:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">giù in Città</span>
+             {/* Titolo con Leading corretto per evitare sovrapposizioni */}
+             <h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase mb-8 text-slate-900 leading-[1.1] tracking-tight">
+                In trasferta e <br className="hidden md:block" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">giù in Città</span>
              </h2>
-             <p className="text-slate-500 max-w-2xl mx-auto leading-relaxed text-base md:text-lg px-2 font-light">
-                Non seguiamo le regole del merchandising. Le riscriviamo.
-             </p>
+             
+             <div className="space-y-6 text-slate-600 text-lg md:text-xl font-light leading-relaxed">
+                <p>
+                    <strong className="text-slate-900 font-medium">Tacalabala</strong> non è solo un brand, è un manifesto d'appartenenza. Nati tra i gradoni di San Siro e cresciuti nelle strade di Milano, abbiamo sentito l'esigenza di colmare il vuoto tra la curva e la passerella.
+                </p>
+                <p>
+                    La nostra missione è semplice ma ambiziosa: prendere l'estetica sacra della maglia nerazzurra e fonderla con i codici del design urbano contemporaneo. Non facciamo repliche, creiamo visioni.
+                </p>
+                <p>
+                    Ogni cucitura racconta una trasferta, ogni grafica celebra una leggenda. Siamo indipendenti, siamo visionari, ma soprattutto, siamo tifosi.
+                </p>
+             </div>
         </motion.div>
 
-        {/* CONTENT SPLIT */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        {/* --- VALUES CARDS (Total Blue) --- */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
             
-            {/* Text Column */}
+            {/* Card 1 */}
             <motion.div 
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={fadeIn}
-              className="space-y-8 text-center lg:text-left order-2 lg:order-1"
+                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} 
+                className={cardClass}
             >
-                <div className="px-2">
-                    <p className="text-slate-600 leading-loose mb-6 text-base md:text-lg">
-                        Tacalabala nasce per riempire il vuoto tra la curva e la passerella. 
-                        <strong> Non vendiamo divise ufficiali da gara.</strong> Creiamo visioni: maglie <i>custom</i> e concept kit che fondono l'estetica calcistica con il design urbano.
-                    </p>
-                    <p className="text-slate-600 leading-loose text-base md:text-lg">
-                        Ogni pezzo è ispirato all'anima di Milano e ai colori nerazzurri, reinterpretati per chi vuole indossare la propria fede calcistica con uno stile unico, lontano dalle repliche commerciali.
-                    </p>
-                </div>
-
-                {/* Features Grid - ICONE E TESTI INGRANDITI */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 pt-8 border-t border-slate-100 mt-8">
-                    <div className="flex flex-col items-center lg:items-start gap-4">
-                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm transform hover:scale-105 transition-transform">
-                            <PenTool size={32} className="md:w-10 md:h-10" />
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-lg uppercase text-slate-900">Design Unico</h4>
-                            <p className="text-sm text-slate-500 leading-relaxed mt-1">Grafiche esclusive create dai nostri designer.</p>
-                        </div>
+                <div className={bgIconClass}><PenTool size={180} strokeWidth={1} /></div>
+                <div className="relative z-10 flex flex-col items-center text-center">
+                    <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-8 shadow-inner">
+                        <PenTool size={32} className="text-white" />
                     </div>
-                    <div className="flex flex-col items-center lg:items-start gap-4">
-                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm transform hover:scale-105 transition-transform">
-                            <Shirt size={32} className="md:w-10 md:h-10" />
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-lg uppercase text-slate-900">Fit Moderno</h4>
-                            <p className="text-sm text-slate-500 leading-relaxed mt-1">Taglio streetwear perfetto per l'outfit quotidiano.</p>
-                        </div>
-                    </div>
-                    <div className="flex flex-col items-center lg:items-start gap-4">
-                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0066b2] shadow-sm transform hover:scale-105 transition-transform">
-                            <Heart size={32} className="md:w-10 md:h-10" />
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-lg uppercase text-slate-900">Ispirazione</h4>
-                            <p className="text-sm text-slate-500 leading-relaxed mt-1">Tributo indipendente alla Milano nerazzurra.</p>
-                        </div>
-                    </div>
+                    <h3 className="text-white font-oswald text-2xl uppercase mb-4">Design Unico</h3>
+                    <p className="text-blue-100 text-base leading-relaxed font-light">Grafiche esclusive create dai nostri designer. Nessun template, solo pura creatività milanese.</p>
                 </div>
             </motion.div>
 
-            {/* Carousel Column */}
+            {/* Card 2 */}
             <motion.div 
-               initial={{ opacity: 0, x: 50 }}
-               whileInView={{ opacity: 1, x: 0 }}
-               viewport={{ once: true }}
-               transition={{ duration: 0.8 }}
-               className="relative px-2 lg:px-0 order-1 lg:order-2"
+                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} 
+                className={cardClass}
+                style={{ transitionDelay: '100ms' }}
             >
-                {/* Decorative Element Behind */}
-                <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#0066b2]/10 rounded-full blur-3xl hidden md:block"></div>
-                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-slate-200/50 rounded-full blur-3xl hidden md:block"></div>
-
-                <div className="relative rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl shadow-blue-900/5 group bg-white border border-slate-100 p-2 md:p-3">
-                    
-                    {/* Maschera interna - Aspect Ratio 3:2 */}
-                    <div className="relative w-full aspect-[4/3] md:aspect-[3/2] overflow-hidden rounded-[1rem] md:rounded-[2rem]">
-                        {images.map((img, i) => (
-                            <img 
-                                key={i} 
-                                src={img} 
-                                alt="Tacalabala Lifestyle" 
-                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]" 
-                                style={{ transform: `translateX(${(i - curr) * 100}%)` }}
-                            />
-                        ))}
+                <div className={bgIconClass}><Shirt size={180} strokeWidth={1} /></div>
+                <div className="relative z-10 flex flex-col items-center text-center">
+                    <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-8 shadow-inner">
+                        <Shirt size={32} className="text-white" />
                     </div>
-                    
-                    {/* Navigation Buttons */}
-                    <div className="absolute inset-0 flex items-center justify-between p-4 md:p-6 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                        <button onClick={prev} className="pointer-events-auto p-2 md:p-3 rounded-full bg-white/90 text-slate-900 shadow-xl hover:scale-110 transition-transform backdrop-blur-sm"><ChevronLeft size={20} /></button>
-                        <button onClick={next} className="pointer-events-auto p-2 md:p-3 rounded-full bg-white/90 text-slate-900 shadow-xl hover:scale-110 transition-transform backdrop-blur-sm"><ChevronRight size={20} /></button>
-                    </div>
-
-                    {/* Dots */}
-                    <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
-                        {images.map((_, i) => (
-                            <div key={i} className={`h-1.5 rounded-full transition-all duration-300 shadow-sm ${curr === i ? "w-6 bg-white" : "w-1.5 bg-white/60"}`} />
-                        ))}
-                    </div>
+                    <h3 className="text-white font-oswald text-2xl uppercase mb-4">Fit Moderno</h3>
+                    <p className="text-blue-100 text-base leading-relaxed font-light">Taglio boxy e materiali premium. Perfetto per lo stadio, impeccabile per l'aperitivo.</p>
                 </div>
             </motion.div>
 
+            {/* Card 3 */}
+            <motion.div 
+                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} 
+                className={cardClass}
+                style={{ transitionDelay: '200ms' }}
+            >
+                <div className={bgIconClass}><Heart size={180} strokeWidth={1} /></div>
+                <div className="relative z-10 flex flex-col items-center text-center">
+                    <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-8 shadow-inner">
+                        <Heart size={32} className="text-white" />
+                    </div>
+                    <h3 className="text-white font-oswald text-2xl uppercase mb-4">Passione Pura</h3>
+                    <p className="text-blue-100 text-base leading-relaxed font-light">Un tributo indipendente ai colori più belli del mondo. Fatto da tifosi, per tifosi.</p>
+                </div>
+            </motion.div>
         </div>
+
+        {/* --- TEAM SECTION --- */}
+        <motion.div 
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn}
+            className="border-t border-slate-100 pt-20"
+        >
+             <div className="text-center mb-16">
+                 <span className="inline-block py-1 px-3 border border-[#0066b2] rounded-full bg-blue-50 text-[#0066b2] font-bold tracking-[0.2em] text-[10px] uppercase mb-4">Staff Tecnico</span>
+                 <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase text-slate-900">La <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Formazione</span></h2>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                
+                {/* Team Member 1 */}
+                <div className="group bg-white border border-slate-100 p-4 rounded-[2.5rem] hover:border-[#0066b2] transition-all duration-500 hover:shadow-xl hover:shadow-blue-900/5">
+                    <div className="aspect-[4/5] bg-slate-50 rounded-[2rem] mb-6 relative overflow-hidden flex items-center justify-center border border-slate-200 group-hover:bg-blue-50/50 transition-colors">
+                        <div className="absolute inset-0 bg-jersey-mesh opacity-50"></div>
+                        <User size={80} className="text-slate-300 group-hover:text-[#0066b2] transition-colors duration-500" strokeWidth={1} />
+                    </div>
+                    <div className="text-center pb-4">
+                        <h4 className="font-oswald text-2xl uppercase font-bold text-slate-900 group-hover:text-[#0066b2] transition-colors">Alessandro Valli</h4>
+                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-1">Founder & Creative Director</p>
+                    </div>
+                </div>
+
+                {/* Team Member 2 */}
+                <div className="group bg-white border border-slate-100 p-4 rounded-[2.5rem] hover:border-[#0066b2] transition-all duration-500 hover:shadow-xl hover:shadow-blue-900/5">
+                    <div className="aspect-[4/5] bg-slate-50 rounded-[2rem] mb-6 relative overflow-hidden flex items-center justify-center border border-slate-200 group-hover:bg-blue-50/50 transition-colors">
+                         <div className="absolute inset-0 bg-jersey-mesh opacity-50"></div>
+                         <User size={80} className="text-slate-300 group-hover:text-[#0066b2] transition-colors duration-500" strokeWidth={1} />
+                    </div>
+                    <div className="text-center pb-4">
+                        <h4 className="font-oswald text-2xl uppercase font-bold text-slate-900 group-hover:text-[#0066b2] transition-colors">Davide Mariani</h4>
+                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-1">Head of Operations</p>
+                    </div>
+                </div>
+
+             </div>
+        </motion.div>
+
       </div>
     </section>
   );
 };
 
-export default About;
+export default ChiSiamo;
