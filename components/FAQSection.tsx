@@ -41,21 +41,28 @@ const FAQSection: React.FC = () => {
     return (
         <section className="pt-32 md:pt-48 pb-16 md:pb-24 bg-slate-50 border-t border-slate-100 relative overflow-hidden">
              
-             {/* Header Aggiornato */}
+             {/* Header Aggiornato stile Chi Siamo */}
              <div className="container mx-auto px-6 relative z-20 text-center mb-16">
-                <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase mb-4 text-slate-900 leading-none">
-                   Tattiche & <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Risposte</span> (FAQ)
-                </h2>
-                <p className="text-slate-500 text-base md:text-lg px-4 max-w-xl mx-auto font-light">
-                    Tutto quello che devi sapere prima del calcio d'inizio. Spedizioni, resi e dettagli tecnici.
-                </p>
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                >
+                    <h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase mb-4 text-slate-900 leading-[1.1]">
+                        Tattiche & <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Risposte</span>
+                    </h2>
+                    <p className="text-slate-500 text-base md:text-lg px-4 max-w-xl mx-auto font-light">
+                        Tutto quello che devi sapere prima del calcio d'inizio. Spedizioni, resi e dettagli tecnici.
+                    </p>
+                </motion.div>
              </div>
 
-            {/* Container allargato SOLO CAMPO */}
-            <div className="container mx-auto px-4 md:px-6 max-w-5xl relative z-10">
+            {/* Container allargato SOLO CAMPO - Aumentato a max-w-7xl e Aspect Ratio più alto */}
+            <div className="container mx-auto px-4 md:px-6 max-w-7xl relative z-10">
                 
-                {/* TACTICAL BOARD CONTAINER (Full Width) */}
-                <div className="w-full relative aspect-[3/4] md:aspect-[21/9] bg-white rounded-[3rem] border border-slate-200 shadow-2xl shadow-blue-900/10 overflow-hidden group select-none">
+                {/* TACTICAL BOARD CONTAINER (Full Width, Taller Ratio) */}
+                <div className="w-full relative aspect-[3/4] md:aspect-[16/9] bg-white rounded-[3rem] border border-slate-200 shadow-2xl shadow-blue-900/10 overflow-hidden group select-none">
                     
                     {/* Background Pitch Graphics */}
                     <div className="absolute inset-0 opacity-[0.08] pointer-events-none">

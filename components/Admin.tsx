@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Product, ProductVariant, Size, FAQ, Discount, OrderStatus, ShippingConfig } from '../types';
 import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, HelpCircle, Tag, Calendar, ShoppingBag, Truck, CheckCircle, XCircle, AlertCircle, Clock, Mail, Plane, AlertTriangle, Check, Search, Shirt, Layers, Globe, Smartphone, PenTool, FileText, ChevronDown, User, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { motion } from 'framer-motion';
 
 // --- STILI CONDIVISI PER UNIFORMITÀ ---
 const cardClass = "bg-white p-8 md:p-12 rounded-[2.5rem] shadow-xl shadow-blue-900/5 border border-slate-100 relative overflow-hidden transition-all duration-300 hover:shadow-blue-900/10";
@@ -297,10 +298,16 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
 
       <div className="container mx-auto px-6 max-w-7xl">
         
-        {/* HEADER */}
-        <div className="text-center mb-16 relative">
-            <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase mb-2 text-slate-900">
-                Admin <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Dashboard</span>
+        {/* HEADER - Styled Like Chi Siamo */}
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-center mb-16 relative"
+        >
+            <h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase mb-4 text-slate-900 leading-[1.1]">
+                Area <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Riservata</span>
             </h2>
             <p className="text-slate-500 text-sm tracking-widest uppercase font-bold">Pannello di controllo avanzato</p>
             <div className="mt-6 md:absolute md:top-1/2 md:right-0 md:-translate-y-1/2 md:mt-0 flex justify-center">
@@ -308,7 +315,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     <LogOut size={14} /> Esci
                 </button>
             </div>
-        </div>
+        </motion.div>
 
         {/* TABS */}
         <div className="flex gap-4 mb-12 border-b border-slate-200 overflow-x-auto pb-1 no-scrollbar justify-start md:justify-center">

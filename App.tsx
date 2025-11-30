@@ -12,10 +12,12 @@ import Footer from './components/Footer';
 import Admin from './components/Admin';
 import Checkout from './components/Checkout';
 import CartDrawer from './components/CartDrawer';
-import InfoBar from './components/InfoBar';
 import CookieConsent from './components/CookieConsent';
+import Store from './components/Store';
+import ProductDetails from './components/ProductDetails';
 import { ArrowLeft, LogIn } from 'lucide-react';
 import { useStore } from './store/useStore';
+import { Product } from './types';
 
 const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = ({ onLogin, onCancel }) => {
     const [user, setUser] = useState('');
@@ -63,11 +65,12 @@ const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = (
 }
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<'home' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'store' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout' | 'product-details'>('home');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { products } = useStore();
 
-  const handleNavigate = (page: 'home' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout', hash?: string) => {
+  const handleNavigate = (page: any, hash?: string) => {
     setCurrentPage(page);
     window.scrollTo(0, 0);
     if (page === 'home' && hash) {
@@ -78,21 +81,34 @@ const App: React.FC = () => {
     }
   };
 
+  const handleOpenProduct = (product: Product) => {
+      setSelectedProduct(product);
+      setCurrentPage('product-details');
+      window.scrollTo(0, 0);
+  };
+
   const handleLogout = () => { setIsAuthenticated(false); setCurrentPage('home'); };
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-[#0066b2] selection:text-white flex flex-col">
-      <Navbar currentPage={currentPage} onNavigate={handleNavigate} />
+      <Navbar currentPage={currentPage as any} onNavigate={handleNavigate} />
       <CartDrawer onCheckout={() => handleNavigate('checkout')} />
       <main className="flex-grow">
         {currentPage === 'home' && (
           <>
             <Hero />
-            <div id="products"><ProductGrid products={products} /></div>
+            <div id="products"><ProductGrid products={products} onProductClick={handleOpenProduct} /></div>
             <About />
             <SupportSection />
-            <InfoBar />
           </>
+        )}
+        {currentPage === 'store' && <Store onProductClick={handleOpenProduct} />}
+        {currentPage === 'product-details' && selectedProduct && (
+            <ProductDetails 
+                product={selectedProduct} 
+                onBack={() => handleNavigate('store')} 
+                onCheckout={() => handleNavigate('checkout')}
+            />
         )}
         {currentPage === 'contact' && <Contact />}
         {currentPage === 'faq' && <FAQSection />}

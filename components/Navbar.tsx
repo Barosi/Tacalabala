@@ -5,8 +5,8 @@ import { LOGO_URL } from '../constants';
 import { useStore } from '../store/useStore';
 
 interface NavbarProps {
-  currentPage: 'home' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout';
-  onNavigate: (page: 'home' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout', hash?: string) => void;
+  currentPage: 'home' | 'store' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout';
+  onNavigate: (page: 'home' | 'store' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout', hash?: string) => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
@@ -32,17 +32,13 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
       const isCompact = isScrolled || currentPage !== 'home';
 
       if (isMobileMenuOpen) {
-          // Mobile Menu Open: Solid white, no border, no shadow.
-          // IMPORTANT: Maintain existing padding to prevent layout jump.
           return `bg-white border-transparent shadow-none ${isCompact ? 'py-2' : 'py-6'}`;
       }
       
       if (isCompact) {
-          // Compact State: Solid white (no blur for performance), light border.
           return 'bg-white border-slate-200 shadow-sm py-2';
       }
 
-      // Default (Home Top): Transparent
       return 'bg-transparent border-transparent py-6';
   };
 
@@ -50,7 +46,6 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-out border-b ${getNavbarClasses()}`}>
       <div className="container mx-auto px-6 flex justify-between items-center">
         <button onClick={() => handleLinkClick('home')} className="relative z-50 focus:outline-none flex items-center justify-center mx-4">
-             {/* Logo Height increased for Mobile: h-28 (was h-20) */}
              <img src={LOGO_URL} alt="Tacalabala Milano" className="h-28 md:h-36 w-auto object-contain drop-shadow-md" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
         </button>
 
@@ -58,6 +53,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
           <div className="flex items-center gap-8 border-r border-slate-200 pr-8 mr-8 h-6">
             <button onClick={() => handleLinkClick('home')} className={`text-xs font-bold uppercase tracking-[0.2em] hover:text-[#0066b2] transition-all duration-300 relative group text-slate-800`}>
               Home <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-[#0066b2] transition-all duration-300 group-hover:w-full ${currentPage === 'home' ? 'w-full' : ''}`}></span>
+            </button>
+            <button onClick={() => handleLinkClick('store')} className={`text-xs font-bold uppercase tracking-[0.2em] hover:text-[#0066b2] transition-all duration-300 relative group text-slate-800`}>
+              Shop <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-[#0066b2] transition-all duration-300 group-hover:w-full ${currentPage === 'store' ? 'w-full' : ''}`}></span>
             </button>
              <button onClick={() => handleLinkClick('chi-siamo')} className={`text-xs font-bold uppercase tracking-[0.2em] hover:text-[#0066b2] transition-all duration-300 relative group text-slate-800`}>
               Chi Siamo <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-[#0066b2] transition-all duration-300 group-hover:w-full ${currentPage === 'chi-siamo' ? 'w-full' : ''}`}></span>
@@ -88,6 +86,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
       <div className={`fixed inset-0 bg-white z-40 transition-transform duration-300 ease-out md:hidden flex items-center justify-center ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col space-y-8 text-center p-6 w-full max-w-sm">
           <button onClick={() => handleLinkClick('home')} className="text-4xl font-oswald text-slate-900 hover:text-[#0066b2] uppercase tracking-widest font-bold">Home</button>
+          <button onClick={() => handleLinkClick('store')} className="text-4xl font-oswald text-slate-900 hover:text-[#0066b2] uppercase tracking-widest font-bold">Shop</button>
           <button onClick={() => handleLinkClick('chi-siamo')} className="text-4xl font-oswald text-slate-900 hover:text-[#0066b2] uppercase tracking-widest font-bold">Chi Siamo</button>
           <button onClick={() => handleLinkClick('faq')} className="text-4xl font-oswald text-slate-900 hover:text-[#0066b2] uppercase tracking-widest font-bold">FAQ</button>
         </div>

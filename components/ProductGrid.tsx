@@ -3,18 +3,20 @@ import React, { useEffect, useState, useRef } from 'react';
 import ProductCard from './ProductCard';
 import { Product } from '../types';
 import { INSTAGRAM_URL } from '../constants';
-import { ArrowRight, ChevronLeft, ChevronRight, Instagram } from 'lucide-react';
-import { motion, useMotionValue, animate } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Instagram, Truck, RefreshCw, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useStore } from '../store/useStore';
 
 interface ProductGridProps {
   products: Product[];
+  onProductClick?: (product: Product) => void;
 }
 
-const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
-  const [width, setWidth] = useState(0);
+const ProductGrid: React.FC<ProductGridProps> = ({ products, onProductClick }) => {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(1);
+  const { shippingConfig } = useStore();
 
   // Calcola quante card mostrare in base alla larghezza schermo
   useEffect(() => {
@@ -42,20 +44,14 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
   };
   
   return (
-    <section id="collection" className="pt-24 md:pt-32 pb-12 bg-white relative overflow-hidden">
+    <section id="products" className="pt-12 md:pt-16 bg-white relative overflow-hidden scroll-mt-48">
       
       {/* Central Axis Continuity */}
       <div className="absolute inset-0 flex justify-center pointer-events-none z-0">
           <div className="w-px h-full bg-slate-100 border-l border-dashed border-slate-300"></div>
       </div>
 
-      {/* Background Pattern Sottile */}
-      <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style={{
-          backgroundImage: `radial-gradient(#0066b2 1.5px, transparent 1.5px)`,
-          backgroundSize: '24px 24px'
-      }}></div>
-
-      <div className="container mx-auto px-6 relative z-10 max-w-7xl">
+      <div className="container mx-auto px-6 relative z-10 max-w-7xl mb-24">
         
         {/* --- HEADER CENTRATO --- */}
         <div className="flex flex-col items-center justify-center mb-16 gap-8 text-center">
@@ -93,10 +89,9 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
         </div>
 
         {/* --- CAROUSEL CONTAINER --- */}
-        {/* Changed 'group' to 'group/carousel' to isolate hover effects from ProductCard */}
         <div className="relative group/carousel">
             
-            {/* Navigazione Frecce (Ai lati, centrate verticalmente) */}
+            {/* Navigazione Frecce */}
             {products.length > itemsPerPage && (
                 <>
                     <button 
@@ -116,7 +111,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
                 </>
             )}
 
-            {/* Finestra di visualizzazione (Overflow Hidden) */}
+            {/* Finestra di visualizzazione */}
             <div className="overflow-hidden py-4 -my-4 px-1 -mx-1" ref={carouselRef}>
                 <motion.div 
                     className="flex gap-8"
@@ -143,14 +138,14 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
                             `}
                         >
                             <div className="h-full transform transition-transform hover:scale-[1.01] duration-300">
-                                <ProductCard product={product} />
+                                <ProductCard product={product} onClick={() => onProductClick?.(product)} />
                             </div>
                         </motion.div>
                     ))}
                 </motion.div>
             </div>
 
-            {/* Indicatori (Dots) in basso */}
+            {/* Indicatori (Dots) */}
             {products.length > itemsPerPage && (
                 <div className="flex justify-center gap-2 mt-8">
                     {Array.from({ length: Math.ceil(products.length / itemsPerPage) + (itemsPerPage > 1 ? 1 : 0) }).slice(0, Math.max(1, products.length - itemsPerPage + 1)).map((_, idx) => (
@@ -163,8 +158,44 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
                 </div>
             )}
         </div>
-
       </div>
+
+      {/* --- INTEGRATED INFO BAND (NEUTRAL & MINIMAL) --- */}
+      <div className="bg-slate-50 border-t border-slate-100 py-10 relative overflow-hidden">
+         <div className="container mx-auto px-6 max-w-7xl relative z-10">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-8 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-slate-200">
+                
+                {/* 1. Spedizioni */}
+                <div className="flex-1 flex flex-col items-center text-center px-4 group cursor-default">
+                    <Truck size={24} className="text-slate-400 mb-3 group-hover:text-[#0066b2] transition-colors duration-300" />
+                    <p className="font-oswald uppercase font-bold text-slate-900 text-sm tracking-wide mb-1">Spedizione Gratis</p>
+                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">
+                        Ordini sopra i €{shippingConfig.italyThreshold}
+                    </p>
+                </div>
+
+                {/* 2. Resi */}
+                <div className="flex-1 flex flex-col items-center text-center px-4 pt-8 md:pt-0 group cursor-default">
+                    <RefreshCw size={24} className="text-slate-400 mb-3 group-hover:text-green-600 transition-colors duration-300" />
+                    <p className="font-oswald uppercase font-bold text-slate-900 text-sm tracking-wide mb-1">Reso Facile</p>
+                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">
+                        14 Giorni di tempo
+                    </p>
+                </div>
+
+                {/* 3. Pagamenti */}
+                <div className="flex-1 flex flex-col items-center text-center px-4 pt-8 md:pt-0 group cursor-default">
+                    <ShieldCheck size={24} className="text-slate-400 mb-3 group-hover:text-purple-600 transition-colors duration-300" />
+                    <p className="font-oswald uppercase font-bold text-slate-900 text-sm tracking-wide mb-1">Pagamenti Sicuri</p>
+                    <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">
+                        SSL & Carte di Credito
+                    </p>
+                </div>
+
+            </div>
+         </div>
+      </div>
+
     </section>
   );
 };

@@ -48,100 +48,105 @@ const SupportSection: React.FC = () => {
       });
   };
 
+  // Button Style: Completely removed border and border-hover effects
+  const buttonClass = "w-full md:w-auto min-w-[200px] relative overflow-hidden group/btn bg-white border-0 text-slate-900 hover:text-white py-3 px-8 rounded-full font-bold uppercase tracking-widest text-[10px] transition-all duration-300 shadow-sm hover:shadow-lg flex items-center justify-center gap-2 transform-gpu active:scale-95";
+
   return (
-    <section className="py-24 bg-slate-50 relative overflow-hidden">
+    <section className="relative pb-0 pt-24 overflow-hidden bg-slate-900 border-t border-slate-800">
       
-      {/* Visual Continuity: Central Axis Line */}
+      {/* Central Axis Continuity (Changes color/opacity on dark bg) */}
       <div className="absolute inset-0 flex justify-center pointer-events-none z-0">
-          <div className="w-px h-full bg-slate-200 border-l border-dashed border-slate-300"></div>
+          <div className="w-px h-full bg-white/5 border-l border-dashed border-white/10"></div>
       </div>
 
-      <div className="container mx-auto px-6 relative z-10">
+      {/* Subtle Noise Texture */}
+      <div className="absolute inset-0 opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] pointer-events-none"></div>
+
+      <div className="container mx-auto px-6 max-w-4xl relative z-10">
         
         {/* Header */}
         <div className="text-center mb-16">
-             <span className="inline-block py-1 px-3 border border-[#0066b2] rounded-full bg-white text-[#0066b2] font-bold tracking-[0.2em] text-[10px] uppercase mb-6">
+             <span className="inline-block py-1 px-3 border border-slate-700 rounded-full bg-slate-800 text-slate-400 font-bold tracking-[0.2em] text-[10px] uppercase mb-6 shadow-sm">
                 Assistenza H24
             </span>
-             <h2 className="font-oswald text-4xl md:text-5xl font-bold uppercase mb-4 text-slate-900">
-                Supporto <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Clienti</span>
+             <h2 className="font-oswald text-4xl md:text-5xl font-bold uppercase mb-4 text-white">
+                Siamo qui <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0066b2] to-[#004a80]">per te</span>
              </h2>
+             <p className="text-slate-400 max-w-lg mx-auto font-light text-lg">Non sei solo un cliente, sei parte della squadra. Per qualsiasi dubbio, noi ci siamo.</p>
         </div>
 
-        <div className="max-w-4xl mx-auto flex flex-col gap-8">
+        {/* --- MAIN CONTACT STACK (Vertical) --- */}
+        <div className="flex flex-col gap-6 mb-24">
             
-            {/* 1. WhatsApp Banner Card (Elongated) */}
-            <div className="bg-white p-8 md:px-12 md:py-10 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-8 hover:border-[#0066b2] transition-all duration-300 group">
+            {/* 1. WhatsApp Card (Darker Theme) */}
+            <div className="bg-slate-800/50 backdrop-blur-sm p-8 md:p-10 rounded-[2rem] border border-slate-700 transition-colors duration-500 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 group">
                 <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
-                    <div className="w-16 h-16 bg-[#25D366] text-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-green-500/20 group-hover:scale-110 transition-transform duration-500">
+                     <div className="w-16 h-16 bg-[#25D366]/10 text-[#25D366] rounded-2xl flex items-center justify-center group-hover:bg-[#25D366] group-hover:text-white transition-all duration-300 border border-[#25D366]/20">
                         <MessageCircle size={32} />
                     </div>
                     <div>
-                        <h3 className="font-oswald text-2xl uppercase font-bold text-slate-900">Chatta con noi</h3>
-                        <p className="text-slate-500 text-sm mt-1 max-w-sm">Risposta immediata su taglie e spedizioni direttamente su WhatsApp.</p>
+                         <h3 className="font-oswald text-2xl uppercase font-bold text-white">Chatta con noi</h3>
+                         <p className="text-slate-400 text-sm mt-1 leading-relaxed max-w-xs">
+                             Il modo più veloce per info su taglie e spedizioni. <br/>Risposta immediata.
+                         </p>
                     </div>
                 </div>
+                
                 <button 
                     onClick={handleWhatsapp}
-                    className="w-auto min-w-[200px] relative overflow-hidden group/btn bg-white border border-[#25D366] text-[#25D366] hover:text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-lg flex items-center justify-center gap-2 active:scale-95 transform-gpu"
+                    className={buttonClass}
                 >
                     <span className="absolute inset-0 bg-[#25D366] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
                     <span className="relative z-10 flex items-center gap-2">
-                        <MessageCircle size={16} /> Apri Chat
+                        <MessageCircle size={16} /> WhatsApp
                     </span>
                 </button>
             </div>
 
-            {/* 2. Email Form Card (Elongated) */}
-            <div className="bg-white p-8 md:px-12 md:py-10 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-slate-200 hover:border-[#0066b2] transition-all duration-300">
-                <div className="flex items-center gap-4 mb-8">
-                    <div className="w-10 h-10 bg-blue-50 text-[#0066b2] rounded-full flex items-center justify-center">
-                        <Mail size={20} />
+            {/* 2. Email Card (Darker Theme) */}
+            <div className="bg-slate-800/50 backdrop-blur-sm p-8 md:p-10 rounded-[2rem] border border-slate-700 transition-colors duration-500 shadow-xl">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-8">
+                     <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+                        <div className="w-16 h-16 bg-blue-500/10 text-[#0066b2] rounded-2xl flex items-center justify-center border border-blue-500/20">
+                            <Mail size={32} />
+                        </div>
+                        <div>
+                            <h3 className="font-oswald text-2xl uppercase font-bold text-white">Scrivici una mail</h3>
+                            <p className="text-slate-400 text-sm mt-1 font-medium">Rispondiamo entro 24 ore lavorative.</p>
+                        </div>
                     </div>
-                    <h3 className="font-oswald text-2xl uppercase font-bold text-slate-900">Inviaci un messaggio</h3>
                 </div>
 
-                <form ref={formRef} onSubmit={sendEmail} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 pl-2">Nome</label>
-                            <input required name="user_name" type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-900 focus:border-[#0066b2] outline-none transition-colors" placeholder="Il tuo nome" />
-                        </div>
-                        <div className="space-y-1 md:col-span-2">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 pl-2">Email</label>
-                            <input required name="user_email" type="email" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-900 focus:border-[#0066b2] outline-none transition-colors" placeholder="tua@email.com" />
-                        </div>
+                <form ref={formRef} onSubmit={sendEmail} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input required name="user_name" type="text" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-sm text-white focus:border-[#0066b2] outline-none transition-colors placeholder:text-slate-500 font-medium" placeholder="Nome" />
+                        <input required name="user_email" type="email" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-sm text-white focus:border-[#0066b2] outline-none transition-colors placeholder:text-slate-500 font-medium" placeholder="Email" />
                     </div>
-                    
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 pl-2">Messaggio</label>
-                        <textarea required name="message" rows={3} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-900 focus:border-[#0066b2] outline-none transition-colors resize-none" placeholder="Scrivi qui la tua richiesta..."></textarea>
-                    </div>
+                    <textarea required name="message" rows={3} className="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-sm text-white focus:border-[#0066b2] outline-none transition-colors resize-none placeholder:text-slate-500 font-medium" placeholder="Il tuo messaggio..."></textarea>
 
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                        {feedback ? (
-                            <div className={`flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-lg w-full md:w-auto ${feedback.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                                {feedback.type === 'success' ? <CheckCircle2 size={16}/> : null} {feedback.msg}
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-2">
+                        {feedback && (
+                            <div className={`flex items-center gap-2 text-[10px] font-bold px-3 py-2 rounded-lg w-full md:w-auto uppercase tracking-wide ${feedback.type === 'success' ? 'bg-green-900/30 text-green-400 border border-green-800' : 'bg-red-900/30 text-red-400 border border-red-800'}`}>
+                                {feedback.type === 'success' ? <CheckCircle2 size={14}/> : null} {feedback.msg}
                             </div>
-                        ) : <div className="hidden md:block"></div>}
+                        )}
                         
-                        <div className="flex justify-center w-full md:w-auto">
-                            <button 
-                                type="submit" 
-                                disabled={loading}
-                                className="w-auto min-w-[200px] relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95 transform-gpu"
-                            >
-                                <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
-                                <span className="relative z-10 flex items-center gap-2">
-                                    {loading ? <Loader2 className="animate-spin" /> : <><Send size={16} /> Invia</>}
-                                </span>
-                            </button>
-                        </div>
+                        <button 
+                            type="submit" 
+                            disabled={loading}
+                            className={`${buttonClass} ml-auto`}
+                        >
+                             <span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                            <span className="relative z-10 flex items-center gap-2">
+                                {loading ? <Loader2 className="animate-spin" /> : <><Send size={16} /> Invia</>}
+                            </span>
+                        </button>
                     </div>
                 </form>
             </div>
 
         </div>
+
       </div>
     </section>
   );

@@ -43,7 +43,7 @@ const About: React.FC = () => {
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center mb-20 reveal-hidden transition-reveal">
-            <span className="inline-block py-1 px-3 border border-[#0066b2] rounded-full bg-blue-50 text-[#0066b2] font-bold tracking-[0.2em] text-[10px] uppercase mb-8">Tactical Analysis</span>
+            <span className="inline-block py-1 px-3 border border-[#0066b2] rounded-full bg-blue-50 text-[#0066b2] font-bold tracking-[0.2em] text-[10px] uppercase mb-8">Analisi Tattica</span>
             <h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase leading-[1.2] mb-4">Non è solo <span className="text-slate-300">Calcio</span>.</h2>
             <h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase leading-[1.2] mb-6">È <span className="text-transparent bg-clip-text bg-gradient-to-r from-black to-[#0066b2]">Identità</span>.</h2>
             <p className="text-slate-500 text-lg md:text-xl font-light leading-relaxed max-w-2xl mx-auto"><strong className="text-black">Tacalabala</strong> riscrive le regole. Uniamo la tradizione di San Siro con l'estetica streetwear di Milano.</p>

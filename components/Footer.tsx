@@ -1,36 +1,15 @@
 
 import React from 'react';
-import { Instagram, Mail, ArrowUp } from 'lucide-react';
+import { Instagram, ArrowUp } from 'lucide-react';
 import { INSTAGRAM_URL } from '../constants';
-
-// Importiamo le icone specifiche dal pacchetto "fa" (Font Awesome)
 import { FaCcVisa, FaCcMastercard, FaCcAmex, FaCcApplePay } from "react-icons/fa";
 
 const PaymentIcons = () => (
-    <div className="flex gap-4 items-center">
-        {/* VISA - Blu scuro */}
-        <FaCcVisa 
-            className="text-3xl text-slate-400" 
-            title="Visa"
-        />
-
-        {/* MASTERCARD - Rosso (o arancione scuro) */}
-        <FaCcMastercard 
-            className="text-3xl text-slate-400" 
-            title="Mastercard"
-        />
-
-        {/* AMEX - Blu chiaro */}
-        <FaCcAmex 
-            className="text-3xl text-slate-400" 
-            title="American Express"
-        />
-
-        {/* APPLE PAY - Nero */}
-        <FaCcApplePay 
-            className="text-3xl text-slate-400" 
-            title="Apple Pay"
-        />
+    <div className="flex gap-4 items-center opacity-50 grayscale hover:grayscale-0 transition-all duration-300">
+        <FaCcVisa className="text-2xl text-white" title="Visa" />
+        <FaCcMastercard className="text-2xl text-white" title="Mastercard" />
+        <FaCcAmex className="text-2xl text-white" title="American Express" />
+        <FaCcApplePay className="text-2xl text-white" title="Apple Pay" />
     </div>
 );
 
@@ -40,61 +19,39 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-slate-900 text-white pt-20 pb-10 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-      }}></div>
-
-      <div className="container mx-auto px-6 relative z-10">
+    <footer className="bg-slate-900 text-white pt-12 pb-8 relative overflow-hidden border-t border-slate-800">
+      
+      <div className="container mx-auto px-6 max-w-7xl relative z-10">
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 items-center">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-10">
             
-            {/* Column 1: Brand & Tagline (Left) */}
-            <div className="flex flex-col gap-4 text-center md:text-left">
-                <p className="text-sm text-slate-400 leading-relaxed font-light tracking-wide">
-                    Streetwear nerazzurro. <br/> 
-                    Milano state of mind.
+            {/* Left: Brand & Copy */}
+            <div className="text-center md:text-left">
+                <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">
+                    © {new Date().getFullYear()} Milano. All rights reserved.
                 </p>
             </div>
 
-            {/* Column 2: Socials & Links (Center) */}
-            <div className="flex flex-col items-center justify-center gap-6">
-                 {/* Social Icons */}
-                 <div className="flex gap-6">
-                    <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="w-12 h-12 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:bg-[#0066b2] hover:text-white transition-all border border-slate-700 hover:border-[#0066b2] shadow-lg hover:shadow-[#0066b2]/50 hover:-translate-y-1">
-                        <Instagram size={20} />
-                    </a>
-                </div>
-                {/* Legal Links below socials */}
-                <div className="flex gap-6 text-[10px] text-slate-500 uppercase tracking-[0.2em] font-bold">
-                    <a href="#" className="hover:text-white transition-colors border-b border-transparent hover:border-white pb-0.5">Privacy</a>
-                    <a href="#" className="hover:text-white transition-colors border-b border-transparent hover:border-white pb-0.5">Terms</a>
-                </div>
+            {/* Center: Social & Links */}
+            <div className="flex items-center gap-8">
+                 <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white transition-colors">
+                    <Instagram size={20} />
+                </a>
+                <a href="#" className="text-[10px] text-slate-500 hover:text-white uppercase tracking-[0.2em] font-bold transition-colors">Privacy</a>
+                <a href="#" className="text-[10px] text-slate-500 hover:text-white uppercase tracking-[0.2em] font-bold transition-colors">Terms</a>
             </div>
 
-            {/* Column 3: Payment Methods (Right) */}
-            <div className="flex flex-col items-center md:items-end gap-4">
-                <span className="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Metodi di Pagamento</span>
+            {/* Right: Payment & Up */}
+            <div className="flex items-center gap-8">
                 <PaymentIcons />
+                <button 
+                    onClick={scrollToTop}
+                    className="w-10 h-10 rounded-full border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+                    title="Torna su"
+                >
+                    <ArrowUp size={16} /> 
+                </button>
             </div>
-        </div>
-
-        {/* Footer Bottom Bar */}
-        <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-slate-600 text-[10px] uppercase tracking-widest font-bold">
-                © {new Date().getFullYear()} Tacalabala. All rights reserved.
-            </p>
-            
-            <button 
-                onClick={scrollToTop}
-                className="relative overflow-hidden group/btn bg-slate-800 border border-slate-700 text-slate-400 hover:text-white px-6 py-3 rounded-full font-bold uppercase tracking-widest text-[10px] transition-all duration-300 flex items-center justify-center gap-2"
-            >
-                <span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
-                <span className="relative z-10 flex items-center gap-2">
-                    <ArrowUp size={14} className="group-hover:-translate-y-1 transition-transform" /> Torna su 
-                </span>
-            </button>
         </div>
       </div>
     </footer>

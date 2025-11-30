@@ -1,51 +1,47 @@
 
 import React, { useState } from 'react';
 import { Product, Size } from '../types';
-import { ShoppingBag, Shirt, AlertCircle, Check, Loader2, Tag, Lock, Clock } from 'lucide-react';
+import { ShoppingBag, Shirt, AlertCircle, Check, Loader2, Tag, Lock, Clock, Eye } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
 interface ProductCardProps {
   product: Product;
+  onClick?: () => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   const [imgSrc, setImgSrc] = useState(product.imageUrl);
   const [selectedSize, setSelectedSize] = useState<Size>('M');
   const [buttonState, setButtonState] = useState<'idle' | 'loading' | 'success'>('idle');
   
   const { addToCart, calculatePrice } = useStore();
   
-  // Logic for Coming Soon / Drop
   const isComingSoon = product.dropDate && new Date(product.dropDate) > new Date();
   const dropDateObj = product.dropDate ? new Date(product.dropDate) : null;
-
   const priceInfo = calculatePrice(product);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
+      e.stopPropagation(); // Stop bubbling to prevent opening detail page
       e.preventDefault();
       setButtonState('loading');
-      
-      // Ritardo leggermente aumentato per una transizione più fluida e percepibile
       setTimeout(() => {
           addToCart(product, selectedSize);
           setButtonState('success');
-          
-          setTimeout(() => { 
-              setButtonState('idle'); 
-          }, 2000);
+          setTimeout(() => { setButtonState('idle'); }, 2000);
       }, 600); 
   };
 
   const currentVariant = product.variants?.find(v => v.size === selectedSize);
   const stockCount = currentVariant ? currentVariant.stock : 0;
   const isSizeSoldOut = stockCount === 0;
-
-  // Stato disabilitato logico (per l'attributo disabled del button)
   const isPermanentlyDisabled = product.isSoldOut || isSizeSoldOut || isComingSoon;
   const isDisabled = isPermanentlyDisabled || buttonState !== 'idle';
 
   return (
-    <div className="group relative bg-white border border-slate-100 overflow-hidden hover:border-[#0066b2] transition-all duration-500 shadow-sm hover:shadow-2xl hover:shadow-blue-900/10 rounded-2xl h-full flex flex-col">
+    <div 
+        onClick={onClick}
+        className="group relative bg-white border border-slate-100 overflow-hidden hover:border-[#0066b2] transition-all duration-500 shadow-sm hover:shadow-2xl hover:shadow-blue-900/10 rounded-2xl h-full flex flex-col cursor-pointer"
+    >
       
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-black to-[#0066b2] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left z-30"></div>
 
@@ -59,10 +55,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
       )}
 
-      {/* IMAGE SECTION WITH COMING SOON LOGIC */}
+      {/* IMAGE SECTION */}
       <div className="relative aspect-[4/5] overflow-hidden bg-slate-50 p-6">
         <div className="absolute inset-0 shadow-[inset_0_0_40px_rgba(0,0,0,0.05)] pointer-events-none z-10 rounded-sm"></div>
         
+        {/* Quick View Overlay hint */}
+        <div className="absolute inset-0 z-20 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+             <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-slate-900 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex items-center gap-2">
+                 <Eye size={14} /> Dettagli
+             </div>
+        </div>
+
         {isComingSoon && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/60 backdrop-blur-md p-6 text-center">
                 <div className="bg-black text-white p-4 rounded-full mb-4 shadow-xl"><Lock size={32} /></div>
@@ -84,13 +87,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
       <div className="p-8 flex flex-col flex-grow bg-white relative">
         <div className="flex justify-between items-start mb-4">
-            <span className="text-[#0066b2] text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-1">
-                <Shirt size={12} /> {product.season}
+            {/* Improved Label Visibility: Smaller font, no hard truncation */}
+            <span className="text-[#0066b2] text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1 flex-shrink min-w-0">
+                <Shirt size={12} className="flex-shrink-0" /> <span className="whitespace-nowrap">{product.season}</span>
             </span>
             
             {/* Size Selector - Hidden if Coming Soon */}
             {!isComingSoon && (
-                <div className="flex gap-1">
+                <div className="flex gap-1 flex-shrink-0 ml-2" onClick={(e) => e.stopPropagation()}>
                     {(['S', 'M', 'L', 'XL'] as Size[]).map((s) => {
                         const variant = product.variants?.find(v => v.size === s);
                         const sizeDisabled = !variant || variant.stock === 0;
@@ -136,7 +140,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                  )}
             </div>
             
-            {/* NEW BUTTON DESIGN: Modern Liquid Fill with OPTIMIZED TRANSITIONS */}
             <button 
                 onClick={handleAddToCart}
                 disabled={isDisabled}
@@ -152,13 +155,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         : buttonState === 'success'
                             ? 'bg-green-500 border-green-500 text-white shadow-md' 
                             : buttonState === 'loading'
-                                ? 'bg-white border-[#0066b2] text-white shadow-md' // Mantieni bordo blu e testo bianco
+                                ? 'bg-white border-[#0066b2] text-white shadow-md'
                                 : 'bg-white border-slate-200 text-slate-900 shadow-sm hover:border-[#0066b2] hover:text-white hover:shadow-lg hover:shadow-blue-900/20'
                     }
                 `}
             >
-                {/* Sliding Background Effect */}
-                {/* Renderizzato se non disabilitato permanentemente e non successo. Se loading, forziamo translate-y-0 */}
                 {!isPermanentlyDisabled && buttonState !== 'success' && (
                     <span className={`
                         absolute inset-0 bg-[#0066b2] transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0
@@ -166,7 +167,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     `}></span>
                 )}
 
-                {/* Content (z-10 to stay on top of background) */}
                 <span className="relative z-10 flex items-center gap-2">
                     {isComingSoon ? (
                         <><Lock size={14} /> Locked</>
