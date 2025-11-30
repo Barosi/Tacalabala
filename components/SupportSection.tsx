@@ -79,9 +79,9 @@ const SupportSection: React.FC = () => {
         <div className="flex flex-col gap-6 mb-24">
             
             {/* 1. WhatsApp Card (Darker Theme) */}
-            <div className="bg-slate-800/50 backdrop-blur-sm p-8 md:p-10 rounded-[2rem] border border-slate-700 transition-colors duration-500 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 group">
+            <div className="bg-slate-800/50 backdrop-blur-sm p-8 md:p-10 rounded-[2rem] border border-slate-700 duration-500 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8 group">
                 <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
-                     <div className="w-16 h-16 bg-[#25D366]/10 text-[#25D366] rounded-2xl flex items-center justify-center group-hover:bg-[#25D366] group-hover:text-white transition-all duration-300 border border-[#25D366]/20">
+                     <div className="w-16 h-16 bg-[#25D366]/10 text-[#25D366] rounded-2xl flex items-center justify-center  duration-300 border border-[#25D366]/20">
                         <MessageCircle size={32} />
                     </div>
                     <div>

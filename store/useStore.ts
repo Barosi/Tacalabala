@@ -17,6 +17,7 @@ interface StoreState {
   setProducts: (products: Product[]) => void;
   addProduct: (product: Product) => void;
   deleteProduct: (id: string) => void;
+  updateProductStock: (productId: string, size: Size, newStock: number) => void;
 
   // Discounts
   discounts: Discount[];
@@ -101,6 +102,23 @@ export const useStore = create<StoreState>()(
       setProducts: (products) => set({ products }),
       addProduct: (product) => set((state) => ({ products: [...state.products, product] })),
       deleteProduct: (id) => set((state) => ({ products: state.products.filter(p => p.id !== id) })),
+      
+      updateProductStock: (productId, size, newStock) => set((state) => {
+          const updatedProducts = state.products.map(p => {
+              if (p.id !== productId) return p;
+              
+              const updatedVariants = p.variants?.map(v => {
+                  if (v.size === size) return { ...v, stock: newStock };
+                  return v;
+              }) || [];
+
+              // Recalculate isSoldOut based on new stock
+              const isSoldOut = updatedVariants.every(v => v.stock === 0);
+              
+              return { ...p, variants: updatedVariants, isSoldOut };
+          });
+          return { products: updatedProducts };
+      }),
 
       addDiscount: (discount) => set((state) => ({ discounts: [...state.discounts, discount] })),
       deleteDiscount: (id) => set((state) => ({ discounts: state.discounts.filter(d => d.id !== id) })),

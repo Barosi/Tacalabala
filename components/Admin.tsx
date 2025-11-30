@@ -88,7 +88,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
   const { 
     products, orders, discounts,
     stripeConfig, supportConfig, mailConfig, shippingConfig,
-    addProduct, deleteProduct, addDiscount, deleteDiscount,
+    addProduct, deleteProduct, updateProductStock, addDiscount, deleteDiscount,
     addFaq, deleteFaq, setStripeConfig, setSupportConfig, setMailConfig, setShippingConfig,
     updateOrderStatus, deleteOrder,
   } = useStore();
@@ -311,8 +311,14 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             </h2>
             <p className="text-slate-500 text-sm tracking-widest uppercase font-bold">Pannello di controllo avanzato</p>
             <div className="mt-6 md:absolute md:top-1/2 md:right-0 md:-translate-y-1/2 md:mt-0 flex justify-center">
-                <button onClick={onLogout} className="flex items-center gap-2 bg-red-50 text-red-600 border border-red-100 px-6 py-2 rounded-full hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm font-bold uppercase tracking-wider text-xs transform active:scale-95">
-                    <LogOut size={14} /> Esci
+                <button 
+                    onClick={onLogout} 
+                    className="relative overflow-hidden group/btn bg-white border border-red-500 text-red-500 hover:text-white px-8 py-3 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-sm hover:shadow-lg flex items-center gap-2 transform-gpu active:scale-95"
+                >
+                     <span className="absolute inset-0 bg-red-500 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                     <span className="relative z-10 flex items-center gap-2">
+                         <LogOut size={16} /> Logout
+                     </span>
                 </button>
             </div>
         </motion.div>
@@ -499,27 +505,33 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                         {/* Pannello Espandibile Dettagli Stock */}
                                         {isExpanded && (
                                             <div className="bg-slate-50 border-t border-slate-100 p-6 md:p-8 animate-in slide-in-from-top-2 fade-in">
-                                                <div className="flex items-center gap-2 mb-4">
-                                                    <Layers size={16} className="text-[#0066b2]" />
-                                                    <h5 className="font-bold uppercase text-xs tracking-widest text-slate-500">Dettaglio Disponibilità per Taglia</h5>
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <Layers size={16} className="text-[#0066b2]" />
+                                                        <h5 className="font-bold uppercase text-xs tracking-widest text-slate-500">Modifica Disponibilità</h5>
+                                                    </div>
                                                 </div>
                                                 
                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                     {product.variants?.map((v, i) => (
                                                         <div 
                                                             key={i} 
-                                                            className={`flex items-center justify-between p-4 rounded-xl border ${v.stock > 0 ? 'bg-white border-slate-200' : 'bg-red-50 border-red-100 opacity-70'}`}
+                                                            className={`flex items-center justify-between p-4 rounded-xl border bg-white border-slate-200 shadow-sm`}
                                                         >
                                                             <div className="flex items-center gap-2">
-                                                                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${v.stock > 0 ? 'bg-slate-100 text-slate-700' : 'bg-white text-red-400'}`}>
+                                                                <span className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 text-slate-700">
                                                                     {v.size}
                                                                 </span>
                                                             </div>
                                                             <div className="text-right">
-                                                                <span className="block text-[10px] font-bold uppercase text-slate-400">Qtà</span>
-                                                                <span className={`font-mono font-bold text-lg ${v.stock > 0 ? 'text-[#0066b2]' : 'text-red-500'}`}>
-                                                                    {v.stock}
-                                                                </span>
+                                                                <span className="block text-[10px] font-bold uppercase text-slate-400 mb-1">Qtà</span>
+                                                                <input 
+                                                                    type="number"
+                                                                    min="0"
+                                                                    value={v.stock}
+                                                                    onChange={(e) => updateProductStock(product.id, v.size, parseInt(e.target.value) || 0)}
+                                                                    className={`w-24 p-3 text-center border-2 rounded-xl font-mono font-bold text-xl outline-none focus:border-[#0066b2] focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all shadow-sm ${v.stock > 0 ? 'bg-white text-slate-900 border-slate-300' : 'bg-red-50 text-red-600 border-red-200'}`}
+                                                                />
                                                             </div>
                                                         </div>
                                                     ))}
@@ -689,27 +701,29 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             </div>
         )}
 
-        {/* --- SHIPPING TAB --- */}
+        {/* --- SHIPPING TAB (UPDATED WIDTH) --- */}
         {activeTab === 'shipping' && (
-             <div className="max-w-2xl mx-auto">
+             <div>
                  <div className={cardClass}>
                     <div className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-100">
                         <div className={headerIconClass}><Plane size={32} /></div>
                         <div><h3 className={headerTitleClass}>Spedizioni</h3><p className={headerSubtitleClass}>Configura tariffe e soglie.</p></div>
                     </div>
                     <form onSubmit={handleShippingSubmit} className="space-y-8">
-                        <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200">
-                            <h4 className="font-bold text-lg mb-4 flex items-center gap-2"><img src="https://flagcdn.com/w20/it.png" alt="IT" className="rounded-sm shadow-sm"/> Italia</h4>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div><label className={labelClass}>Costo (€)</label><input type="number" className={inputClass} value={shippingForm.italyPrice} onChange={e => setShippingForm({...shippingForm, italyPrice: parseFloat(e.target.value)})} /></div>
-                                <div><label className={labelClass}>Gratis da (€)</label><input type="number" className={inputClass} value={shippingForm.italyThreshold} onChange={e => setShippingForm({...shippingForm, italyThreshold: parseFloat(e.target.value)})} /></div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200">
+                                <h4 className="font-bold text-lg mb-4 flex items-center gap-2"><img src="https://flagcdn.com/w20/it.png" alt="IT" className="rounded-sm shadow-sm"/> Italia</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div><label className={labelClass}>Costo (€)</label><input type="number" className={inputClass} value={shippingForm.italyPrice} onChange={e => setShippingForm({...shippingForm, italyPrice: parseFloat(e.target.value)})} /></div>
+                                    <div><label className={labelClass}>Gratis da (€)</label><input type="number" className={inputClass} value={shippingForm.italyThreshold} onChange={e => setShippingForm({...shippingForm, italyThreshold: parseFloat(e.target.value)})} /></div>
+                                </div>
                             </div>
-                        </div>
-                        <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200">
-                            <h4 className="font-bold text-lg mb-4 flex items-center gap-2"><Globe size={18} className="text-slate-400"/> Estero</h4>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div><label className={labelClass}>Costo (€)</label><input type="number" className={inputClass} value={shippingForm.foreignPrice} onChange={e => setShippingForm({...shippingForm, foreignPrice: parseFloat(e.target.value)})} /></div>
-                                <div><label className={labelClass}>Gratis da (€)</label><input type="number" className={inputClass} value={shippingForm.foreignThreshold} onChange={e => setShippingForm({...shippingForm, foreignThreshold: parseFloat(e.target.value)})} /></div>
+                            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200">
+                                <h4 className="font-bold text-lg mb-4 flex items-center gap-2"><Globe size={18} className="text-slate-400"/> Estero</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div><label className={labelClass}>Costo (€)</label><input type="number" className={inputClass} value={shippingForm.foreignPrice} onChange={e => setShippingForm({...shippingForm, foreignPrice: parseFloat(e.target.value)})} /></div>
+                                    <div><label className={labelClass}>Gratis da (€)</label><input type="number" className={inputClass} value={shippingForm.foreignThreshold} onChange={e => setShippingForm({...shippingForm, foreignThreshold: parseFloat(e.target.value)})} /></div>
+                                </div>
                             </div>
                         </div>
                         <div className="flex justify-center pt-4">
@@ -722,9 +736,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             </div>
         )}
 
-        {/* --- PAYMENTS TAB --- */}
+        {/* --- PAYMENTS TAB (UPDATED WIDTH) --- */}
         {activeTab === 'payments' && (
-            <div className="max-w-2xl mx-auto">
+            <div>
                 <div className={cardClass}>
                     <div className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-100">
                         <div className={headerIconClass}><CreditCard size={32} /></div>
@@ -732,14 +746,18 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     </div>
                     <form onSubmit={handlePaymentSubmit} className="space-y-6">
                         <div className="flex items-center gap-3 bg-blue-50 p-6 rounded-2xl text-sm text-[#0066b2] mb-6"><CreditCard size={24} /><p className="font-medium">Chiavi API per processare pagamenti sicuri.</p></div>
-                        <div><label className={labelClass}>Public Key</label><input type="text" className={inputClass} value={paymentForm.publicKey} onChange={e => setPaymentForm({...paymentForm, publicKey: e.target.value})} placeholder="pk_test_..." /></div>
-                        <div><label className={labelClass}>Secret Key</label><input type="password" className={inputClass} value={paymentForm.secretKey} onChange={e => setPaymentForm({...paymentForm, secretKey: e.target.value})} placeholder="sk_test_..." /></div>
-                        <div><label className={labelClass}>Webhook Secret</label><input type="password" className={inputClass} value={paymentForm.webhookSecret} onChange={e => setPaymentForm({...paymentForm, webhookSecret: e.target.value})} placeholder="whsec_..." /></div>
-                        <div>
-                            <label className={labelClass}>Modalità</label>
-                            <div className="flex bg-slate-100 p-1 rounded-xl">
-                                <button type="button" onClick={() => setPaymentForm({...paymentForm, isEnabled: false})} className={`flex-1 py-3 rounded-lg text-xs font-bold uppercase transition-all duration-300 ${!paymentForm.isEnabled ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Test</button>
-                                <button type="button" onClick={() => setPaymentForm({...paymentForm, isEnabled: true})} className={`flex-1 py-3 rounded-lg text-xs font-bold uppercase transition-all duration-300 ${paymentForm.isEnabled ? 'bg-[#0066b2] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Live</button>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div><label className={labelClass}>Public Key</label><input type="text" className={inputClass} value={paymentForm.publicKey} onChange={e => setPaymentForm({...paymentForm, publicKey: e.target.value})} placeholder="pk_test_..." /></div>
+                            <div><label className={labelClass}>Secret Key</label><input type="password" className={inputClass} value={paymentForm.secretKey} onChange={e => setPaymentForm({...paymentForm, secretKey: e.target.value})} placeholder="sk_test_..." /></div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div><label className={labelClass}>Webhook Secret</label><input type="password" className={inputClass} value={paymentForm.webhookSecret} onChange={e => setPaymentForm({...paymentForm, webhookSecret: e.target.value})} placeholder="whsec_..." /></div>
+                            <div>
+                                <label className={labelClass}>Modalità</label>
+                                <div className="flex bg-slate-100 p-1 rounded-xl">
+                                    <button type="button" onClick={() => setPaymentForm({...paymentForm, isEnabled: false})} className={`flex-1 py-3 rounded-lg text-xs font-bold uppercase transition-all duration-300 ${!paymentForm.isEnabled ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Test</button>
+                                    <button type="button" onClick={() => setPaymentForm({...paymentForm, isEnabled: true})} className={`flex-1 py-3 rounded-lg text-xs font-bold uppercase transition-all duration-300 ${paymentForm.isEnabled ? 'bg-[#0066b2] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Live</button>
+                                </div>
                             </div>
                         </div>
                          <div className="flex justify-center pt-4">
@@ -797,9 +815,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             </div>
         )}
 
-        {/* --- FAQ TAB --- */}
+        {/* --- FAQ TAB (UPDATED WIDTH) --- */}
         {activeTab === 'faq' && (
-             <div className="max-w-4xl mx-auto">
+             <div>
                  <div className={cardClass}>
                     <div className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-100">
                         <div className={headerIconClass}><HelpCircle size={32} /></div>
