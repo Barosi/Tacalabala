@@ -18,6 +18,7 @@ import ProductDetails from './components/ProductDetails';
 import { ArrowLeft, LogIn } from 'lucide-react';
 import { useStore } from './store/useStore';
 import { Product } from './types';
+import { motion } from 'framer-motion';
 
 const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = ({ onLogin, onCancel }) => {
     const [user, setUser] = useState('');
@@ -34,20 +35,32 @@ const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = (
     };
 
     return (
-        <section className="min-h-screen flex flex-col items-center bg-slate-50 px-4 t-32 md:pt-48 pb-16 md:pb-24">
-            <div className="text-center mb-12">
-                <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase mb-4 text-slate-900">
+        <section className="min-h-screen flex flex-col items-center bg-slate-50 px-4 pt-32 md:pt-48 pb-16 md:pb-24">
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="text-center mb-12"
+            >
+                <h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase mb-4 text-slate-900 leading-[1.1]">
                     Area <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Riservata</span>
                 </h2>
                 <p className="text-slate-500 text-sm tracking-widest uppercase font-bold">Accesso limitato allo staff</p>
-            </div>
-            <form onSubmit={handleLogin} className="bg-white p-10 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-slate-100 w-full max-w-md relative">
+            </motion.div>
+            
+            <motion.form 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                onSubmit={handleLogin} 
+                className="bg-white p-10 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-slate-100 w-full max-w-md relative"
+            >
                 <button type="button" onClick={onCancel} className="absolute top-8 left-8 text-slate-400 hover:text-[#0066b2] transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
                     <ArrowLeft size={14} /> Home
                 </button>
                 <div className="space-y-4 mt-12">
-                    <input type="text" placeholder="Username" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 focus:border-[#0066b2] outline-none" value={user} onChange={e => setUser(e.target.value)}/>
-                    <input type="password" placeholder="Password" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 focus:border-[#0066b2] outline-none" value={pass} onChange={e => setPass(e.target.value)}/>
+                    <input type="text" placeholder="Username" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 focus:border-[#0066b2] outline-none transition-colors" value={user} onChange={e => setUser(e.target.value)}/>
+                    <input type="password" placeholder="Password" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 focus:border-[#0066b2] outline-none transition-colors" value={pass} onChange={e => setPass(e.target.value)}/>
                     {error && <div className="bg-red-50 text-red-500 p-3 rounded-lg text-center text-xs font-bold uppercase tracking-wide border border-red-100">Credenziali Errate</div>}
                     
                     <div className="flex justify-center mt-6">
@@ -59,7 +72,7 @@ const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = (
                         </button>
                     </div>
                 </div>
-            </form>
+            </motion.form>
         </section>
     );
 }

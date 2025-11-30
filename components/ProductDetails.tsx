@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product, Size } from '../types';
 import { useStore } from '../store/useStore';
 import { ArrowLeft, ShoppingBag, Truck, ShieldCheck, Ruler, Check, Heart, Share2 } from 'lucide-react';
@@ -14,6 +14,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onBack, onChec
   const { addToCart, calculatePrice } = useStore();
   const [selectedSize, setSelectedSize] = useState<Size | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+
+  // Force scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const priceInfo = calculatePrice(product);
 

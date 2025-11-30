@@ -93,22 +93,22 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
                 </div>
             </div>
 
-            {/* Filter Rows */}
-            <div className="flex flex-col gap-4">
+            {/* Filter Rows: Collection & Size Inline */}
+            <div className="flex flex-col xl:flex-row xl:items-center gap-8 w-full">
                 
-                {/* 1. Collezione Filter - NOW ROW ALIGNED */}
+                {/* 1. Collezione Filter */}
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                     <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider flex items-center gap-1.5 min-w-fit">
                         <Layers size={12} /> Collezione
                     </span>
                     <div className="flex flex-wrap gap-2">
-                         <button
+                        {/* 'View All' Removed as requested */}
+                        <button
                             onClick={() => setFilterType('all')}
                             className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 border ${filterType === 'all' ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:border-[#0066b2]'}`}
                         >
-                            View All
+                            Tutte
                         </button>
-
                         {categories.map(cat => (
                             <button
                                 key={cat}
@@ -121,10 +121,10 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
                     </div>
                 </div>
 
-                {/* VISUAL DIVIDER */}
-                <div className="w-full h-px bg-slate-100 border-t border-dashed border-slate-200 my-2"></div>
+                {/* Vertical Divider (Visible on XL) */}
+                <div className="hidden xl:block h-8 w-px bg-slate-200 border-l border-dashed border-slate-300"></div>
 
-                {/* 2. Size Filter */}
+                {/* 2. Size Filter (Next to Collection) */}
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                     <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider flex items-center gap-1.5 min-w-fit">
                         <Ruler size={12} /> Taglia
