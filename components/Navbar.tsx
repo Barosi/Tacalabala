@@ -50,7 +50,8 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-out border-b ${getNavbarClasses()}`}>
       <div className="container mx-auto px-6 flex justify-between items-center">
         <button onClick={() => handleLinkClick('home')} className="relative z-50 focus:outline-none flex items-center justify-center mx-4">
-             <img src={LOGO_URL} alt="Tacalabala Milano" className="h-20 md:h-36 w-auto object-contain drop-shadow-md" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
+             {/* Logo Height increased for Mobile: h-28 (was h-20) */}
+             <img src={LOGO_URL} alt="Tacalabala Milano" className="h-28 md:h-36 w-auto object-contain drop-shadow-md" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
         </button>
 
         <div className="hidden md:flex items-center">
