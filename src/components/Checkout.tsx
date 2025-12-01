@@ -27,6 +27,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack, onNavigate }) => {
   const { cart, cartTotal, addOrder, shippingConfig } = useStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null); // Gestione errori server
   
   const [countryCode, setCountryCode] = useState('IT');
   const [wantInvoice, setWantInvoice] = useState(false);
@@ -96,8 +97,10 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack, onNavigate }) => {
       return null;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setServerError(null);
+
     if (!privacyAccepted || !termsAccepted) {
         alert("Devi accettare Privacy Policy e Termini per procedere.");
         return;
@@ -108,29 +111,31 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack, onNavigate }) => {
 
     setIsProcessing(true);
     
-    // GENERAZIONE ID ORDINE SEQUENZIALE (Basato su Timestamp)
-    const uniqueId = Date.now().toString().slice(-6);
-    const orderId = `ORD-${uniqueId}`;
-
-    setTimeout(() => {
-      const newOrder = {
-        id: orderId,
+    // Costruzione payload ordine (Solo dati essenziali, i prezzi sono ricalcolati dal server)
+    const newOrderPayload = {
+        // ID generato dal server per sicurezza
         customerEmail: form.email,
         customerName: `${form.firstName} ${form.lastName}`,
-        total: grandTotal,
-        shippingCost: shippingCost,
-        items: [...cart],
-        date: new Date().toISOString(),
-        status: 'paid' as const,
         shippingAddress: `${form.address}, ${form.city} ${form.zip} (${COUNTRIES.find(c => c.code === countryCode)?.name})`,
-        invoiceDetails: wantInvoice ? { taxId: form.taxId, vatNumber: form.vatNumber, sdiCode: form.sdiCode } : undefined
-      };
-      
-      addOrder(newOrder);
-      setIsProcessing(false);
-      setIsSuccess(true);
-      window.scrollTo(0,0);
-    }, 2500);
+        items: cart.map(i => ({ id: i.id, selectedSize: i.selectedSize, quantity: i.quantity, title: i.title })), // Solo ID e qty
+        invoiceDetails: wantInvoice ? { taxId: form.taxId, vatNumber: form.vatNumber, sdiCode: form.sdiCode } : undefined,
+        // Inviamo totali per UI optimistic, ma il server ricalcola
+        total: grandTotal, 
+        shippingCost: shippingCost
+    };
+    
+    try {
+        // useStore.addOrder ora gestisce la chiamata API e lancia errori se fallisce
+        await addOrder(newOrderPayload as any);
+        setIsProcessing(false);
+        setIsSuccess(true);
+        window.scrollTo(0,0);
+    } catch (err: any) {
+        setIsProcessing(false);
+        console.error("Errore Checkout:", err);
+        setServerError(err.message || "Si è verificato un errore durante il checkout. Riprova.");
+        window.scrollTo(0,0);
+    }
   };
 
   if (isSuccess) {
@@ -163,7 +168,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack, onNavigate }) => {
 
   return (
     <section className="pt-32 md:pt-48 pb-16 md:pb-24 bg-slate-50 min-h-screen">
-      <div className="container mx-auto px-6 max-w-7xl"> {/* max-w-7xl per dare spazio al layout a 2 colonne larghe */}
+      <div className="container mx-auto px-6 max-w-7xl">
         
         <div className="text-center mb-16">
             <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase mb-4 text-slate-900">
@@ -171,6 +176,17 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack, onNavigate }) => {
             </h2>
             <p className="text-slate-500">Completa il tuo ordine in pochi passaggi.</p>
         </div>
+
+        {/* ERROR BOX IF SERVER REJECTS */}
+        {serverError && (
+            <div className="max-w-2xl mx-auto mb-8 bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
+                <AlertCircle size={24} className="flex-shrink-0" />
+                <div>
+                    <p className="font-bold uppercase text-xs tracking-wider">Errore nell'ordine</p>
+                    <p className="text-sm">{serverError}</p>
+                </div>
+            </div>
+        )}
 
         <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-[#0066b2] mb-8 text-[10px] font-bold uppercase tracking-widest transition-colors">
             <ArrowLeft size={14} /> Torna alla home

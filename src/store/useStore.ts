@@ -280,13 +280,20 @@ export const useStore = create<StoreState>()(
                 body: JSON.stringify(order)
             });
             const data = await res.json();
+            
+            if (!res.ok) {
+                // Lancia errore con messaggio dal server (es. Stock esaurito)
+                throw new Error(data.error || 'Errore nella creazione ordine');
+            }
+
             if (data.success && data.id) {
-                // Update local order with the server generated ID
-                const serverOrder = { ...order, id: data.id };
+                // Ordine creato con successo e ID confermato
+                const serverOrder = { ...order, id: data.id, total: data.total || order.total };
                 set((state) => ({ orders: [serverOrder, ...state.orders], cart: [] }));
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error('Failed to sync order', e);
+            throw e; // Rilancia per essere catturato dal componente UI
         }
       },
 
