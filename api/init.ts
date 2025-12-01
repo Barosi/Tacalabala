@@ -72,6 +72,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
     } catch (e) { console.warn("FAQ table setup failed", e); }
 
+    // 0.2 Update Orders table schema for Tracking if needed
+    try {
+        await pool.query(`
+            ALTER TABLE orders 
+            ADD COLUMN IF NOT EXISTS tracking_code TEXT,
+            ADD COLUMN IF NOT EXISTS courier TEXT
+        `);
+    } catch (e) { console.warn("Orders table schema update failed", e); }
+
 
     // 1. Fetch Products
     const { rows: productsRaw } = await pool.query('SELECT * FROM products ORDER BY created_at DESC');

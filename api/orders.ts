@@ -85,7 +85,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                   taxId: o.invoice_tax_id,
                   vatNumber: o.invoice_vat_number,
                   sdiCode: o.invoice_sdi_code
-              } : undefined
+              } : undefined,
+              trackingCode: o.tracking_code,
+              courier: o.courier
           }));
           return res.status(200).json(fullOrders);
       } catch (e) {
@@ -126,6 +128,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
           // 3. Loop items, Validate Stock, Calculate Price
           for (const item of items) {
+              // SECURITY CHECK: Quantità deve essere positiva intera
+              if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
+                  throw new Error(`Quantità non valida per articolo ${item.id}`);
+              }
+
               const dbProduct = dbProducts.find((p: any) => p.id === item.id);
               
               if (!dbProduct) {
@@ -164,8 +171,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           const isItaly = shippingAddress.toLowerCase().includes('italia') || shippingAddress.toLowerCase().includes('italy');
           let shippingCost = 0;
           
-          // Logica semplificata basata sulla stringa indirizzo (in produzione si userebbe country code)
-          // Nota: Il frontend invia "Indirizzo, Città CAP (Nazione)".
+          // Logica semplificata basata sulla stringa indirizzo
           if (isItaly) {
               shippingCost = calculatedSubtotal >= shippingConfig.italyThreshold ? 0 : shippingConfig.italyPrice;
           } else {
@@ -180,7 +186,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           await client.query(
               `INSERT INTO orders (id, customer_email, customer_name, shipping_address, total, shipping_cost, status, date, invoice_tax_id, invoice_vat_number, invoice_sdi_code)
                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-              [newOrderId, customerEmail, customerName, shippingAddress, grandTotal, shippingCost, 'paid', new Date().toISOString(), 
+              [newOrderId, customerEmail, customerName, shippingAddress, grandTotal, shippingCost, 'pending', new Date().toISOString(), 
                invoiceDetails?.taxId, invoiceDetails?.vatNumber, invoiceDetails?.sdiCode]
           );
 
@@ -206,11 +212,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
   }
 
-  // PATCH: Update Status
+  // PATCH: Update Status and Tracking
   if (req.method === 'PATCH') {
-      const { id, status } = req.body;
+      const { id, status, trackingCode, courier } = req.body;
       try {
-          await pool.query('UPDATE orders SET status = $1 WHERE id = $2', [status, id]);
+          if (status === 'shipped' && trackingCode) {
+               await pool.query(
+                   'UPDATE orders SET status = $1, tracking_code = $2, courier = $3 WHERE id = $4', 
+                   [status, trackingCode, courier, id]
+               );
+          } else {
+               await pool.query('UPDATE orders SET status = $1 WHERE id = $2', [status, id]);
+          }
           return res.status(200).json({ success: true });
       } catch (e) {
           return res.status(500).json({ error: 'Failed to update status' });

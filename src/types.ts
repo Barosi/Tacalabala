@@ -10,10 +10,10 @@ export interface Product {
   id: string;
   articleCode?: string; // SKU / Codice interno
   title: string;
-  brand?: string; // Nike, Adidas, Umbro, Custom...
-  kitType?: string; // Home, Away, Third, Training...
-  year?: string; // 1997/98, 2024, etc.
-  season: string; // Visual label (es. "Streetwear Edition")
+  brand?: string; 
+  kitType?: string; 
+  year?: string;
+  season: string; 
   price: string; // es. "€45"
   imageUrl: string;
   size: string; 
@@ -67,6 +67,8 @@ export interface Order {
       vatNumber: string;
       sdiCode: string;
   };
+  trackingCode?: string;
+  courier?: string;
 }
 
 export interface NavItem {

@@ -17,19 +17,20 @@ const ChiSiamo: React.FC = () => {
   };
 
   const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 }, // Ridotto shift Y per meno repaint
+    hidden: { opacity: 0, y: 20 },
     visible: { 
       opacity: 1, 
       y: 0, 
       transition: { 
         duration: 0.6, 
-        ease: "easeOut" // Standard easing is smoother on lower-end devices
+        ease: "easeOut"
       } 
     }
   };
 
-  // Blue Card Style matching About.tsx
+  // Blue Card Style matching About.tsx (Updated icon size)
   const cardClass = "bg-[#0066b2] text-white border border-[#0066b2] p-8 md:p-12 rounded-[2rem] shadow-xl shadow-blue-900/10 hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden h-full flex flex-col items-center justify-center";
+  // Reduced Icon Size to 100/120 to be less overwhelming
   const bgIconClass = "absolute -right-6 -top-6 text-white opacity-10 group-hover:scale-110 transition-transform duration-500 pointer-events-none";
 
   return (
@@ -66,8 +67,8 @@ const ChiSiamo: React.FC = () => {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2] inline-block pt-2">giù in Città</span>
              </h2>
              
-             {/* STORYTELLING */}
-             <div className="space-y-8 text-slate-800 text-lg md:text-2xl font-normal leading-relaxed text-left md:text-center">
+             {/* STORYTELLING - Typography Refined: Lighter, Smaller, Elegant */}
+             <div className="space-y-6 text-slate-700 text-base md:text-lg font-light leading-loose tracking-wide text-left md:text-center max-w-3xl mx-auto">
                 <p>
                     <strong className="text-slate-900 font-medium">Tacalabala</strong> non è solo un brand, è un manifesto d'appartenenza. Nati tra i gradoni di San Siro e cresciuti nelle strade di Milano, abbiamo sentito l'esigenza di colmare il vuoto tra la curva e la passerella.
                 </p>
@@ -92,13 +93,13 @@ const ChiSiamo: React.FC = () => {
             {/* Card 1 */}
             <motion.div variants={itemVariants}>
                 <div className={cardClass}>
-                    <div className={bgIconClass}><PenTool size={180} strokeWidth={1} /></div>
+                    <div className={bgIconClass}><PenTool size={100} strokeWidth={1} /></div>
                     <div className="relative z-10 flex flex-col items-center text-center">
-                        <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-8 shadow-inner">
-                            <PenTool size={32} className="text-white" />
+                        <div className="w-20 h-20 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-8 shadow-inner">
+                            <PenTool size={28} className="text-white" />
                         </div>
                         <h3 className="text-white font-oswald text-2xl uppercase mb-4">Design Unico</h3>
-                        <p className="text-blue-100 text-base leading-relaxed font-light">Grafiche esclusive create dai nostri designer. Nessun template, solo pura creatività milanese.</p>
+                        <p className="text-blue-100 text-sm leading-relaxed font-light">Grafiche esclusive create dai nostri designer. Nessun template, solo pura creatività milanese.</p>
                     </div>
                 </div>
             </motion.div>
@@ -106,27 +107,27 @@ const ChiSiamo: React.FC = () => {
             {/* Card 2 */}
             <motion.div variants={itemVariants}>
                 <div className={cardClass}>
-                    <div className={bgIconClass}><Shirt size={180} strokeWidth={1} /></div>
+                    <div className={bgIconClass}><Shirt size={100} strokeWidth={1} /></div>
                     <div className="relative z-10 flex flex-col items-center text-center">
-                        <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-8 shadow-inner">
-                            <Shirt size={32} className="text-white" />
+                        <div className="w-20 h-20 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-8 shadow-inner">
+                            <Shirt size={28} className="text-white" />
                         </div>
                         <h3 className="text-white font-oswald text-2xl uppercase mb-4">Fit Moderno</h3>
-                        <p className="text-blue-100 text-base leading-relaxed font-light">Taglio boxy e materiali premium. Perfetto per lo stadio, impeccabile per l'aperitivo.</p>
+                        <p className="text-blue-100 text-sm leading-relaxed font-light">Taglio boxy e materiali premium. Perfetto per lo stadio, impeccabile per l'aperitivo.</p>
                     </div>
                 </div>
             </motion.div>
 
-            {/* Card 3 - Centered on tablet if odd number */}
+            {/* Card 3 */}
             <motion.div variants={itemVariants} className="md:col-span-2 lg:col-span-1">
                 <div className={cardClass}>
-                    <div className={bgIconClass}><Heart size={180} strokeWidth={1} /></div>
+                    <div className={bgIconClass}><Heart size={100} strokeWidth={1} /></div>
                     <div className="relative z-10 flex flex-col items-center text-center">
-                        <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-8 shadow-inner">
-                            <Heart size={32} className="text-white" />
+                        <div className="w-20 h-20 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-8 shadow-inner">
+                            <Heart size={28} className="text-white" />
                         </div>
                         <h3 className="text-white font-oswald text-2xl uppercase mb-4">Passione Pura</h3>
-                        <p className="text-blue-100 text-base leading-relaxed font-light">Un tributo indipendente ai colori più belli del mondo. Fatto da tifosi, per tifosi.</p>
+                        <p className="text-blue-100 text-sm leading-relaxed font-light">Un tributo indipendente ai colori più belli del mondo. Fatto da tifosi, per tifosi.</p>
                     </div>
                 </div>
             </motion.div>

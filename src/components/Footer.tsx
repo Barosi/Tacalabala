@@ -35,7 +35,6 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                     © {new Date().getFullYear()} Tacalabala Milano
                 </p>
                 <div className="text-[10px] text-slate-600 leading-tight space-y-1">
-                    <p className="font-bold text-slate-500">Tacalabala S.r.l.</p>
                     <p>Sede Legale: Via del Calcio 10, 20100 Milano (MI)</p>
                     <p>P.IVA / C.F.: 12345678901</p>
                     <p>REA: MI-123456</p>

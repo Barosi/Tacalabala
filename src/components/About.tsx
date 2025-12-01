@@ -20,6 +20,9 @@ const About: React.FC = () => {
       })
   };
 
+  // Ridotta dimensione icona sfondo da 180 a 120
+  const bgIconClass = "absolute -right-6 -top-6 text-white opacity-10 transition-transform duration-500 group-hover:scale-110 pointer-events-none";
+
   return (
     <section id="about" className="pt-12 md:pt-20 pb-24 md:pb-32 bg-white relative overflow-hidden">
       
@@ -57,7 +60,7 @@ const About: React.FC = () => {
             {/* CARD 1 */}
             <motion.div custom={0} variants={variants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
                 <div className={cardClass}>
-                    <div className="absolute -right-6 -top-6 text-white opacity-10 transition-transform duration-500 group-hover:scale-110 pointer-events-none"><Trophy size={180} strokeWidth={1} /></div>
+                    <div className={bgIconClass}><Trophy size={120} strokeWidth={1} /></div>
                     <div className="relative z-10 flex flex-col items-center text-center">
                         <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-10 shadow-inner">
                             <Trophy size={40} className="text-white" />
@@ -71,7 +74,7 @@ const About: React.FC = () => {
             {/* CARD 2 */}
             <motion.div custom={1} variants={variants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
                 <div className={cardClass}>
-                    <div className="absolute -right-6 -top-6 text-white opacity-10 transition-transform duration-500 group-hover:scale-110 pointer-events-none"><Layers size={180} strokeWidth={1} /></div>
+                    <div className={bgIconClass}><Layers size={120} strokeWidth={1} /></div>
                     <div className="relative z-10 flex flex-col items-center text-center">
                         <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-10 shadow-inner">
                             <Layers size={40} className="text-white" />
@@ -85,7 +88,7 @@ const About: React.FC = () => {
             {/* CARD 3 */}
             <motion.div custom={2} variants={variants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
                 <div className={cardClass}>
-                    <div className="absolute -right-6 -top-6 text-white opacity-10 transition-transform duration-500 group-hover:scale-110 pointer-events-none"><MapPin size={180} strokeWidth={1} /></div>
+                    <div className={bgIconClass}><MapPin size={120} strokeWidth={1} /></div>
                     <div className="relative z-10 flex flex-col items-center text-center">
                         <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-10 shadow-inner">
                             <MapPin size={40} className="text-white" />

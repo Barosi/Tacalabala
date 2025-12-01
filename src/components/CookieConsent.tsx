@@ -18,7 +18,7 @@ const CookieConsent: React.FC = () => {
   const loadThirdPartyScripts = () => {
     // Inserire qui i pixel di Facebook e Google Analytics
     // Questi script NON partono finché l'utente non clicca su "Accetta Tutto"
-    console.log("Consent given. Loading Google Analytics & Pixels...");
+    console.log("Consent given. Loading Google Analytics...");
     
     // Esempio:
     /*
@@ -65,7 +65,7 @@ const CookieConsent: React.FC = () => {
                     Gestione dei Cookie
                 </h4>
                 <p className="text-slate-400 text-sm leading-relaxed max-w-2xl text-justify md:text-left">
-                    Utilizziamo cookie per assicurarti la migliore esperienza sul sito. I cookie di profilazione (es. Google Analytics, Facebook Pixel) vengono installati solo previo tuo consenso. 
+                    Utilizziamo cookie per assicurarti la migliore esperienza sul sito. I cookie di profilazione vengono installati solo previo tuo consenso. 
                     Senza il tuo consenso, utilizzeremo solo cookie tecnici essenziali.
                     Per maggiori info, consulta la <strong className="text-white cursor-pointer underline hover:text-[#0066b2]" onClick={() => window.location.hash = 'privacy'}>Cookie Policy</strong>.
                 </p>
@@ -75,13 +75,13 @@ const CookieConsent: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto min-w-[300px]">
              <button 
                 onClick={handleReject}
-                className="w-full sm:flex-1 py-3 px-6 bg-transparent border border-slate-700 text-slate-300 rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-slate-800 hover:text-white transition-all duration-300"
+                className="w-full sm:flex-1 py-3 px-6 bg-transparent border border-slate-700 text-slate-600 rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-slate-800 hover:text-white transition-all duration-300"
             >
                 Solo Tecnici
             </button>
              <button 
                 onClick={handleAccept}
-                className="w-full sm:flex-1 py-3 px-8 bg-white text-slate-900 rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-[#0066b2] hover:text-white transition-all duration-300 shadow-lg transform active:scale-95 whitespace-nowrap"
+                className="w-full sm:flex-1 py-3 px-6 bg-white text-slate-900 rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-[#0066b2] hover:text-white transition-all duration-300 shadow-lg transform active:scale-95 whitespace-nowrap"
             >
                 Accetta Tutto
             </button>

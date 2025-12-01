@@ -98,7 +98,8 @@ export const useStore = create<StoreState>()(
       // --- ASYNC INITIALIZATION ---
       initialize: async () => {
           try {
-              const res = await fetch('/api/init');
+              // Cache: no-store to ensure we get fresh stock data
+              const res = await fetch('/api/init', { cache: 'no-store' });
               if (!res.ok) {
                   throw new Error(`API returned status ${res.status}`);
               }
@@ -289,7 +290,12 @@ export const useStore = create<StoreState>()(
             if (data.success && data.id) {
                 // Ordine creato con successo e ID confermato
                 const serverOrder = { ...order, id: data.id, total: data.total || order.total };
-                set((state) => ({ orders: [serverOrder, ...state.orders] })); // Non svuotare il carrello qui, lo svuotiamo dopo il pagamento
+                set((state) => ({ orders: [serverOrder, ...state.orders] }));
+                
+                // CRITICO: Ricarica tutti i prodotti per aggiornare lo stock visibile
+                // Questo assicura che il decremento nel DB sia riflesso subito nel frontend
+                await get().initialize(); 
+
                 return serverOrder;
             }
             return null;
