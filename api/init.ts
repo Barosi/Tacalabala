@@ -40,30 +40,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         };
     });
 
-    // 3. Fetch Settings (Shipping, Support, etc.) - Optional
+    // 3. Fetch Settings (Shipping, Support, Stripe, EmailJS)
     const settingsMap: any = {};
     try {
         const { rows: settingsRaw } = await pool.query('SELECT * FROM app_settings');
         settingsRaw.forEach(s => { settingsMap[s.key] = s.value; });
     } catch (e) { console.warn("Settings table missing", e); }
 
-    // 4. Fetch FAQs - Optional
+    // 4. Fetch FAQs
     let faqs: any[] = [];
     try {
         const res = await pool.query('SELECT * FROM faqs');
         faqs = res.rows;
     } catch (e) { console.warn("FAQs table missing", e); }
 
-    // 5. Fetch Active Discounts - Optional
+    // 5. Fetch Active Discounts
     let discounts: any[] = [];
     try {
-        const res = await pool.query('SELECT * FROM discounts WHERE is_active = true');
-        discounts = res.rows;
+        const res = await pool.query('SELECT * FROM discounts');
+        // Ensure target_product_ids is parsed if it comes as string/jsonb
+        discounts = res.rows.map(d => ({
+            ...d,
+            targetProductIds: typeof d.target_product_ids === 'string' ? JSON.parse(d.target_product_ids) : d.target_product_ids,
+            startDate: d.start_date, // Map snake_case to camelCase
+            endDate: d.end_date,
+            targetType: d.target_type,
+            isActive: d.is_active
+        }));
     } catch (e) { console.warn("Discounts table missing", e); }
 
     return res.status(200).json({
         products,
         shippingConfig: settingsMap['shipping'] || null,
+        stripeConfig: settingsMap['stripe'] || null,
+        mailConfig: settingsMap['emailjs'] || null,
         supportConfig: {
             whatsappNumber: settingsMap['support']?.whatsappNumber || '',
             faqs: faqs

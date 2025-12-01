@@ -104,6 +104,8 @@ export const useStore = create<StoreState>()(
               set({
                   products: data.products || [],
                   shippingConfig: data.shippingConfig || get().shippingConfig,
+                  stripeConfig: data.stripeConfig || get().stripeConfig,
+                  mailConfig: data.mailConfig || get().mailConfig,
                   supportConfig: { 
                       ...get().supportConfig, 
                       ...data.supportConfig 
@@ -293,7 +295,16 @@ export const useStore = create<StoreState>()(
           } catch(e) { console.warn("API failed", e); }
       },
 
-      setStripeConfig: (config) => set({ stripeConfig: config }),
+      setStripeConfig: async (config) => {
+          set({ stripeConfig: config });
+          try {
+            await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'stripe', data: config })
+            });
+          } catch(e) { console.warn("API failed", e); }
+      },
       
       setShippingConfig: async (config) => {
           set({ shippingConfig: config });
@@ -306,7 +317,19 @@ export const useStore = create<StoreState>()(
           } catch(e) { console.warn("API failed", e); }
       },
       
-      setSupportConfig: (config) => set((state) => ({ supportConfig: { ...state.supportConfig, ...config } })),
+      setSupportConfig: async (config) => {
+          set((state) => ({ supportConfig: { ...state.supportConfig, ...config } }));
+          // If update includes whatsappNumber, save it to DB
+          if (config.whatsappNumber) {
+            try {
+                await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'support', data: { whatsappNumber: config.whatsappNumber } })
+                });
+            } catch(e) { console.warn("API failed", e); }
+          }
+      },
       
       addFaq: async (faq) => {
           set((state) => ({ supportConfig: { ...state.supportConfig, faqs: [...state.supportConfig.faqs, faq] } }));
@@ -330,7 +353,16 @@ export const useStore = create<StoreState>()(
           } catch(e) { console.warn("API failed", e); }
       },
 
-      setMailConfig: (config) => set({ mailConfig: config }),
+      setMailConfig: async (config) => {
+          set({ mailConfig: config });
+          try {
+            await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'emailjs', data: config })
+            });
+          } catch(e) { console.warn("API failed", e); }
+      },
     }),
     { 
         name: 'tacalabala-store', 
