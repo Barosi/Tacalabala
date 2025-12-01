@@ -1,6 +1,10 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import pool from './_db';
+import { Pool } from '@neondatabase/serverless';
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   
@@ -8,7 +12,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'GET') {
       try {
           const { rows: orders } = await pool.query('SELECT * FROM orders ORDER BY date DESC');
-          const { rows: items } = await pool.query('SELECT * FROM order_items');
+          
+          let items: any[] = [];
+          try {
+             const resItems = await pool.query('SELECT * FROM order_items');
+             items = resItems.rows;
+          } catch(e) { console.warn("Order items missing", e); }
           
           const fullOrders = orders.map(o => ({
               ...o,
@@ -61,10 +70,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               );
 
               // Decrement Stock
-              await client.query(
-                  `UPDATE product_variants SET stock = stock - $1 WHERE product_id = $2 AND size = $3`,
-                  [item.quantity, item.id, item.selectedSize]
-              );
+              try {
+                await client.query(
+                    `UPDATE product_variants SET stock = stock - $1 WHERE product_id = $2 AND size = $3`,
+                    [item.quantity, item.id, item.selectedSize]
+                );
+              } catch(e) {
+                  console.warn("Could not update stock (table might be missing)", e);
+              }
           }
 
           await client.query('COMMIT');

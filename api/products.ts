@@ -1,6 +1,10 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import pool from './_db';
+import { Pool } from '@neondatabase/serverless';
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'POST') {
