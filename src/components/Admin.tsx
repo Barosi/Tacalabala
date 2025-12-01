@@ -123,8 +123,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
   const [newProduct, setNewProduct] = useState<Partial<Product>>({
     title: '', 
     articleCode: '',
-    brand: 'Nike',
-    kitType: '', // Text field ora
+    brand: 'Tacalabala', // Default fisso
+    kitType: '', 
     year: '',
     season: '', 
     price: '€', 
@@ -194,7 +194,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
       id: Date.now().toString(),
       articleCode: newProduct.articleCode || `SKU-${Date.now()}`,
       title: newProduct.title || 'Untitled',
-      brand: newProduct.brand || 'Generic',
+      brand: 'Tacalabala', // Forzato
       kitType: newProduct.kitType || 'Home',
       year: newProduct.year || new Date().getFullYear().toString(),
       season: newProduct.season || 'Classic',
@@ -212,7 +212,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
     
     addProduct(productToAdd);
     setNewProduct({ 
-        title: '', articleCode: '', brand: 'Nike', kitType: '', year: '', season: '', 
+        title: '', articleCode: '', brand: 'Tacalabala', kitType: '', year: '', season: '', 
         price: '€', imageUrl: '', condition: 'Nuovo con etichetta', description: '', 
         isSoldOut: false, tags: [], instagramUrl: '', dropDate: '' 
     });
@@ -298,7 +298,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
 
       <div className="container mx-auto px-6 max-w-7xl">
         
-        {/* HEADER - Styled Like Chi Siamo */}
+        {/* HEADER */}
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -389,12 +389,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
 
                                 <div><label className={labelClass}>URL Immagine</label><input type="text" className={inputClass} value={newProduct.imageUrl} onChange={e => setNewProduct({...newProduct, imageUrl: e.target.value})} placeholder="https://..." /></div>
                                 <div><label className={labelClass}>Link Instagram</label><input type="text" className={inputClass} value={newProduct.instagramUrl} onChange={e => setNewProduct({...newProduct, instagramUrl: e.target.value})} placeholder="URL Post" /></div>
-                                
-                                {/* Campi nascosti ma necessari per il tipo Product */}
-                                <div className="hidden">
-                                    <select value={newProduct.brand} onChange={e => setNewProduct({...newProduct, brand: e.target.value})}><option>Nike</option></select>
-                                    <select value={newProduct.condition} onChange={e => setNewProduct({...newProduct, condition: e.target.value})}><option>Nuovo</option></select>
-                                </div>
                             </div>
 
                             {/* COLONNA 3: INVENTARIO */}
@@ -466,7 +460,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                         key={product.id} 
                                         className={`bg-white border rounded-[2rem] overflow-hidden transition-all duration-300 ${isExpanded ? 'border-[#0066b2] shadow-xl' : 'border-slate-100 hover:border-slate-300 shadow-sm'}`}
                                     >
-                                        {/* Riga Cliccabile */}
                                         <div 
                                             className="p-4 md:p-6 flex flex-col md:flex-row items-center gap-6 cursor-pointer group"
                                             onClick={() => toggleExpandProduct(product.id)}
@@ -486,7 +479,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                     <span className="font-oswald font-bold text-lg text-[#0066b2]">{product.price}</span>
                                                 </div>
                                                 <div className="text-center">
-                                                    <span className="block text-[10px] font-bold uppercase text-slate-400">Stock Totale</span>
+                                                    <span className="block text-[10px] font-bold uppercase text-slate-400">Stock</span>
                                                     <span className={`font-mono font-bold text-lg ${totalStock < 5 ? 'text-orange-500' : 'text-slate-900'}`}>{totalStock}</span>
                                                 </div>
                                                 
@@ -494,7 +487,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                     <button 
                                                         onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product.id); }} 
                                                         className={deleteBtnClass}
-                                                        title="Elimina Prodotto"
+                                                        title="Elimina"
                                                     >
                                                         <Trash2 size={18} />
                                                     </button>
@@ -502,7 +495,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             </div>
                                         </div>
 
-                                        {/* Pannello Espandibile Dettagli Stock */}
                                         {isExpanded && (
                                             <div className="bg-slate-50 border-t border-slate-100 p-6 md:p-8 animate-in slide-in-from-top-2 fade-in">
                                                 <div className="flex items-center justify-between mb-4">
@@ -514,10 +506,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                 
                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                     {product.variants?.map((v, i) => (
-                                                        <div 
-                                                            key={i} 
-                                                            className={`flex items-center justify-between p-4 rounded-xl border bg-white border-slate-200 shadow-sm`}
-                                                        >
+                                                        <div key={i} className={`flex items-center justify-between p-4 rounded-xl border bg-white border-slate-200 shadow-sm`}>
                                                             <div className="flex items-center gap-2">
                                                                 <span className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 text-slate-700">
                                                                     {v.size}
@@ -535,9 +524,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                             </div>
                                                         </div>
                                                     ))}
-                                                    {(!product.variants || product.variants.length === 0) && (
-                                                        <p className="text-sm text-slate-400 italic">Nessuna variante configurata.</p>
-                                                    )}
                                                 </div>
                                             </div>
                                         )}
@@ -549,8 +535,10 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                 </div>
             </div>
         )}
-
-        {/* --- ORDERS TAB (COMPLETELY REDESIGNED & PAGINATED) --- */}
+        
+        {/* ... (Orders, Shipping, etc. Tabs remain the same) ... */}
+        
+        {/* --- ORDERS TAB --- */}
         {activeTab === 'orders' && (
             <div className={cardClass}>
                 <div className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-100">
@@ -576,9 +564,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         return (
                             <>
                                 {currentOrders.map(order => (
-                                    <div key={order.id} className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
-                                        
-                                        {/* 1. HEADER: ID & DATE */}
+                                    <div key={order.id} className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300">
                                         <div className="bg-slate-50 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-10 h-10 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400">
@@ -597,23 +583,16 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             </div>
                                         </div>
 
-                                        {/* 2. BODY: DETAILS GRID */}
                                         <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-                                            
-                                            {/* Column 1: Customer */}
                                             <div>
                                                 <h5 className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400 mb-3 tracking-widest"><User size={12}/> Cliente</h5>
                                                 <p className="font-bold text-slate-900 text-sm mb-1">{order.customerName}</p>
                                                 <p className="text-slate-500 text-sm">{order.customerEmail}</p>
                                             </div>
-
-                                            {/* Column 2: Shipping */}
                                             <div>
                                                 <h5 className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-400 mb-3 tracking-widest"><MapPin size={12}/> Spedizione</h5>
                                                 <p className="text-slate-600 text-sm leading-relaxed max-w-xs">{order.shippingAddress}</p>
                                             </div>
-
-                                            {/* Column 3: Total */}
                                             <div className="md:text-right">
                                                 <h5 className="text-[10px] font-bold uppercase text-slate-400 mb-3 tracking-widest">Totale Ordine</h5>
                                                 <p className="font-oswald font-bold text-2xl text-[#0066b2]">€{order.total.toFixed(2)}</p>
@@ -621,7 +600,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             </div>
                                         </div>
 
-                                        {/* 3. ITEMS LIST (Compact) */}
                                         <div className="px-6 md:px-8 pb-6">
                                             <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
                                                 {order.items.map((item, idx) => (
@@ -636,10 +614,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             </div>
                                         </div>
 
-                                        {/* 4. FOOTER: ACTIONS & STATUS SELECTOR */}
                                         <div className="bg-slate-50/50 p-6 md:p-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-                                            
-                                            {/* Left: Quick Actions */}
                                             <div className="flex items-center gap-3 w-full md:w-auto">
                                                 {order.invoiceDetails && (
                                                     <button onClick={() => showToast('Generazione fattura non ancora disponibile')} className={invoiceBtnClass} title="Genera Fattura">
@@ -651,7 +626,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                 </button>
                                             </div>
 
-                                            {/* Right: Modern Status Selector (No Labels, Clean Pill) */}
                                             <div className="relative group w-full md:w-auto">
                                                 <select 
                                                     value={order.status} 
@@ -665,12 +639,10 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                 </select>
                                                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-[#0066b2] transition-colors" size={16} />
                                             </div>
-
                                         </div>
                                     </div>
                                 ))}
 
-                                {/* PAGINATION CONTROLS */}
                                 {orders.length > ORDERS_PER_PAGE && (
                                     <div className="flex justify-center items-center gap-6 mt-10 pt-6 border-t border-slate-100">
                                         <button 
@@ -680,11 +652,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                         >
                                             <ChevronLeft size={16} /> Precedente
                                         </button>
-                                        
                                         <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
                                             Pagina <span className="text-slate-900 text-sm">{currentOrderPage}</span> di {totalOrderPages}
                                         </span>
-
                                         <button 
                                             disabled={currentOrderPage === totalOrderPages}
                                             onClick={() => setCurrentOrderPage(p => p + 1)}
@@ -701,7 +671,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             </div>
         )}
 
-        {/* --- SHIPPING TAB (UPDATED WIDTH) --- */}
+        {/* --- SHIPPING, PAYMENTS, SUPPORT, FAQ, PROMOTIONS TABS --- */}
+        {/* (Codice tab rimasto invariato per brevità, ma incluso nella logica precedente se necessario) */}
         {activeTab === 'shipping' && (
              <div>
                  <div className={cardClass}>
@@ -736,7 +707,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             </div>
         )}
 
-        {/* --- PAYMENTS TAB (UPDATED WIDTH) --- */}
         {activeTab === 'payments' && (
             <div>
                 <div className={cardClass}>
@@ -770,10 +740,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             </div>
         )}
 
-        {/* --- SUPPORT TAB --- */}
         {activeTab === 'support' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                 {/* WhatsApp Config */}
                  <div className={cardClass}>
                     <div className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-100">
                         <div className={headerIconClass}><MessageCircle size={32} /></div>
@@ -792,7 +760,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     </form>
                  </div>
 
-                 {/* Mail Config */}
                  <div className={cardClass}>
                     <div className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-100">
                         <div className={headerIconClass}><Mail size={32} /></div>
@@ -815,7 +782,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             </div>
         )}
 
-        {/* --- FAQ TAB (UPDATED WIDTH) --- */}
         {activeTab === 'faq' && (
              <div>
                  <div className={cardClass}>
@@ -857,7 +823,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
              </div>
         )}
 
-        {/* --- PROMOTIONS TAB --- */}
         {activeTab === 'promotions' && (
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div className={cardClass}>

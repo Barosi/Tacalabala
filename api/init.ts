@@ -76,24 +76,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 1. Fetch Products
     const { rows: productsRaw } = await pool.query('SELECT * FROM products ORDER BY created_at DESC');
     
-    // 2. Fetch Variants for all products (Safe query, returns empty if table missing)
+    // 2. Fetch Variants for all products
     let variantsRaw: any[] = [];
     try {
         const res = await pool.query('SELECT * FROM product_variants');
         variantsRaw = res.rows;
     } catch (e) { console.warn("Variants table missing or empty", e); }
     
-    // Merge variants into products
+    // Merge variants into products and MAP SNAKE_CASE TO CAMELCASE
     const products = productsRaw.map(p => {
         const pVariants = variantsRaw.filter(v => v.product_id === p.id);
         const sizeString = pVariants.map((v: any) => v.size).join(' - ');
-        // Convert decimal price back to string format for frontend "€45"
         const priceFormatted = `€${Number(p.price).toString()}`;
         
         return {
-            ...p,
+            id: p.id,
+            articleCode: p.article_code,
+            title: p.title,
+            brand: p.brand,
+            kitType: p.kit_type,
+            year: p.year,
+            season: p.season,
             price: priceFormatted,
-            size: sizeString,
+            imageUrl: p.image_url, // CRITICAL FIX: Map snake_case from DB to camelCase for Frontend
+            condition: p.condition,
+            description: p.description,
+            isSoldOut: p.is_sold_out,
+            tags: p.tags,
+            instagramUrl: p.instagram_url,
+            dropDate: p.drop_date,
             variants: pVariants.map((v: any) => ({ size: v.size, stock: v.stock }))
         };
     });
@@ -108,7 +119,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 4. Fetch FAQs
     let faqs: any[] = [];
     try {
-        const res = await pool.query('SELECT * FROM faqs ORDER BY length(id), id ASC'); // Sort hack for numeric strings 1, 2, 10, 11
+        const res = await pool.query('SELECT * FROM faqs ORDER BY length(id), id ASC'); 
         faqs = res.rows;
     } catch (e) { console.warn("FAQs table missing", e); }
 
@@ -116,11 +127,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let discounts: any[] = [];
     try {
         const res = await pool.query('SELECT * FROM discounts ORDER BY id ASC');
-        // Ensure target_product_ids is parsed if it comes as string/jsonb
         discounts = res.rows.map(d => ({
-            ...d,
+            id: d.id,
+            name: d.name,
+            percentage: d.percentage,
             targetProductIds: typeof d.target_product_ids === 'string' ? JSON.parse(d.target_product_ids) : d.target_product_ids,
-            startDate: d.start_date, // Map snake_case to camelCase
+            startDate: d.start_date, 
             endDate: d.end_date,
             targetType: d.target_type,
             isActive: d.is_active
@@ -141,7 +153,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   } catch (error: any) {
     console.error('Init API Error:', error);
-    // Return detailed error for debugging purposes
     return res.status(500).json({ error: 'Failed to fetch data', details: error.message });
   }
 }

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Product, Size } from '../types';
 import { useStore } from '../store/useStore';
-import { ArrowLeft, ShoppingBag, Truck, ShieldCheck, Ruler, Check, Heart, Share2 } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Truck, ShieldCheck, Ruler, Check, Heart, Share2, Shirt } from 'lucide-react';
 
 interface ProductDetailsProps {
   product: Product;
@@ -66,7 +66,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onBack, onChec
                     </div>
                 </div>
 
-                {/* Thumbnail Grid (Mocked for visual structure since we have 1 image per product in data) */}
+                {/* Thumbnail Grid */}
                 <div className="grid grid-cols-4 gap-4">
                     <div className="bg-slate-50 rounded-2xl border border-slate-200 aspect-square p-2 cursor-pointer hover:border-[#0066b2] transition-colors"><img src={product.imageUrl} className="w-full h-full object-contain" alt="" /></div>
                     <div className="bg-slate-50 rounded-2xl border border-slate-100 aspect-square p-2 cursor-pointer hover:border-[#0066b2] transition-colors opacity-50 hover:opacity-100"><img src={product.imageUrl} className="w-full h-full object-contain grayscale hover:grayscale-0" alt="" /></div>
@@ -86,12 +86,17 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onBack, onChec
                         </span>
                     </div>
 
-                    {/* Fixed Title: Removed truncate, added break-words, adjusted size/leading */}
                     <h1 className="font-oswald text-3xl md:text-5xl font-bold uppercase text-slate-900 leading-tight mb-4 break-words w-full" title={product.title}>
                         {product.title}
                     </h1>
                     
-                    <p className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-6">{product.brand || 'Tacalabala Authentic'}</p>
+                    {/* NEW INFO BLOCK: Kit Type & Season instead of Brand */}
+                    <div className="flex items-center gap-4 mb-6">
+                        <p className="text-xs font-bold uppercase text-slate-500 tracking-wider flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                            <Shirt size={14} className="text-[#0066b2]" /> 
+                            {product.kitType} {product.year}
+                        </p>
+                    </div>
 
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-4">
@@ -144,7 +149,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onBack, onChec
                     )}
                 </div>
 
-                {/* Actions - UPDATED BUTTON STYLE TO MATCH GLOBAL */}
+                {/* Actions */}
                 <div className="flex items-center gap-4 mb-10 border-b border-slate-100 pb-10">
                     <button 
                         onClick={handleAddToCart}
@@ -164,7 +169,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onBack, onChec
                                     : 'bg-white border-slate-900 text-slate-900 hover:text-white shadow-lg hover:shadow-xl hover:shadow-slate-900/20'}
                         `}
                     >
-                         {/* Liquid Background Effect for Normal State */}
                          {(!isAdding && selectedSize && !isSoldOut) && (
                             <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
                          )}

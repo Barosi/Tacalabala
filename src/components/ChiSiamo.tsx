@@ -4,27 +4,26 @@ import { PenTool, Shirt, Heart, User } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
 
 const ChiSiamo: React.FC = () => {
-  // Configurazione Animazione Fluida (Staggered)
+  // Configurazione Animazione Fluida - Semplificata per Vercel/Production
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2, // Ritardo a cascata tra un elemento e l'altro
+        staggerChildren: 0.15,
         delayChildren: 0.1
       }
     }
   };
 
   const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 40, scale: 0.95 },
+    hidden: { opacity: 0, y: 20 }, // Ridotto shift Y per meno repaint
     visible: { 
       opacity: 1, 
       y: 0, 
-      scale: 1, 
       transition: { 
-        duration: 0.8, 
-        ease: [0.25, 0.4, 0.25, 1] // Cubic Bezier per movimento "Smooth"
+        duration: 0.6, 
+        ease: "easeOut" // Standard easing is smoother on lower-end devices
       } 
     }
   };
@@ -61,13 +60,13 @@ const ChiSiamo: React.FC = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="text-center max-w-4xl mx-auto mb-24"
         >
-             {/* TITOLO: Adjusted leading and padding to fix overlap */}
+             {/* TITOLO */}
              <h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase mb-12 text-slate-900 leading-[1.1] tracking-tight">
                 In trasferta e <br className="hidden md:block" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2] inline-block pt-2">giù in Città</span>
              </h2>
              
-             {/* STORYTELLING: Darker text (slate-800), larger size (text-2xl), looser leading */}
+             {/* STORYTELLING */}
              <div className="space-y-8 text-slate-800 text-lg md:text-2xl font-normal leading-relaxed text-left md:text-center">
                 <p>
                     <strong className="text-slate-900 font-medium">Tacalabala</strong> non è solo un brand, è un manifesto d'appartenenza. Nati tra i gradoni di San Siro e cresciuti nelle strade di Milano, abbiamo sentito l'esigenza di colmare il vuoto tra la curva e la passerella.
