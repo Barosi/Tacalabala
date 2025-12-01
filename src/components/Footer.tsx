@@ -31,15 +31,13 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             
             {/* Left: Brand & Copy */}
             <div className="text-center md:text-left space-y-4">
-                <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">
-                    © {new Date().getFullYear()} Tacalabala Milano
+                <p className="text-xs text-slate-500 tracking-widest font-bold">
+                    © {new Date().getFullYear()} Tacalabala. All rights reserved.
                 </p>
                 <div className="text-[10px] text-slate-600 leading-tight space-y-1">
-                    <p className="font-bold text-slate-500">Tacalabala S.r.l.</p>
                     <p>Sede Legale: Via del Calcio 10, 20100 Milano (MI)</p>
                     <p>P.IVA / C.F.: 12345678901</p>
                     <p>REA: MI-123456</p>
-                    <p>Capitale Sociale: €10.000,00 i.v.</p>
                     <p>PEC: tacalabala@legalmail.it</p>
                 </div>
             </div>
