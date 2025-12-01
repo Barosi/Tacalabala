@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Cookie } from 'lucide-react';
+import { Cookie, ShieldCheck } from 'lucide-react';
 
 const CookieConsent: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -8,38 +8,72 @@ const CookieConsent: React.FC = () => {
   useEffect(() => {
     const consent = localStorage.getItem('tacalabala-cookie-consent');
     if (!consent) {
-      // Delay showing slightly for better UX
-      setTimeout(() => setIsVisible(true), 1500);
+      setTimeout(() => setIsVisible(true), 1000);
+    } else if (consent === 'true') {
+      // User already accepted, load scripts
+      loadThirdPartyScripts();
     }
   }, []);
 
+  const loadThirdPartyScripts = () => {
+    // PLACEHOLDER: Logic to inject Google Analytics / Facebook Pixel
+    console.log("Consent given. Loading Google Analytics & Pixels...");
+    
+    // Example (Do not uncomment unless you have a real ID):
+    /*
+    const script = document.createElement('script');
+    script.src = `https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID`;
+    script.async = true;
+    document.head.appendChild(script);
+    */
+  };
+
   const handleAccept = () => {
     localStorage.setItem('tacalabala-cookie-consent', 'true');
+    loadThirdPartyScripts();
     setIsVisible(false);
+  };
+
+  // For strictly compliant setups, you might want a "Reject" button that saves 'false'
+  // and does NOT load scripts.
+  const handleReject = () => {
+      localStorage.setItem('tacalabala-cookie-consent', 'false');
+      setIsVisible(false);
   };
 
   if (!isVisible) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-[999] p-4 md:p-6 animate-in slide-in-from-bottom-full duration-500">
-      <div className="max-w-4xl mx-auto bg-slate-900 text-white p-6 md:p-8 rounded-[2rem] shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800">
+      <div className="max-w-5xl mx-auto bg-slate-900/95 backdrop-blur-md text-white p-6 md:p-8 rounded-[2rem] shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800">
         
         <div className="flex items-start gap-4">
             <div className="p-3 bg-slate-800 rounded-full text-[#0066b2] hidden md:block">
-                <Cookie size={24} />
+                <ShieldCheck size={24} />
             </div>
             <div>
-                <h4 className="font-oswald font-bold uppercase text-lg mb-2">Rispetto della Privacy (GDPR)</h4>
-                <p className="text-slate-400 text-sm leading-relaxed max-w-xl">
-                    Utilizziamo cookie tecnici essenziali per far funzionare il carrello e migliorare la tua esperienza di navigazione. Nessun dato viene venduto a terze parti.
+                <h4 className="font-oswald font-bold uppercase text-lg mb-2 flex items-center gap-2">
+                    <Cookie size={18} className="md:hidden text-[#0066b2]" />
+                    Informativa Privacy & Cookie
+                </h4>
+                <p className="text-slate-400 text-sm leading-relaxed max-w-2xl text-justify md:text-left">
+                    Questo sito utilizza cookie tecnici necessari al funzionamento e, previo tuo consenso, cookie di profilazione di terze parti (es. Google Analytics) per migliorare l'esperienza di navigazione. 
+                    Chiudendo questo banner o cliccando su "Accetta Tutto", acconsenti all'uso dei cookie. 
+                    Consulta la nostra <button className="text-white underline hover:text-[#0066b2] transition-colors font-bold">Cookie Policy</button> per maggiori dettagli.
                 </p>
             </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto min-w-[300px]">
+             <button 
+                onClick={handleReject}
+                className="w-full sm:flex-1 py-3 px-6 bg-transparent border border-slate-700 text-slate-300 rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-slate-800 hover:text-white transition-all duration-300"
+            >
+                Solo Tecnici
+            </button>
              <button 
                 onClick={handleAccept}
-                className="flex-1 md:flex-none py-3 px-8 bg-white text-slate-900 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-[#0066b2] hover:text-white transition-all duration-300 shadow-lg transform active:scale-95 whitespace-nowrap"
+                className="w-full sm:flex-1 py-3 px-8 bg-white text-slate-900 rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-[#0066b2] hover:text-white transition-all duration-300 shadow-lg transform active:scale-95 whitespace-nowrap"
             >
                 Accetta Tutto
             </button>

@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { Send, MessageCircle, Clock, CheckCircle2, Loader2 } from 'lucide-react';
+import { Send, MessageCircle, Clock, CheckCircle2, Loader2, Info } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import * as emailjs from '@emailjs/browser';
 
@@ -10,6 +10,7 @@ const Contact: React.FC = () => {
   
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{type: 'success'|'error', msg: string} | null>(null);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
   const handleWhatsapp = () => {
       if (!supportConfig.whatsappNumber) {
@@ -23,6 +24,11 @@ const Contact: React.FC = () => {
   const sendEmail = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!privacyAccepted) {
+        setFeedback({ type: 'error', msg: 'Devi accettare la Privacy Policy per inviare il messaggio.' });
+        return;
+    }
+
     // 1. Validazione Configurazione
     if (!mailConfig.serviceId || !mailConfig.templateId || !mailConfig.publicKey) {
         setFeedback({ type: 'error', msg: 'Configurazione Email mancante nel pannello Admin.' });
@@ -42,6 +48,7 @@ const Contact: React.FC = () => {
       .then((result) => {
           setFeedback({ type: 'success', msg: 'Messaggio inviato con successo! Ti risponderemo presto.' });
           if(formRef.current) formRef.current.reset(); // Pulisce il form
+          setPrivacyAccepted(false);
       }, (error) => {
           console.error(error);
           setFeedback({ type: 'error', msg: 'Errore nell\'invio. Riprova o scrivici su WhatsApp.' });
@@ -149,6 +156,20 @@ const Contact: React.FC = () => {
                             ></textarea>
                         </div>
                         
+                        {/* PRIVACY CHECKBOX */}
+                        <div className="flex items-start gap-3 pt-2">
+                            <input 
+                                type="checkbox" 
+                                id="privacy-check" 
+                                checked={privacyAccepted}
+                                onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                                className="mt-1 w-4 h-4 text-[#0066b2] border-slate-300 rounded focus:ring-[#0066b2] cursor-pointer"
+                            />
+                            <label htmlFor="privacy-check" className="text-xs text-slate-500 cursor-pointer select-none">
+                                Ho letto e accetto la <span className="font-bold underline text-slate-700">Privacy Policy</span>. Acconsento al trattamento dei miei dati per la gestione della richiesta.
+                            </label>
+                        </div>
+
                         {/* Messaggi di Feedback */}
                         {feedback && (
                             <div className={`text-xs font-bold p-3 rounded-lg ${feedback.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
@@ -158,7 +179,7 @@ const Contact: React.FC = () => {
                      </form>
                  </div>
 
-                 <div className="pt-8 flex justify-center">
+                 <div className="pt-6 flex justify-center">
                     <button 
                         type="button" 
                         // Importante: onClick triggera il submit del form esterno se non è dentro

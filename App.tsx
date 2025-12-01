@@ -15,6 +15,8 @@ import CartDrawer from './components/CartDrawer';
 import CookieConsent from './components/CookieConsent';
 import Store from './components/Store';
 import ProductDetails from './components/ProductDetails';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsAndConditions from './components/TermsAndConditions';
 import { ArrowLeft, LogIn } from 'lucide-react';
 import { useStore } from './store/useStore';
 import { Product } from './types';
@@ -78,7 +80,7 @@ const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = (
 }
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<'home' | 'store' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout' | 'product-details'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'store' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout' | 'product-details' | 'privacy' | 'terms'>('home');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { products } = useStore();
@@ -126,13 +128,15 @@ const App: React.FC = () => {
         {currentPage === 'contact' && <Contact />}
         {currentPage === 'faq' && <FAQSection />}
         {currentPage === 'chi-siamo' && <ChiSiamo />}
+        {currentPage === 'privacy' && <PrivacyPolicy onBack={() => handleNavigate('home')} />}
+        {currentPage === 'terms' && <TermsAndConditions onBack={() => handleNavigate('home')} />}
         {currentPage === 'checkout' && <Checkout onBack={() => handleNavigate('home')} />}
         {currentPage === 'admin' && (
             !isAuthenticated ? <Login onLogin={setIsAuthenticated} onCancel={() => setCurrentPage('home')} /> : <Admin onLogout={handleLogout} />
         )}
       </main>
       <CookieConsent />
-      <Footer />
+      <Footer onNavigate={handleNavigate as any} />
     </div>
   );
 };

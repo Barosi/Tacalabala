@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { ArrowLeft, CreditCard, CheckCircle, Loader2, FileText, Globe, Lock, AlertCircle } from 'lucide-react';
+import { ArrowLeft, CreditCard, CheckCircle, Loader2, FileText, Globe, Lock, AlertCircle, Info } from 'lucide-react';
 import { FaApplePay, FaGooglePay, FaPaypal } from "react-icons/fa";
 
 interface CheckoutProps {
@@ -29,6 +29,8 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
   
   const [countryCode, setCountryCode] = useState('IT');
   const [wantInvoice, setWantInvoice] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -95,13 +97,17 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!privacyAccepted || !termsAccepted) {
+        alert("Devi accettare Privacy Policy e Termini per procedere.");
+        return;
+    }
+
     const error = validateCard();
     if (error) { setCardError(error); return; }
 
     setIsProcessing(true);
     
     // GENERAZIONE ID ORDINE SEQUENZIALE (Basato su Timestamp)
-    // Usiamo gli ultimi 6 digit del timestamp per avere un numero crescente e corto
     const uniqueId = Date.now().toString().slice(-6);
     const orderId = `ORD-${uniqueId}`;
 
@@ -275,10 +281,11 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                      <div className="flex justify-between items-center text-sm"><span className="text-slate-500 font-medium">Spedizione</span><span className={shippingCost === 0 ? "text-green-600 font-bold text-xs uppercase bg-green-50 px-3 py-1 rounded-full" : "font-bold text-slate-800"}>{shippingCost === 0 ? 'Gratis' : `€${shippingCost.toFixed(2)}`}</span></div>
                 </div>
 
-                <div className="flex justify-between items-center mt-6 pt-6 border-t-2 border-slate-900 mb-10">
+                <div className="flex justify-between items-center mt-6 pt-6 border-t-2 border-slate-900 mb-2">
                     <span className="font-oswald text-xl uppercase font-bold text-slate-900">Totale</span>
                     <span className="font-oswald text-3xl font-bold text-[#0066b2]">€{grandTotal.toFixed(2)}</span>
                 </div>
+                <div className="text-right text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-8">Tutti i prezzi sono IVA inclusa</div>
 
                 {/* --- SEZIONE PAGAMENTO --- */}
                 <div className="space-y-6">
@@ -341,12 +348,36 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                     )}
                 </div>
 
+                {/* CONSENSI LEGALI */}
+                <div className="mt-8 space-y-4 border-t border-slate-100 pt-6">
+                    <div className="flex items-start gap-3">
+                         <input type="checkbox" checked={privacyAccepted} onChange={e => setPrivacyAccepted(e.target.checked)} className="mt-1 w-4 h-4 text-[#0066b2] rounded focus:ring-[#0066b2] cursor-pointer" id="chk-privacy" />
+                         <label htmlFor="chk-privacy" className="text-xs text-slate-500 cursor-pointer select-none">
+                             Dichiaro di aver letto e accettato la <span className="font-bold underline text-slate-700">Privacy Policy</span>.
+                         </label>
+                    </div>
+                    <div className="flex items-start gap-3">
+                         <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} className="mt-1 w-4 h-4 text-[#0066b2] rounded focus:ring-[#0066b2] cursor-pointer" id="chk-terms" />
+                         <label htmlFor="chk-terms" className="text-xs text-slate-500 cursor-pointer select-none">
+                             Accetto i <span className="font-bold underline text-slate-700">Termini e Condizioni</span> di vendita.
+                         </label>
+                    </div>
+                    
+                    <div className="bg-slate-50 p-4 rounded-xl flex gap-3 items-start">
+                        <Info size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                        <p className="text-[10px] text-slate-500 leading-relaxed">
+                            <strong>Diritto di Recesso:</strong> Hai 14 giorni per restituire il prodotto. Le spese di spedizione del reso sono a carico del cliente. 
+                            <br/>Procedendo con l'ordine accetti espressamente queste condizioni.
+                        </p>
+                    </div>
+                </div>
+
                 {/* BOTTONE FINALE (ALTEZZA h-16 = 64px) - Centrato e non full width */}
                 <div className="mt-8 flex justify-center">
                     <button 
-                        disabled={isProcessing} 
+                        disabled={isProcessing || !privacyAccepted || !termsAccepted} 
                         type="submit" 
-                        className="w-auto min-w-[320px] h-16 relative overflow-hidden group/btn bg-white border border-[#0066b2] text-[#0066b2] hover:text-white rounded-full font-bold uppercase tracking-widest transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-sm transform-gpu active:scale-95 px-8 shadow-lg hover:shadow-blue-900/10"
+                        className="w-auto min-w-[320px] h-16 relative overflow-hidden group/btn bg-white border border-[#0066b2] text-[#0066b2] hover:text-white rounded-full font-bold uppercase tracking-widest transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-sm transform-gpu active:scale-95 px-8 shadow-lg hover:shadow-blue-900/10"
                     >
                         <span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
                         <span className="relative z-10 flex items-center gap-2">

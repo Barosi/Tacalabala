@@ -93,15 +93,18 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onBack, onChec
                     
                     <p className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-6">{product.brand || 'Tacalabala Authentic'}</p>
 
-                    <div className="flex items-center gap-4">
-                        {priceInfo.hasDiscount ? (
-                            <div className="flex items-baseline gap-3">
-                                <span className="font-oswald font-bold text-3xl md:text-4xl text-red-600">€{priceInfo.finalPrice.toFixed(2)}</span>
-                                <span className="font-oswald font-medium text-xl text-slate-400 line-through">€{priceInfo.originalPrice}</span>
-                            </div>
-                        ) : (
-                            <span className="font-oswald font-bold text-3xl md:text-4xl text-slate-900">{product.price}</span>
-                        )}
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-4">
+                            {priceInfo.hasDiscount ? (
+                                <div className="flex items-baseline gap-3">
+                                    <span className="font-oswald font-bold text-3xl md:text-4xl text-red-600">€{priceInfo.finalPrice.toFixed(2)}</span>
+                                    <span className="font-oswald font-medium text-xl text-slate-400 line-through">€{priceInfo.originalPrice}</span>
+                                </div>
+                            ) : (
+                                <span className="font-oswald font-bold text-3xl md:text-4xl text-slate-900">{product.price}</span>
+                            )}
+                        </div>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">IVA Inclusa</span>
                     </div>
                 </div>
 

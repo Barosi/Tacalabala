@@ -5,8 +5,8 @@ import { LOGO_URL } from '../constants';
 import { useStore } from '../store/useStore';
 
 interface NavbarProps {
-  currentPage: 'home' | 'store' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout';
-  onNavigate: (page: 'home' | 'store' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout', hash?: string) => void;
+  currentPage: 'home' | 'store' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout' | 'product-details' | 'privacy' | 'terms';
+  onNavigate: (page: 'home' | 'store' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout' | 'product-details' | 'privacy' | 'terms', hash?: string) => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
