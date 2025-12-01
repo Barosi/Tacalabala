@@ -16,10 +16,11 @@ const CookieConsent: React.FC = () => {
   }, []);
 
   const loadThirdPartyScripts = () => {
-    // PLACEHOLDER: Logic to inject Google Analytics / Facebook Pixel
+    // Inserire qui i pixel di Facebook e Google Analytics
+    // Questi script NON partono finché l'utente non clicca su "Accetta Tutto"
     console.log("Consent given. Loading Google Analytics & Pixels...");
     
-    // Example (Do not uncomment unless you have a real ID):
+    // Esempio:
     /*
     const script = document.createElement('script');
     script.src = `https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID`;
@@ -34,11 +35,18 @@ const CookieConsent: React.FC = () => {
     setIsVisible(false);
   };
 
-  // For strictly compliant setups, you might want a "Reject" button that saves 'false'
-  // and does NOT load scripts.
   const handleReject = () => {
+      // Salva il rifiuto: non verranno caricati script di tracciamento
       localStorage.setItem('tacalabala-cookie-consent', 'false');
       setIsVisible(false);
+  };
+
+  // Naviga alla pagina privacy (simulazione refresh o gestione router esterna se necessario, 
+  // qui usiamo un href semplice per semplicità dato che è un componente globale)
+  const openPrivacy = () => {
+      // Dispatch event to app to switch page if possible, otherwise simple anchor
+      const event = new CustomEvent('navigate-to-privacy');
+      window.dispatchEvent(event);
   };
 
   if (!isVisible) return null;
@@ -54,12 +62,12 @@ const CookieConsent: React.FC = () => {
             <div>
                 <h4 className="font-oswald font-bold uppercase text-lg mb-2 flex items-center gap-2">
                     <Cookie size={18} className="md:hidden text-[#0066b2]" />
-                    Informativa Privacy & Cookie
+                    Gestione dei Cookie
                 </h4>
                 <p className="text-slate-400 text-sm leading-relaxed max-w-2xl text-justify md:text-left">
-                    Questo sito utilizza cookie tecnici necessari al funzionamento e, previo tuo consenso, cookie di profilazione di terze parti (es. Google Analytics) per migliorare l'esperienza di navigazione. 
-                    Chiudendo questo banner o cliccando su "Accetta Tutto", acconsenti all'uso dei cookie. 
-                    Consulta la nostra <button className="text-white underline hover:text-[#0066b2] transition-colors font-bold">Cookie Policy</button> per maggiori dettagli.
+                    Utilizziamo cookie per assicurarti la migliore esperienza sul sito. I cookie di profilazione (es. Google Analytics, Facebook Pixel) vengono installati solo previo tuo consenso. 
+                    Senza il tuo consenso, utilizzeremo solo cookie tecnici essenziali.
+                    Per maggiori info, consulta la <strong className="text-white cursor-pointer underline hover:text-[#0066b2]" onClick={() => window.location.hash = 'privacy'}>Cookie Policy</strong>.
                 </p>
             </div>
         </div>

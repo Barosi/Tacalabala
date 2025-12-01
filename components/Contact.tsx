@@ -161,12 +161,13 @@ const Contact: React.FC = () => {
                             <input 
                                 type="checkbox" 
                                 id="privacy-check" 
+                                required
                                 checked={privacyAccepted}
                                 onChange={(e) => setPrivacyAccepted(e.target.checked)}
                                 className="mt-1 w-4 h-4 text-[#0066b2] border-slate-300 rounded focus:ring-[#0066b2] cursor-pointer"
                             />
                             <label htmlFor="privacy-check" className="text-xs text-slate-500 cursor-pointer select-none">
-                                Ho letto e accetto la <span className="font-bold underline text-slate-700">Privacy Policy</span>. Acconsento al trattamento dei miei dati per la gestione della richiesta.
+                                Ho letto e accetto la <span className="font-bold underline text-slate-700">Privacy Policy</span>. Acconsento al trattamento dei dati.
                             </label>
                         </div>
 
@@ -184,7 +185,7 @@ const Contact: React.FC = () => {
                         type="button" 
                         // Importante: onClick triggera il submit del form esterno se non è dentro
                         onClick={() => formRef.current?.requestSubmit()} 
-                        disabled={loading}
+                        disabled={loading || !privacyAccepted}
                         className="w-auto min-w-[260px] relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 font-bold uppercase tracking-widest py-4 px-10 rounded-full transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-blue-900/20 active:scale-95 transform-gpu"
                     >
                         <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>

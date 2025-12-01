@@ -277,7 +277,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
 
                 {/* TOTALI */}
                 <div className="space-y-3 pt-6 border-t border-slate-100">
-                     <div className="flex justify-between items-center text-sm"><span className="text-slate-500 font-medium">Subtotale</span><span className="font-bold text-slate-800">€{subTotal.toFixed(2)}</span></div>
+                     <div className="flex justify-between items-center text-sm"><span className="text-slate-500 font-medium">Subtotale (IVA inclusa)</span><span className="font-bold text-slate-800">€{subTotal.toFixed(2)}</span></div>
                      <div className="flex justify-between items-center text-sm"><span className="text-slate-500 font-medium">Spedizione</span><span className={shippingCost === 0 ? "text-green-600 font-bold text-xs uppercase bg-green-50 px-3 py-1 rounded-full" : "font-bold text-slate-800"}>{shippingCost === 0 ? 'Gratis' : `€${shippingCost.toFixed(2)}`}</span></div>
                 </div>
 
@@ -351,23 +351,22 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                 {/* CONSENSI LEGALI */}
                 <div className="mt-8 space-y-4 border-t border-slate-100 pt-6">
                     <div className="flex items-start gap-3">
-                         <input type="checkbox" checked={privacyAccepted} onChange={e => setPrivacyAccepted(e.target.checked)} className="mt-1 w-4 h-4 text-[#0066b2] rounded focus:ring-[#0066b2] cursor-pointer" id="chk-privacy" />
+                         <input type="checkbox" required checked={privacyAccepted} onChange={e => setPrivacyAccepted(e.target.checked)} className="mt-1 w-4 h-4 text-[#0066b2] rounded focus:ring-[#0066b2] cursor-pointer" id="chk-privacy" />
                          <label htmlFor="chk-privacy" className="text-xs text-slate-500 cursor-pointer select-none">
                              Dichiaro di aver letto e accettato la <span className="font-bold underline text-slate-700">Privacy Policy</span>.
                          </label>
                     </div>
                     <div className="flex items-start gap-3">
-                         <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} className="mt-1 w-4 h-4 text-[#0066b2] rounded focus:ring-[#0066b2] cursor-pointer" id="chk-terms" />
+                         <input type="checkbox" required checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} className="mt-1 w-4 h-4 text-[#0066b2] rounded focus:ring-[#0066b2] cursor-pointer" id="chk-terms" />
                          <label htmlFor="chk-terms" className="text-xs text-slate-500 cursor-pointer select-none">
                              Accetto i <span className="font-bold underline text-slate-700">Termini e Condizioni</span> di vendita.
                          </label>
                     </div>
                     
-                    <div className="bg-slate-50 p-4 rounded-xl flex gap-3 items-start">
-                        <Info size={16} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                    <div className="bg-slate-50 p-4 rounded-xl flex gap-3 items-start border border-slate-100">
+                        <Info size={16} className="text-[#0066b2] mt-0.5 flex-shrink-0" />
                         <p className="text-[10px] text-slate-500 leading-relaxed">
-                            <strong>Diritto di Recesso:</strong> Hai 14 giorni per restituire il prodotto. Le spese di spedizione del reso sono a carico del cliente. 
-                            <br/>Procedendo con l'ordine accetti espressamente queste condizioni.
+                            <strong>Diritto di Recesso:</strong> In conformità al D.Lgs 206/2005, hai 14 giorni per restituire il prodotto. <span className="font-bold">Le spese di spedizione per la restituzione sono a carico del cliente</span>, salvo difetti di conformità.
                         </p>
                     </div>
                 </div>

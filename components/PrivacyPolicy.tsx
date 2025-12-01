@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowLeft, Shield, Lock, Eye, Server, Cookie, BarChart } from 'lucide-react';
+import { ArrowLeft, Shield, Lock, Eye, Server, Cookie } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface PrivacyPolicyProps {
@@ -74,9 +74,10 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
             <ul className="list-disc pl-5 space-y-2 text-slate-600">
                 <li><strong>Cookie Tecnici:</strong> Necessari per il funzionamento del sito (es. carrello, sessione). Non richiedono consenso.</li>
                 <li><strong>Cookie Analitici (Google Analytics):</strong> Utilizzati per analizzare statisticamente il traffico sul sito in forma anonima. Questi cookie vengono installati <strong>solo previo tuo consenso</strong> espresso tramite il banner.</li>
+                <li><strong>Pixel di Facebook:</strong> Utilizzati per misurare l'efficacia delle campagne pubblicitarie. Anche questi richiedono consenso esplicito.</li>
             </ul>
             <p className="mt-4 bg-yellow-50 p-4 rounded-xl border border-yellow-200 text-sm">
-                Puoi revocare il consenso in qualsiasi momento o gestire le tue preferenze tramite le impostazioni del browser o contattandoci.
+                Puoi revocare il consenso in qualsiasi momento o gestire le tue preferenze cancellando i cookie dal browser o utilizzando il nostro pannello di controllo cookie.
             </p>
 
             <h3 className="flex items-center gap-3 font-oswald text-2xl uppercase font-bold text-slate-900 mt-12 mb-6">

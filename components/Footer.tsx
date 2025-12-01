@@ -30,11 +30,11 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10 items-start">
             
             {/* Left: Brand & Copy */}
-            <div className="text-center md:text-left space-y-2">
+            <div className="text-center md:text-left space-y-4">
                 <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">
                     © {new Date().getFullYear()} Tacalabala Milano
                 </p>
-                <div className="text-[10px] text-slate-600 leading-tight space-y-0.5">
+                <div className="text-[10px] text-slate-600 leading-tight space-y-1">
                     <p className="font-bold text-slate-500">Tacalabala S.r.l.</p>
                     <p>Sede Legale: Via del Calcio 10, 20100 Milano (MI)</p>
                     <p>P.IVA / C.F.: 12345678901</p>
@@ -45,12 +45,14 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </div>
 
             {/* Center: Social & Links */}
-            <div className="flex flex-col md:flex-row items-center justify-center gap-8">
-                 <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white transition-colors">
+            <div className="flex flex-col items-center justify-center gap-4">
+                 <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white transition-colors mb-2">
                     <Instagram size={20} />
                 </a>
-                <button onClick={() => onNavigate('privacy')} className="text-[10px] text-slate-500 hover:text-white uppercase tracking-[0.2em] font-bold transition-colors">Privacy & Cookie Policy</button>
-                <button onClick={() => onNavigate('terms')} className="text-[10px] text-slate-500 hover:text-white uppercase tracking-[0.2em] font-bold transition-colors">Termini e Condizioni</button>
+                <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+                    <button onClick={() => onNavigate('privacy')} className="text-[10px] text-slate-500 hover:text-white uppercase tracking-[0.2em] font-bold transition-colors">Privacy & Cookie Policy</button>
+                    <button onClick={() => onNavigate('terms')} className="text-[10px] text-slate-500 hover:text-white uppercase tracking-[0.2em] font-bold transition-colors">Termini e Condizioni</button>
+                </div>
             </div>
 
             {/* Right: Payment & Up */}
