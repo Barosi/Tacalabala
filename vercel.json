@@ -1,8 +1,8 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }],
-  "functions": {
-    "api/**/*": {
-      "includeFiles": "lib/**"
+  "rewrites": [
+    {
+      "source": "/((?!api/.*).*)",
+      "destination": "/index.html"
     }
-  }
+  ]
 }

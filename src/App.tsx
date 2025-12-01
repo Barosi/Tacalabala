@@ -92,6 +92,8 @@ const App: React.FC = () => {
 
   // --- ROUTING LOGIC START ---
   const getPageFromUrl = (): PageType => {
+      // Safe check for window availability
+      if (typeof window === 'undefined') return 'home';
       const path = window.location.pathname.substring(1); 
       if (!path) return 'home';
       const validPages: PageType[] = ['home', 'store', 'contact', 'faq', 'chi-siamo', 'admin', 'checkout', 'product-details', 'privacy', 'terms'];
@@ -99,9 +101,14 @@ const App: React.FC = () => {
       return 'home';
   };
 
-  const [currentPage, setCurrentPage] = useState<PageType>(getPageFromUrl());
+  const [currentPage, setCurrentPage] = useState<PageType>('home');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Initial load
+  useEffect(() => {
+      setCurrentPage(getPageFromUrl());
+  }, []);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -117,24 +124,31 @@ const App: React.FC = () => {
         }
     };
     window.addEventListener('popstate', handlePopState);
-    if (currentPage === 'product-details') {
+    if (currentPage === 'product-details' && !selectedProduct && products.length > 0) {
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
         if (id) {
-            // Se products è vuoto perché sta caricando, questo verrà riprovato quando products cambia?
-            // Effettivamente servirebbe un effect su [products]
             const found = products.find(p => p.id === id);
             if (found) setSelectedProduct(found);
         }
     }
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [products, currentPage]);
+  }, [products, currentPage, selectedProduct]);
 
   const handleNavigate = (page: PageType, hash?: string) => {
     setCurrentPage(page);
     window.scrollTo(0, 0);
     const url = page === 'home' ? '/' : `/${page}`;
-    window.history.pushState({}, '', url);
+    
+    // SAFE NAVIGATION: Try/Catch allows app to work in sandboxed environments (like code previewers)
+    // where history.pushState might be blocked due to security restrictions.
+    try {
+        window.history.pushState({}, '', url);
+    } catch (e) {
+        // Silently fail if history API is blocked
+        console.debug('Navigation state update skipped (environment restriction)');
+    }
+
     if (page === 'home' && hash) {
       setTimeout(() => {
         const element = document.getElementById(hash);
@@ -147,7 +161,11 @@ const App: React.FC = () => {
       setSelectedProduct(product);
       setCurrentPage('product-details');
       window.scrollTo(0, 0);
-      window.history.pushState({}, '', `/product-details?id=${product.id}`);
+      try {
+        window.history.pushState({}, '', `/product-details?id=${product.id}`);
+      } catch (e) {
+        // Silently fail
+      }
   };
 
   const handleLogout = () => { setIsAuthenticated(false); handleNavigate('home'); };

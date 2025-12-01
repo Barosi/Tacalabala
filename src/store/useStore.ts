@@ -2,6 +2,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { Product, CartItem, Size, Order, StripeConfig, SupportConfig, FAQ, Discount, OrderStatus, ShippingConfig } from '../types';
+import { PRODUCTS } from '../constants'; // Fallback Data
 
 export interface MailConfig {
     serviceId: string;
@@ -95,7 +96,9 @@ export const useStore = create<StoreState>()(
       initialize: async () => {
           try {
               const res = await fetch('/api/init');
-              if (!res.ok) throw new Error('Failed to fetch initial data');
+              if (!res.ok) {
+                  throw new Error(`API returned status ${res.status}`);
+              }
               const data = await res.json();
               
               set({
@@ -109,32 +112,43 @@ export const useStore = create<StoreState>()(
                   isLoading: false
               });
 
-              // Admin: Fetch Orders separately to keep init light if needed, or include it
-              // For now we lazy load orders when needed or call it here
-              fetch('/api/orders').then(r => r.json()).then(orders => set({ orders: Array.isArray(orders) ? orders : [] })).catch(console.error);
+              // Lazy load orders
+              fetch('/api/orders').then(r => r.json()).then(orders => {
+                  if(Array.isArray(orders)) set({ orders });
+              }).catch(console.error);
 
           } catch (e) {
-              console.error(e);
-              set({ isLoading: false });
+              console.warn("API Unavailable (likely local/preview mode). Loading Fallback Data.", e);
+              // Fallback to local constants
+              set({ 
+                  products: PRODUCTS,
+                  isLoading: false,
+                  // Ensure basic configs exist so page doesn't break
+                  shippingConfig: get().shippingConfig,
+                  supportConfig: get().supportConfig
+              });
           }
       },
 
       setProducts: (products) => set({ products }),
       
       addProduct: async (product) => {
-          // Optimistic Update
           set((state) => ({ products: [product, ...state.products] }));
-          await fetch('/api/products', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(product)
-          });
-          get().initialize(); // Re-sync to get clean data
+          try {
+            await fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(product)
+            });
+            get().initialize();
+          } catch(e) { console.warn("API write failed", e); }
       },
 
       deleteProduct: async (id) => {
           set((state) => ({ products: state.products.filter(p => p.id !== id) }));
-          await fetch(`/api/products?id=${id}`, { method: 'DELETE' });
+          try {
+            await fetch(`/api/products?id=${id}`, { method: 'DELETE' });
+          } catch(e) { console.warn("API delete failed", e); }
       },
       
       updateProductStock: async (productId, size, newStock) => {
@@ -148,29 +162,35 @@ export const useStore = create<StoreState>()(
               return { products: updatedProducts };
           });
           
-          await fetch('/api/products', {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ productId, size, stock: newStock })
-          });
+          try {
+            await fetch('/api/products', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId, size, stock: newStock })
+            });
+          } catch(e) { console.warn("API update failed", e); }
       },
 
       addDiscount: async (discount) => {
           set((state) => ({ discounts: [...state.discounts, discount] }));
-          await fetch('/api/settings', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ type: 'discount_add', data: discount })
-          });
+          try {
+            await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'discount_add', data: discount })
+            });
+          } catch(e) { console.warn("API failed", e); }
       },
 
       deleteDiscount: async (id) => {
           set((state) => ({ discounts: state.discounts.filter(d => d.id !== id) }));
-          await fetch('/api/settings', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ type: 'discount_delete', data: { id } })
-          });
+          try {
+            await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'discount_delete', data: { id } })
+            });
+          } catch(e) { console.warn("API failed", e); }
       },
 
       calculatePrice: (product: Product) => {
@@ -241,7 +261,6 @@ export const useStore = create<StoreState>()(
       },
 
       addOrder: async (order) => {
-        // Optimistic: Add to list, clear cart
         set((state) => ({ orders: [order, ...state.orders], cart: [] }));
         
         try {
@@ -250,7 +269,6 @@ export const useStore = create<StoreState>()(
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(order)
             });
-            // Re-fetch to sync stock decrements from server
             get().initialize();
         } catch (e) {
             console.error('Failed to sync order', e);
@@ -259,47 +277,57 @@ export const useStore = create<StoreState>()(
 
       updateOrderStatus: async (id, status) => {
           set((state) => ({ orders: state.orders.map(o => o.id === id ? { ...o, status } : o) }));
-          await fetch('/api/orders', {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ id, status })
-          });
+          try {
+            await fetch('/api/orders', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, status })
+            });
+          } catch(e) { console.warn("API failed", e); }
       },
 
       deleteOrder: async (id) => {
           set((state) => ({ orders: state.orders.filter(o => o.id !== id) }));
-          await fetch(`/api/orders?id=${id}`, { method: 'DELETE' });
+          try {
+            await fetch(`/api/orders?id=${id}`, { method: 'DELETE' });
+          } catch(e) { console.warn("API failed", e); }
       },
 
       setStripeConfig: (config) => set({ stripeConfig: config }),
       
       setShippingConfig: async (config) => {
           set({ shippingConfig: config });
-          await fetch('/api/settings', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ type: 'shipping', data: config })
-          });
+          try {
+            await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'shipping', data: config })
+            });
+          } catch(e) { console.warn("API failed", e); }
       },
       
       setSupportConfig: (config) => set((state) => ({ supportConfig: { ...state.supportConfig, ...config } })),
       
       addFaq: async (faq) => {
           set((state) => ({ supportConfig: { ...state.supportConfig, faqs: [...state.supportConfig.faqs, faq] } }));
-          await fetch('/api/settings', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ type: 'faq_add', data: faq })
-          });
+          try {
+            await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'faq_add', data: faq })
+            });
+          } catch(e) { console.warn("API failed", e); }
       },
 
       deleteFaq: async (id) => {
           set((state) => ({ supportConfig: { ...state.supportConfig, faqs: state.supportConfig.faqs.filter(f => f.id !== id) } }));
-          await fetch('/api/settings', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ type: 'faq_delete', data: { id } })
-          });
+          try {
+            await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'faq_delete', data: { id } })
+            });
+          } catch(e) { console.warn("API failed", e); }
       },
 
       setMailConfig: (config) => set({ mailConfig: config }),
@@ -307,7 +335,6 @@ export const useStore = create<StoreState>()(
     { 
         name: 'tacalabala-store', 
         storage: createJSONStorage(() => localStorage), 
-        // IMPORTANT: Only persist CART. Everything else hydrates from Neon DB.
         partialize: (state) => ({ cart: state.cart }) 
     }
   )
