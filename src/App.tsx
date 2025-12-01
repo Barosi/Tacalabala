@@ -29,10 +29,17 @@ const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = (
     const [user, setUser] = useState('');
     const [pass, setPass] = useState('');
     const [error, setError] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const { login } = useStore();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (user === 'admin' && pass === 'admin') {
+        setIsLoading(true);
+        setError(false);
+        const success = await login(user, pass);
+        setIsLoading(false);
+        
+        if (success) {
             onLogin(true);
         } else {
             setError(true);
@@ -64,15 +71,15 @@ const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = (
                     <ArrowLeft size={14} /> Home
                 </button>
                 <div className="space-y-4 mt-12">
-                    <input type="text" placeholder="Username" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 focus:border-[#0066b2] outline-none transition-colors" value={user} onChange={e => setUser(e.target.value)}/>
-                    <input type="password" placeholder="Password" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 focus:border-[#0066b2] outline-none transition-colors" value={pass} onChange={e => setPass(e.target.value)}/>
+                    <input type="text" placeholder="Username" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 focus:border-[#0066b2] outline-none transition-colors" value={user} onChange={e => setUser(e.target.value)} disabled={isLoading} />
+                    <input type="password" placeholder="Password" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 focus:border-[#0066b2] outline-none transition-colors" value={pass} onChange={e => setPass(e.target.value)} disabled={isLoading} />
                     {error && <div className="bg-red-50 text-red-500 p-3 rounded-lg text-center text-xs font-bold uppercase tracking-wide border border-red-100">Credenziali Errate</div>}
                     
                     <div className="flex justify-center mt-6">
-                        <button type="submit" className="w-auto min-w-[200px] relative overflow-hidden group/btn bg-white border border-slate-200 text-slate-500 hover:text-white py-3 px-10 rounded-full font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 shadow-sm hover:shadow-lg active:scale-95 transform-gpu">
+                        <button type="submit" disabled={isLoading} className="w-auto min-w-[200px] relative overflow-hidden group/btn bg-white border border-slate-200 text-slate-500 hover:text-white py-3 px-10 rounded-full font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 shadow-sm hover:shadow-lg active:scale-95 transform-gpu disabled:opacity-50">
                              <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
                              <span className="relative z-10 flex items-center gap-2">
-                                 <LogIn size={16} /> Accedi
+                                 {isLoading ? <Loader2 className="animate-spin" size={16} /> : <><LogIn size={16} /> Accedi</>}
                              </span>
                         </button>
                     </div>

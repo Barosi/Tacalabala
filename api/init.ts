@@ -1,4 +1,4 @@
-
+ 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Pool } from '@neondatabase/serverless';
 
@@ -15,6 +15,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    // 0. Ensure USERS table exists and default admin exists
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                email TEXT,
+                role TEXT DEFAULT 'admin',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        const userCount = await pool.query('SELECT COUNT(*) FROM users');
+        if (parseInt(userCount.rows[0].count) === 0) {
+            // Create default admin: id USR-001
+            await pool.query(`
+                INSERT INTO users (id, username, password, email, role)
+                VALUES ('USR-001', 'admin', 'password123', 'admin@tacalabala.it', 'admin')
+            `);
+            console.log("Default admin user created.");
+        }
+    } catch (e) { console.warn("User table setup failed", e); }
+
+
     // 1. Fetch Products
     const { rows: productsRaw } = await pool.query('SELECT * FROM products ORDER BY created_at DESC');
     
@@ -50,14 +75,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 4. Fetch FAQs
     let faqs: any[] = [];
     try {
-        const res = await pool.query('SELECT * FROM faqs');
+        const res = await pool.query('SELECT * FROM faqs ORDER BY id ASC');
         faqs = res.rows;
     } catch (e) { console.warn("FAQs table missing", e); }
 
     // 5. Fetch Active Discounts
     let discounts: any[] = [];
     try {
-        const res = await pool.query('SELECT * FROM discounts');
+        const res = await pool.query('SELECT * FROM discounts ORDER BY id ASC');
         // Ensure target_product_ids is parsed if it comes as string/jsonb
         discounts = res.rows.map(d => ({
             ...d,

@@ -6,6 +6,20 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
+// Helper per generare ID incrementale TC-XXX
+async function generateNextProductId(client: any): Promise<string> {
+    const res = await client.query('SELECT id FROM products ORDER BY id DESC LIMIT 1');
+    if (res.rows.length === 0) return 'TC-001';
+    
+    const lastId = res.rows[0].id; // Es: TC-042
+    // Estrai parte numerica
+    const match = lastId.match(/TC-(\d+)/);
+    if (!match) return `TC-${Date.now()}`; // Fallback se formato diverso
+    
+    const nextNum = parseInt(match[1]) + 1;
+    return `TC-${nextNum.toString().padStart(3, '0')}`;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'POST') {
     const client = await pool.connect();
@@ -13,13 +27,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const p = req.body;
         await client.query('BEGIN');
 
-        // Insert Product
+        // Genera ID Incrementale
+        const newId = await generateNextProductId(client);
+        const articleCode = p.articleCode || `${newId}-ART`; // Default SKU if missing
+
         const priceNum = parseFloat(p.price.replace('€', '').replace(',', '.').trim());
         
         await client.query(
             `INSERT INTO products (id, article_code, title, brand, kit_type, year, season, price, image_url, condition, description, is_sold_out, tags, instagram_url, drop_date)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
-            [p.id, p.articleCode, p.title, p.brand, p.kitType, p.year, p.season, priceNum, p.imageUrl, p.condition, p.description, p.isSoldOut, p.tags, p.instagramUrl, p.dropDate || null]
+            [newId, articleCode, p.title, p.brand, p.kitType, p.year, p.season, priceNum, p.imageUrl, p.condition, p.description, p.isSoldOut, p.tags, p.instagramUrl, p.dropDate || null]
         );
 
         // Insert Variants
@@ -27,13 +44,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             for (const v of p.variants) {
                 await client.query(
                     'INSERT INTO product_variants (product_id, size, stock) VALUES ($1, $2, $3)',
-                    [p.id, v.size, v.stock]
+                    [newId, v.size, v.stock]
                 );
             }
         }
 
         await client.query('COMMIT');
-        return res.status(201).json({ success: true });
+        
+        // Ritorna il prodotto creato con il nuovo ID per aggiornare lo store frontend
+        return res.status(201).json({ success: true, product: { ...p, id: newId, articleCode } });
     } catch (e) {
         await client.query('ROLLBACK');
         console.error(e);

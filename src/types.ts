@@ -92,3 +92,10 @@ export interface SupportConfig {
   whatsappApiKey?: string; 
   faqs: FAQ[];
 }
+
+export interface User {
+  id: string;
+  username: string;
+  email?: string;
+  role: 'admin' | 'editor';
+}

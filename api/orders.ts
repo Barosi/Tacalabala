@@ -6,6 +6,19 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
+// Helper per generare ID ordine incrementale ORD-XXX
+async function generateNextOrderId(client: any): Promise<string> {
+    const res = await client.query('SELECT id FROM orders ORDER BY id DESC LIMIT 1');
+    if (res.rows.length === 0) return 'ORD-001';
+    
+    const lastId = res.rows[0].id;
+    const match = lastId.match(/ORD-(\d+)/);
+    if (!match) return `ORD-${Date.now()}`;
+    
+    const nextNum = parseInt(match[1]) + 1;
+    return `ORD-${nextNum.toString().padStart(3, '0')}`;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   
   // GET: List Orders (For Admin)
@@ -50,11 +63,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           const order = req.body;
           await client.query('BEGIN');
 
+          // Genera ID Ordine Incrementale
+          const newOrderId = await generateNextOrderId(client);
+
           // 1. Insert Order
           await client.query(
               `INSERT INTO orders (id, customer_email, customer_name, shipping_address, total, shipping_cost, status, date, invoice_tax_id, invoice_vat_number, invoice_sdi_code)
                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-              [order.id, order.customerEmail, order.customerName, order.shippingAddress, order.total, order.shippingCost, 'paid', new Date().toISOString(), 
+              [newOrderId, order.customerEmail, order.customerName, order.shippingAddress, order.total, order.shippingCost, 'paid', new Date().toISOString(), 
                order.invoiceDetails?.taxId, order.invoiceDetails?.vatNumber, order.invoiceDetails?.sdiCode]
           );
 
@@ -66,7 +82,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               await client.query(
                   `INSERT INTO order_items (order_id, product_id, product_title, product_price, selected_size, quantity)
                    VALUES ($1, $2, $3, $4, $5, $6)`,
-                  [order.id, item.id, item.title, priceNum, item.selectedSize, item.quantity]
+                  [newOrderId, item.id, item.title, priceNum, item.selectedSize, item.quantity]
               );
 
               // Decrement Stock
@@ -81,7 +97,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           }
 
           await client.query('COMMIT');
-          return res.status(201).json({ success: true });
+          // Return new ID so frontend can redirect or show confirmation with correct ID
+          return res.status(201).json({ success: true, id: newOrderId });
       } catch (e) {
           await client.query('ROLLBACK');
           console.error(e);

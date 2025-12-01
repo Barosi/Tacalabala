@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Product, CartItem, Size, Order, StripeConfig, SupportConfig, FAQ, Discount, OrderStatus, ShippingConfig } from '../types';
+import { Product, CartItem, Size, Order, StripeConfig, SupportConfig, FAQ, Discount, OrderStatus, ShippingConfig, User } from '../types';
 import { PRODUCTS } from '../constants'; // Fallback Data
 
 export interface MailConfig {
@@ -15,7 +15,7 @@ interface StoreState {
   // Products
   products: Product[];
   setProducts: (products: Product[]) => void;
-  addProduct: (product: Product) => void;
+  addProduct: (product: Product) => Promise<void>;
   deleteProduct: (id: string) => void;
   updateProductStock: (productId: string, size: Size, newStock: number) => void;
 
@@ -37,7 +37,7 @@ interface StoreState {
 
   // Orders
   orders: Order[];
-  addOrder: (order: Order) => void;
+  addOrder: (order: Order) => Promise<void>;
   updateOrderStatus: (id: string, status: OrderStatus) => void;
   deleteOrder: (id: string) => void;
   
@@ -55,6 +55,9 @@ interface StoreState {
 
   mailConfig: MailConfig;
   setMailConfig: (config: MailConfig) => void;
+
+  // Auth
+  login: (u: string, p: string) => Promise<boolean>;
 
   // Initialization
   isLoading: boolean;
@@ -135,14 +138,18 @@ export const useStore = create<StoreState>()(
       setProducts: (products) => set({ products }),
       
       addProduct: async (product) => {
-          set((state) => ({ products: [product, ...state.products] }));
+          // Temporarily add locally to UI (optimistic), but we will reload from server to get correct ID
           try {
-            await fetch('/api/products', {
+            const res = await fetch('/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(product)
             });
-            get().initialize();
+            const data = await res.json();
+            if (data.success && data.product) {
+                // Prepend the REAL product with the server-generated ID
+                set((state) => ({ products: [data.product, ...state.products] }));
+            }
           } catch(e) { console.warn("API write failed", e); }
       },
 
@@ -174,13 +181,16 @@ export const useStore = create<StoreState>()(
       },
 
       addDiscount: async (discount) => {
-          set((state) => ({ discounts: [...state.discounts, discount] }));
           try {
-            await fetch('/api/settings', {
+            const res = await fetch('/api/settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: 'discount_add', data: discount })
             });
+            const data = await res.json();
+            if(data.success && data.id) {
+                set((state) => ({ discounts: [...state.discounts, { ...discount, id: data.id }] }));
+            }
           } catch(e) { console.warn("API failed", e); }
       },
 
@@ -263,15 +273,18 @@ export const useStore = create<StoreState>()(
       },
 
       addOrder: async (order) => {
-        set((state) => ({ orders: [order, ...state.orders], cart: [] }));
-        
         try {
-            await fetch('/api/orders', {
+            const res = await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(order)
             });
-            get().initialize();
+            const data = await res.json();
+            if (data.success && data.id) {
+                // Update local order with the server generated ID
+                const serverOrder = { ...order, id: data.id };
+                set((state) => ({ orders: [serverOrder, ...state.orders], cart: [] }));
+            }
         } catch (e) {
             console.error('Failed to sync order', e);
         }
@@ -332,13 +345,16 @@ export const useStore = create<StoreState>()(
       },
       
       addFaq: async (faq) => {
-          set((state) => ({ supportConfig: { ...state.supportConfig, faqs: [...state.supportConfig.faqs, faq] } }));
           try {
-            await fetch('/api/settings', {
+            const res = await fetch('/api/settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: 'faq_add', data: faq })
             });
+            const data = await res.json();
+            if(data.success && data.id) {
+                 set((state) => ({ supportConfig: { ...state.supportConfig, faqs: [...state.supportConfig.faqs, { ...faq, id: data.id }] } }));
+            }
           } catch(e) { console.warn("API failed", e); }
       },
 
@@ -363,6 +379,24 @@ export const useStore = create<StoreState>()(
             });
           } catch(e) { console.warn("API failed", e); }
       },
+
+      login: async (username, password) => {
+          try {
+              const res = await fetch('/api/login', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ username, password })
+              });
+              const data = await res.json();
+              if (res.ok && data.success) {
+                  return true;
+              }
+              return false;
+          } catch (e) {
+              console.error(e);
+              return false;
+          }
+      }
     }),
     { 
         name: 'tacalabala-store', 
