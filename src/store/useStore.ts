@@ -37,7 +37,7 @@ interface StoreState {
 
   // Orders
   orders: Order[];
-  addOrder: (order: Order) => Promise<void>;
+  addOrder: (order: Order) => Promise<Order | null>; // Return Order object
   updateOrderStatus: (id: string, status: OrderStatus) => void;
   deleteOrder: (id: string) => void;
   
@@ -289,8 +289,10 @@ export const useStore = create<StoreState>()(
             if (data.success && data.id) {
                 // Ordine creato con successo e ID confermato
                 const serverOrder = { ...order, id: data.id, total: data.total || order.total };
-                set((state) => ({ orders: [serverOrder, ...state.orders], cart: [] }));
+                set((state) => ({ orders: [serverOrder, ...state.orders] })); // Non svuotare il carrello qui, lo svuotiamo dopo il pagamento
+                return serverOrder;
             }
+            return null;
         } catch (e: any) {
             console.error('Failed to sync order', e);
             throw e; // Rilancia per essere catturato dal componente UI
