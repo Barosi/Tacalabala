@@ -6,6 +6,7 @@ import { FaApplePay, FaGooglePay, FaPaypal } from "react-icons/fa";
 
 interface CheckoutProps {
   onBack: () => void;
+  onNavigate?: (page: 'privacy' | 'terms') => void;
 }
 
 const COUNTRIES = [
@@ -22,7 +23,7 @@ const COUNTRIES = [
     { code: 'OTHER', name: 'Altro (Resto del Mondo)' }
 ];
 
-const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
+const Checkout: React.FC<CheckoutProps> = ({ onBack, onNavigate }) => {
   const { cart, cartTotal, addOrder, shippingConfig } = useStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -189,17 +190,17 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                  
                  <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div><label className={labelClass}>Email</label><input required type="email" className={inputClass} value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="tua@email.com" /></div>
-                        <div><label className={labelClass}>Telefono</label><input required type="tel" className={inputClass} value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+39 333..." /></div>
+                        <div><label className={labelClass}>Email</label><input required type="email" className={inputClass} value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="mario.rossi@email.com" /></div>
+                        <div><label className={labelClass}>Telefono</label><input required type="tel" className={inputClass} value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+39 333 1234567" /></div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div><label className={labelClass}>Nome</label><input required type="text" className={inputClass} value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})} /></div>
-                        <div><label className={labelClass}>Cognome</label><input required type="text" className={inputClass} value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})} /></div>
+                        <div><label className={labelClass}>Nome</label><input required type="text" className={inputClass} value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})} placeholder="Mario" /></div>
+                        <div><label className={labelClass}>Cognome</label><input required type="text" className={inputClass} value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})} placeholder="Rossi" /></div>
                     </div>
-                    <div><label className={labelClass}>Indirizzo e N. Civico</label><input required type="text" className={inputClass} value={form.address} onChange={e => setForm({...form, address: e.target.value})} placeholder="Via Roma 10" /></div>
+                    <div><label className={labelClass}>Indirizzo e N. Civico</label><input required type="text" className={inputClass} value={form.address} onChange={e => setForm({...form, address: e.target.value})} placeholder="Via Alessandro Manzoni 10" /></div>
                     <div className="grid grid-cols-2 gap-6">
-                        <div><label className={labelClass}>Città</label><input required type="text" className={inputClass} value={form.city} onChange={e => setForm({...form, city: e.target.value})} /></div>
-                        <div><label className={labelClass}>CAP</label><input required type="text" className={inputClass} value={form.zip} onChange={e => setForm({...form, zip: e.target.value})} /></div>
+                        <div><label className={labelClass}>Città</label><input required type="text" className={inputClass} value={form.city} onChange={e => setForm({...form, city: e.target.value})} placeholder="Milano" /></div>
+                        <div><label className={labelClass}>CAP</label><input required type="text" className={inputClass} value={form.zip} onChange={e => setForm({...form, zip: e.target.value})} placeholder="20121" /></div>
                     </div>
                     <div>
                         <label className={`${labelClass} text-[#0066b2]`}>Paese / Nazione</label>
@@ -239,9 +240,9 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                  <div className={`transition-all duration-500 ease-in-out overflow-hidden ${wantInvoice ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
                      <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4 mb-2">
                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                             <div><label className={labelClass}>Codice Fiscale</label><input type="text" className={inputClass} value={form.taxId} onChange={e => setForm({...form, taxId: e.target.value})} placeholder="CF..." /></div>
-                             <div><label className={labelClass}>Partita IVA (Opzionale)</label><input type="text" className={inputClass} value={form.vatNumber} onChange={e => setForm({...form, vatNumber: e.target.value})} placeholder="P.IVA..." /></div>
-                             <div className="md:col-span-2"><label className={labelClass}>Codice SDI o PEC</label><input type="text" className={inputClass} value={form.sdiCode} onChange={e => setForm({...form, sdiCode: e.target.value})} placeholder="Codice Destinatario o PEC" /></div>
+                             <div><label className={labelClass}>Codice Fiscale</label><input type="text" className={inputClass} value={form.taxId} onChange={e => setForm({...form, taxId: e.target.value})} placeholder="RSSMRA80A01H501U" /></div>
+                             <div><label className={labelClass}>Partita IVA (Opzionale)</label><input type="text" className={inputClass} value={form.vatNumber} onChange={e => setForm({...form, vatNumber: e.target.value})} placeholder="12345678901" /></div>
+                             <div className="md:col-span-2"><label className={labelClass}>Codice SDI o PEC</label><input type="text" className={inputClass} value={form.sdiCode} onChange={e => setForm({...form, sdiCode: e.target.value})} placeholder="0000000" /></div>
                          </div>
                      </div>
                  </div>
@@ -348,18 +349,18 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                     )}
                 </div>
 
-                {/* CONSENSI LEGALI */}
+                {/* CONSENSI LEGALI - ALLINEATI E CLICCABILI */}
                 <div className="mt-8 space-y-4 border-t border-slate-100 pt-6">
-                    <div className="flex items-start gap-3">
-                         <input type="checkbox" required checked={privacyAccepted} onChange={e => setPrivacyAccepted(e.target.checked)} className="mt-1 w-4 h-4 text-[#0066b2] rounded focus:ring-[#0066b2] cursor-pointer" id="chk-privacy" />
+                    <div className="flex items-center gap-3">
+                         <input type="checkbox" required checked={privacyAccepted} onChange={e => setPrivacyAccepted(e.target.checked)} className="w-4 h-4 text-[#0066b2] rounded focus:ring-[#0066b2] cursor-pointer flex-shrink-0" id="chk-privacy" />
                          <label htmlFor="chk-privacy" className="text-xs text-slate-500 cursor-pointer select-none">
-                             Dichiaro di aver letto e accettato la <span className="font-bold underline text-slate-700">Privacy Policy</span>.
+                             Dichiaro di aver letto e accettato la <span onClick={(e) => { e.preventDefault(); onNavigate?.('privacy'); }} className="font-bold underline text-slate-700 hover:text-[#0066b2] cursor-pointer">Privacy Policy</span>.
                          </label>
                     </div>
-                    <div className="flex items-start gap-3">
-                         <input type="checkbox" required checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} className="mt-1 w-4 h-4 text-[#0066b2] rounded focus:ring-[#0066b2] cursor-pointer" id="chk-terms" />
+                    <div className="flex items-center gap-3">
+                         <input type="checkbox" required checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} className="w-4 h-4 text-[#0066b2] rounded focus:ring-[#0066b2] cursor-pointer flex-shrink-0" id="chk-terms" />
                          <label htmlFor="chk-terms" className="text-xs text-slate-500 cursor-pointer select-none">
-                             Accetto i <span className="font-bold underline text-slate-700">Termini e Condizioni</span> di vendita.
+                             Accetto i <span onClick={(e) => { e.preventDefault(); onNavigate?.('terms'); }} className="font-bold underline text-slate-700 hover:text-[#0066b2] cursor-pointer">Termini e Condizioni</span> di vendita.
                          </label>
                     </div>
                     

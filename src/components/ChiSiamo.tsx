@@ -86,7 +86,7 @@ const ChiSiamo: React.FC = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24"
         >
             
             {/* Card 1 */}
@@ -117,8 +117,8 @@ const ChiSiamo: React.FC = () => {
                 </div>
             </motion.div>
 
-            {/* Card 3 */}
-            <motion.div variants={itemVariants}>
+            {/* Card 3 - Centered on tablet if odd number */}
+            <motion.div variants={itemVariants} className="md:col-span-2 lg:col-span-1">
                 <div className={cardClass}>
                     <div className={bgIconClass}><Heart size={180} strokeWidth={1} /></div>
                     <div className="relative z-10 flex flex-col items-center text-center">

@@ -361,16 +361,16 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                             <div className="space-y-6">
                                 <h4 className={sectionHeaderClass}><Shirt size={16}/> Dati Maglia</h4>
                                 
-                                <div><label className={labelClass}>Titolo Prodotto</label><input type="text" className={inputClass} value={newProduct.title} onChange={e => setNewProduct({...newProduct, title: e.target.value})} placeholder="Es. Inter Home 1998" required /></div>
+                                <div><label className={labelClass}>Titolo Prodotto</label><input type="text" className={inputClass} value={newProduct.title} onChange={e => setNewProduct({...newProduct, title: e.target.value})} placeholder="Es. Milano Concrete Tee" required /></div>
                                 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div><label className={labelClass}>Tipo Kit</label><input type="text" className={inputClass} value={newProduct.kitType} onChange={e => setNewProduct({...newProduct, kitType: e.target.value})} placeholder="Home, Away..." /></div>
-                                    <div><label className={labelClass}>Anno</label><input type="text" className={inputClass} value={newProduct.year} onChange={e => setNewProduct({...newProduct, year: e.target.value})} placeholder="Es. 1997/98" /></div>
+                                    <div><label className={labelClass}>Tipo Kit</label><input type="text" className={inputClass} value={newProduct.kitType} onChange={e => setNewProduct({...newProduct, kitType: e.target.value})} placeholder="Streetwear, Special..." /></div>
+                                    <div><label className={labelClass}>Anno</label><input type="text" className={inputClass} value={newProduct.year} onChange={e => setNewProduct({...newProduct, year: e.target.value})} placeholder="Es. 2024" /></div>
                                 </div>
 
-                                <div><label className={labelClass}>Label Visuale</label><input type="text" className={inputClass} value={newProduct.season} onChange={e => setNewProduct({...newProduct, season: e.target.value})} placeholder="Es. Vintage, Concept" /></div>
+                                <div><label className={labelClass}>Label Visuale</label><input type="text" className={inputClass} value={newProduct.season} onChange={e => setNewProduct({...newProduct, season: e.target.value})} placeholder="Es. FW24 Drop, Concept" /></div>
                                 
-                                <div><label className={labelClass}>Descrizione</label><textarea className={inputClass} rows={4} value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} placeholder="Storia della maglia..." /></div>
+                                <div><label className={labelClass}>Descrizione</label><textarea className={inputClass} rows={4} value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} placeholder="Design ispirato alla città..." /></div>
                             </div>
 
                             {/* COLONNA 2: VENDITA & MEDIA */}
@@ -379,7 +379,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div><label className={labelClass}>Prezzo (€)</label><input type="text" className={inputClass} value={newProduct.price} onChange={handlePriceChange} placeholder="€0.00" required /></div>
-                                    <div><label className={labelClass}>SKU (Opzionale)</label><input type="text" className={inputClass} value={newProduct.articleCode} onChange={e => setNewProduct({...newProduct, articleCode: e.target.value})} placeholder="INT-98-H" /></div>
+                                    <div><label className={labelClass}>SKU (Opzionale)</label><input type="text" className={inputClass} value={newProduct.articleCode} onChange={e => setNewProduct({...newProduct, articleCode: e.target.value})} placeholder="TC-FW24-001" /></div>
                                 </div>
 
                                 <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100">
@@ -387,8 +387,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     <input type="datetime-local" className={`${inputClass} bg-white text-sm`} value={newProduct.dropDate} onChange={e => setNewProduct({...newProduct, dropDate: e.target.value})} />
                                 </div>
 
-                                <div><label className={labelClass}>URL Immagine</label><input type="text" className={inputClass} value={newProduct.imageUrl} onChange={e => setNewProduct({...newProduct, imageUrl: e.target.value})} placeholder="https://..." /></div>
-                                <div><label className={labelClass}>Link Instagram</label><input type="text" className={inputClass} value={newProduct.instagramUrl} onChange={e => setNewProduct({...newProduct, instagramUrl: e.target.value})} placeholder="URL Post" /></div>
+                                <div><label className={labelClass}>URL Immagine</label><input type="text" className={inputClass} value={newProduct.imageUrl} onChange={e => setNewProduct({...newProduct, imageUrl: e.target.value})} placeholder="https://i.postimg.cc/..." /></div>
+                                <div><label className={labelClass}>Link Instagram</label><input type="text" className={inputClass} value={newProduct.instagramUrl} onChange={e => setNewProduct({...newProduct, instagramUrl: e.target.value})} placeholder="URL Post IG" /></div>
                             </div>
 
                             {/* COLONNA 3: INVENTARIO */}
@@ -436,7 +436,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                             <input 
                                 type="text" 
-                                placeholder="Cerca..." 
+                                placeholder="Cerca nel catalogo..." 
                                 className="w-full bg-slate-50 border border-slate-200 pl-12 pr-4 py-4 rounded-2xl outline-none focus:border-[#0066b2] transition-colors font-medium text-slate-900"
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
@@ -717,8 +717,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     <form onSubmit={handlePaymentSubmit} className="space-y-6">
                         <div className="flex items-center gap-3 bg-blue-50 p-6 rounded-2xl text-sm text-[#0066b2] mb-6"><CreditCard size={24} /><p className="font-medium">Chiavi API per processare pagamenti sicuri.</p></div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div><label className={labelClass}>Public Key</label><input type="text" className={inputClass} value={paymentForm.publicKey} onChange={e => setPaymentForm({...paymentForm, publicKey: e.target.value})} placeholder="pk_test_..." /></div>
-                            <div><label className={labelClass}>Secret Key</label><input type="password" className={inputClass} value={paymentForm.secretKey} onChange={e => setPaymentForm({...paymentForm, secretKey: e.target.value})} placeholder="sk_test_..." /></div>
+                            <div><label className={labelClass}>Public Key</label><input type="text" className={inputClass} value={paymentForm.publicKey} onChange={e => setPaymentForm({...paymentForm, publicKey: e.target.value})} placeholder="pk_live_..." /></div>
+                            <div><label className={labelClass}>Secret Key</label><input type="password" className={inputClass} value={paymentForm.secretKey} onChange={e => setPaymentForm({...paymentForm, secretKey: e.target.value})} placeholder="sk_live_..." /></div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div><label className={labelClass}>Webhook Secret</label><input type="password" className={inputClass} value={paymentForm.webhookSecret} onChange={e => setPaymentForm({...paymentForm, webhookSecret: e.target.value})} placeholder="whsec_..." /></div>
@@ -763,7 +763,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                  <div className={cardClass}>
                     <div className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-100">
                         <div className={headerIconClass}><Mail size={32} /></div>
-                        <div><h3 className={headerTitleClass}>EmailJS</h3><p className={headerSubtitleClass}>Configurazione modulo contatto.</p></div>
+                        <div><h3 className={headerTitleClass}>Mail System</h3><p className={headerSubtitleClass}>Provider: EmailJS.</p></div>
                     </div>
                     <form onSubmit={handleMailSubmit} className="space-y-6">
                         <div><label className={labelClass}>Email Ricezione</label><input type="email" className={inputClass} value={mailForm.emailTo} onChange={e => setMailForm({...mailForm, emailTo: e.target.value})} placeholder="info@tacalabala.it" /></div>
@@ -831,7 +831,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         <div><h3 className={headerTitleClass}>Nuova Promo</h3><p className={headerSubtitleClass}>Crea codice sconto.</p></div>
                     </div>
                     <form onSubmit={handleDiscountSubmit} className="space-y-6">
-                        <div><label className={labelClass}>Nome</label><input type="text" className={inputClass} value={newDiscount.name} onChange={e => setNewDiscount({...newDiscount, name: e.target.value})} placeholder="BLACK FRIDAY" required /></div>
+                        <div><label className={labelClass}>Nome</label><input type="text" className={inputClass} value={newDiscount.name} onChange={e => setNewDiscount({...newDiscount, name: e.target.value})} placeholder="STREET20" required /></div>
                         <div><label className={labelClass}>Sconto (%)</label><input type="number" className={inputClass} value={newDiscount.percentage} onChange={e => setNewDiscount({...newDiscount, percentage: Number(e.target.value)})} placeholder="20" required /></div>
                         <div className="grid grid-cols-2 gap-4">
                             <div><label className={labelClass}>Inizio</label><input type="date" className={inputClass} value={discountDates.start} onChange={e => setDiscountDates({...discountDates, start: e.target.value})} required /></div>

@@ -213,7 +213,12 @@ const App: React.FC = () => {
         {currentPage === 'chi-siamo' && <ChiSiamo />}
         {currentPage === 'privacy' && <PrivacyPolicy onBack={() => handleNavigate('home')} />}
         {currentPage === 'terms' && <TermsAndConditions onBack={() => handleNavigate('home')} />}
-        {currentPage === 'checkout' && <Checkout onBack={() => handleNavigate('home')} />}
+        {currentPage === 'checkout' && (
+            <Checkout 
+                onBack={() => handleNavigate('home')} 
+                onNavigate={handleNavigate}
+            />
+        )}
         {currentPage === 'admin' && (
             !isAuthenticated ? <Login onLogin={setIsAuthenticated} onCancel={() => handleNavigate('home')} /> : <Admin onLogout={handleLogout} />
         )}

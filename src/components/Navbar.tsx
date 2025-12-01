@@ -32,25 +32,36 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
       const isCompact = isScrolled || currentPage !== 'home';
 
       if (isMobileMenuOpen) {
-          return `bg-white border-transparent shadow-none ${isCompact ? 'py-2' : 'py-6'}`;
+          return `bg-white border-transparent shadow-none py-4`;
       }
       
       if (isCompact) {
-          return 'bg-white border-slate-200 shadow-sm py-2';
+          return 'bg-white border-slate-200 shadow-sm py-4';
       }
 
-      return 'bg-transparent border-transparent py-6';
+      // Transparent state (Home top) - Keeping py-4 to match compact state height preventing layout jumps
+      return 'bg-transparent border-transparent py-4';
   };
+
+  const getLogoClasses = () => {
+      const isCompact = isScrolled || currentPage !== 'home';
+      return isCompact ? 'h-20 md:h-24' : 'h-24 md:h-32';
+  }
 
   return (
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-out border-b ${getNavbarClasses()}`}>
       <div className="container mx-auto px-6 flex justify-between items-center">
-        <button onClick={() => handleLinkClick('home')} className="relative z-50 focus:outline-none flex items-center justify-center mx-4">
-             <img src={LOGO_URL} alt="Tacalabala Milano" className="h-28 md:h-36 w-auto object-contain drop-shadow-md" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
+        <button onClick={() => handleLinkClick('home')} className="relative z-50 focus:outline-none flex items-center justify-center mx-4 transition-all duration-300">
+             <img 
+                src={LOGO_URL} 
+                alt="Tacalabala Milano" 
+                className={`${getLogoClasses()} w-auto object-contain drop-shadow-md transition-all duration-300`} 
+                onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} 
+             />
         </button>
 
         <div className="hidden md:flex items-center">
-          <div className="flex items-center gap-8 border-r border-slate-200 pr-8 mr-8 h-6">
+          <div className="flex items-center gap-6 lg:gap-8 border-r border-slate-200 pr-6 lg:pr-8 mr-6 lg:mr-8 h-6">
             <button onClick={() => handleLinkClick('home')} className={`text-xs font-bold uppercase tracking-[0.2em] hover:text-[#0066b2] transition-all duration-300 relative group text-slate-800`}>
               Home <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-[#0066b2] transition-all duration-300 group-hover:w-full ${currentPage === 'home' ? 'w-full' : ''}`}></span>
             </button>

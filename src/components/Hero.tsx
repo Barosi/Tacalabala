@@ -38,8 +38,8 @@ const Hero: React.FC = () => {
       {/* Main Content */}
       <div className="relative z-20 text-center px-4 max-w-6xl mx-auto flex flex-col items-center justify-center">
         
-        {/* Main Title - Fixed Truncation: Increased Padding and Leading */}
-        <h1 className="font-oswald text-6xl sm:text-8xl md:text-9xl lg:text-[10rem] font-bold leading-tight mb-6 tracking-tighter uppercase drop-shadow-sm select-none py-8">
+        {/* Main Title - Responsive Text Sizing */}
+        <h1 className="font-oswald text-6xl md:text-8xl lg:text-[10rem] font-bold leading-tight mb-6 tracking-tighter uppercase drop-shadow-sm select-none py-4 md:py-8">
           <motion.span 
             initial={{ y: 80, opacity: 0, rotate: 3 }}
             animate={{ y: 0, opacity: 1, rotate: 0 }}
