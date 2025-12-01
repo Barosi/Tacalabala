@@ -17,7 +17,7 @@ import Store from './components/Store';
 import ProductDetails from './components/ProductDetails';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsAndConditions from './components/TermsAndConditions';
-import { ArrowLeft, LogIn } from 'lucide-react';
+import { ArrowLeft, LogIn, Loader2 } from 'lucide-react';
 import { useStore } from './store/useStore';
 import { Product } from './types';
 import { motion } from 'framer-motion';
@@ -83,19 +83,19 @@ const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = (
 }
 
 const App: React.FC = () => {
-  const { products } = useStore();
+  const { products, initialize, isLoading } = useStore();
+
+  // --- INIT DATA FROM DB ---
+  useEffect(() => {
+      initialize();
+  }, [initialize]);
 
   // --- ROUTING LOGIC START ---
-  
-  // Helper to determine page from URL
   const getPageFromUrl = (): PageType => {
-      const path = window.location.pathname.substring(1); // Remove leading slash
+      const path = window.location.pathname.substring(1); 
       if (!path) return 'home';
-      
       const validPages: PageType[] = ['home', 'store', 'contact', 'faq', 'chi-siamo', 'admin', 'checkout', 'product-details', 'privacy', 'terms'];
-      if (validPages.includes(path as PageType)) {
-          return path as PageType;
-      }
+      if (validPages.includes(path as PageType)) return path as PageType;
       return 'home';
   };
 
@@ -103,13 +103,10 @@ const App: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Sync URL on Mount and PopState (Back Button)
   useEffect(() => {
     const handlePopState = () => {
         const newPage = getPageFromUrl();
         setCurrentPage(newPage);
-        
-        // Restore product selection from URL param if needed
         if (newPage === 'product-details') {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
@@ -119,30 +116,25 @@ const App: React.FC = () => {
             }
         }
     };
-
     window.addEventListener('popstate', handlePopState);
-    
-    // Initial check for deep links (e.g. shared product link)
     if (currentPage === 'product-details') {
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
         if (id) {
+            // Se products è vuoto perché sta caricando, questo verrà riprovato quando products cambia?
+            // Effettivamente servirebbe un effect su [products]
             const found = products.find(p => p.id === id);
             if (found) setSelectedProduct(found);
         }
     }
-
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [products]);
+  }, [products, currentPage]);
 
   const handleNavigate = (page: PageType, hash?: string) => {
     setCurrentPage(page);
     window.scrollTo(0, 0);
-    
-    // Update URL without reload
     const url = page === 'home' ? '/' : `/${page}`;
     window.history.pushState({}, '', url);
-
     if (page === 'home' && hash) {
       setTimeout(() => {
         const element = document.getElementById(hash);
@@ -155,13 +147,20 @@ const App: React.FC = () => {
       setSelectedProduct(product);
       setCurrentPage('product-details');
       window.scrollTo(0, 0);
-      // Update URL with ID
       window.history.pushState({}, '', `/product-details?id=${product.id}`);
   };
 
   const handleLogout = () => { setIsAuthenticated(false); handleNavigate('home'); };
 
-  // --- ROUTING LOGIC END ---
+  // --- LOADING SCREEN ---
+  if (isLoading) {
+      return (
+          <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+              <Loader2 size={48} className="text-[#0066b2] animate-spin mb-4" />
+              <p className="font-oswald text-slate-900 uppercase font-bold tracking-widest text-lg animate-pulse">Caricamento Store...</p>
+          </div>
+      );
+  }
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-[#0066b2] selection:text-white flex flex-col">

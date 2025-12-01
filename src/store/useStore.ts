@@ -2,7 +2,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { Product, CartItem, Size, Order, StripeConfig, SupportConfig, FAQ, Discount, OrderStatus, ShippingConfig } from '../types';
-import { PRODUCTS } from '../constants';
 
 export interface MailConfig {
     serviceId: string;
@@ -55,6 +54,10 @@ interface StoreState {
 
   mailConfig: MailConfig;
   setMailConfig: (config: MailConfig) => void;
+
+  // Initialization
+  isLoading: boolean;
+  initialize: () => Promise<void>;
 }
 
 const parsePrice = (priceStr: string | number) => {
@@ -65,70 +68,116 @@ const parsePrice = (priceStr: string | number) => {
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
-      products: PRODUCTS, 
+      products: [], 
       orders: [], 
       cart: [],
       discounts: [], 
       isCartOpen: false,
+      isLoading: true,
       
       stripeConfig: { publicKey: '', secretKey: '', webhookSecret: '', isEnabled: false },
       
       shippingConfig: {
           italyPrice: 10,
-          italyThreshold: 100, // Free over 100
+          italyThreshold: 100, 
           foreignPrice: 25,
-          foreignThreshold: 200 // Free over 200
+          foreignThreshold: 200
       },
 
       supportConfig: {
-          whatsappNumber: '', 
-          faqs: [
-              { id: '1', question: 'Tempi di spedizione?', answer: 'Spediamo in 24/48 ore lavorative in tutta Italia tramite corriere espresso tracciato.' },
-              { id: '2', question: 'Politica di Reso?', answer: 'Hai 14 giorni dalla ricezione per effettuare il reso. Il prodotto deve essere intatto e con etichetta.' },
-              { id: '3', question: 'Materiali utilizzati?', answer: 'Utilizziamo cotone premium 100% organico e tessuti tecnici traspiranti per i kit performance.' },
-              { id: '4', question: 'Come scelgo la taglia?', answer: 'Le nostre maglie hanno un fit "Boxy" moderno. Consigliamo la tua taglia abituale per un look regolare, una in più per oversize.' },
-              { id: '5', question: 'Metodi di pagamento?', answer: 'Accettiamo Carte di Credito, PayPal, Apple Pay, Google Pay e Bonifico Bancario.' },
-              { id: '6', question: 'Posso richiedere fattura?', answer: 'Certamente. In fase di checkout puoi selezionare "Richiedi Fattura" e inserire SDI o PEC.' },
-              { id: '7', question: 'Come traccio l\'ordine?', answer: 'Appena spedito riceverai una mail con il link di tracking del corriere.' },
-              { id: '8', question: 'Istruzioni lavaggio?', answer: 'Lavare al rovescio a max 30°C. Non utilizzare asciugatrice per preservare le stampe.' },
-              { id: '9', question: 'Spedite all\'estero?', answer: 'Sì, spediamo in tutta Europa. I costi vengono calcolati al checkout in base alla zona.' },
-              { id: '10', question: 'Prodotti esauriti?', answer: 'I nostri drop sono limitati. Iscriviti alla newsletter o seguici su IG per sapere quando torneranno.' },
-              { id: '11', question: 'Chi produce i kit?', answer: 'Tacalabala è un brand indipendente. Realizziamo Concept Kit e abbigliamento ispirato alla cultura calcistica.' }
-          ]
+          whatsappNumber: '393330000000', 
+          faqs: []
       },
 
       mailConfig: { serviceId: '', templateId: '', publicKey: '', emailTo: '' },
 
+      // --- ASYNC INITIALIZATION ---
+      initialize: async () => {
+          try {
+              const res = await fetch('/api/init');
+              if (!res.ok) throw new Error('Failed to fetch initial data');
+              const data = await res.json();
+              
+              set({
+                  products: data.products || [],
+                  shippingConfig: data.shippingConfig || get().shippingConfig,
+                  supportConfig: { 
+                      ...get().supportConfig, 
+                      ...data.supportConfig 
+                  },
+                  discounts: data.discounts || [],
+                  isLoading: false
+              });
+
+              // Admin: Fetch Orders separately to keep init light if needed, or include it
+              // For now we lazy load orders when needed or call it here
+              fetch('/api/orders').then(r => r.json()).then(orders => set({ orders: Array.isArray(orders) ? orders : [] })).catch(console.error);
+
+          } catch (e) {
+              console.error(e);
+              set({ isLoading: false });
+          }
+      },
+
       setProducts: (products) => set({ products }),
-      addProduct: (product) => set((state) => ({ products: [...state.products, product] })),
-      deleteProduct: (id) => set((state) => ({ products: state.products.filter(p => p.id !== id) })),
       
-      updateProductStock: (productId, size, newStock) => set((state) => {
-          const updatedProducts = state.products.map(p => {
-              if (p.id !== productId) return p;
-              
-              const updatedVariants = p.variants?.map(v => {
-                  if (v.size === size) return { ...v, stock: newStock };
-                  return v;
-              }) || [];
-
-              // Recalculate isSoldOut based on new stock
-              const isSoldOut = updatedVariants.every(v => v.stock === 0);
-              
-              return { ...p, variants: updatedVariants, isSoldOut };
+      addProduct: async (product) => {
+          // Optimistic Update
+          set((state) => ({ products: [product, ...state.products] }));
+          await fetch('/api/products', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(product)
           });
-          return { products: updatedProducts };
-      }),
+          get().initialize(); // Re-sync to get clean data
+      },
 
-      addDiscount: (discount) => set((state) => ({ discounts: [...state.discounts, discount] })),
-      deleteDiscount: (id) => set((state) => ({ discounts: state.discounts.filter(d => d.id !== id) })),
+      deleteProduct: async (id) => {
+          set((state) => ({ products: state.products.filter(p => p.id !== id) }));
+          await fetch(`/api/products?id=${id}`, { method: 'DELETE' });
+      },
+      
+      updateProductStock: async (productId, size, newStock) => {
+          set((state) => {
+              const updatedProducts = state.products.map(p => {
+                  if (p.id !== productId) return p;
+                  const updatedVariants = p.variants?.map(v => v.size === size ? { ...v, stock: newStock } : v) || [];
+                  const isSoldOut = updatedVariants.every(v => v.stock === 0);
+                  return { ...p, variants: updatedVariants, isSoldOut };
+              });
+              return { products: updatedProducts };
+          });
+          
+          await fetch('/api/products', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ productId, size, stock: newStock })
+          });
+      },
+
+      addDiscount: async (discount) => {
+          set((state) => ({ discounts: [...state.discounts, discount] }));
+          await fetch('/api/settings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ type: 'discount_add', data: discount })
+          });
+      },
+
+      deleteDiscount: async (id) => {
+          set((state) => ({ discounts: state.discounts.filter(d => d.id !== id) }));
+          await fetch('/api/settings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ type: 'discount_delete', data: { id } })
+          });
+      },
 
       calculatePrice: (product: Product) => {
           const { discounts } = get();
           const originalPrice = parsePrice(product.price);
           const now = new Date();
 
-          // If coming soon, return standard logic (price will be hidden in UI anyway)
           if (product.dropDate && new Date(product.dropDate) > now) {
              return { finalPrice: originalPrice, originalPrice: originalPrice, hasDiscount: false, discountPercent: 0 };
           }
@@ -157,7 +206,6 @@ export const useStore = create<StoreState>()(
         const currentCart = get().cart;
         const existingItem = currentCart.find(i => i.cartId === cartId);
         
-        // Prevent adding dropped items via code
         if(product.dropDate && new Date(product.dropDate) > new Date()) return;
 
         let limit = 0;
@@ -192,33 +240,75 @@ export const useStore = create<StoreState>()(
         }, 0);
       },
 
-      addOrder: (order) => set((state) => {
-        const updatedProducts = state.products.map(product => {
-            const orderItemsForProduct = order.items.filter(item => item.id === product.id);
-            if (orderItemsForProduct.length === 0) return product;
-            const updatedVariants = product.variants?.map(variant => {
-                const boughtItem = orderItemsForProduct.find(item => item.selectedSize === variant.size);
-                if (boughtItem) {
-                    const newStock = Math.max(0, variant.stock - boughtItem.quantity);
-                    return { ...variant, stock: newStock };
-                }
-                return variant;
-            }) || [];
-            const isNowSoldOut = updatedVariants.every(v => v.stock === 0);
-            return { ...product, variants: updatedVariants, isSoldOut: isNowSoldOut };
-        });
-        return { orders: [order, ...state.orders], products: updatedProducts, cart: [] };
-      }),
-      updateOrderStatus: (id, status) => set((state) => ({ orders: state.orders.map(o => o.id === id ? { ...o, status } : o) })),
-      deleteOrder: (id) => set((state) => ({ orders: state.orders.filter(o => o.id !== id) })),
+      addOrder: async (order) => {
+        // Optimistic: Add to list, clear cart
+        set((state) => ({ orders: [order, ...state.orders], cart: [] }));
+        
+        try {
+            await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(order)
+            });
+            // Re-fetch to sync stock decrements from server
+            get().initialize();
+        } catch (e) {
+            console.error('Failed to sync order', e);
+        }
+      },
+
+      updateOrderStatus: async (id, status) => {
+          set((state) => ({ orders: state.orders.map(o => o.id === id ? { ...o, status } : o) }));
+          await fetch('/api/orders', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id, status })
+          });
+      },
+
+      deleteOrder: async (id) => {
+          set((state) => ({ orders: state.orders.filter(o => o.id !== id) }));
+          await fetch(`/api/orders?id=${id}`, { method: 'DELETE' });
+      },
 
       setStripeConfig: (config) => set({ stripeConfig: config }),
-      setShippingConfig: (config) => set({ shippingConfig: config }),
+      
+      setShippingConfig: async (config) => {
+          set({ shippingConfig: config });
+          await fetch('/api/settings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ type: 'shipping', data: config })
+          });
+      },
+      
       setSupportConfig: (config) => set((state) => ({ supportConfig: { ...state.supportConfig, ...config } })),
-      addFaq: (faq) => set((state) => ({ supportConfig: { ...state.supportConfig, faqs: [...state.supportConfig.faqs, faq] } })),
-      deleteFaq: (id) => set((state) => ({ supportConfig: { ...state.supportConfig, faqs: state.supportConfig.faqs.filter(f => f.id !== id) } })),
+      
+      addFaq: async (faq) => {
+          set((state) => ({ supportConfig: { ...state.supportConfig, faqs: [...state.supportConfig.faqs, faq] } }));
+          await fetch('/api/settings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ type: 'faq_add', data: faq })
+          });
+      },
+
+      deleteFaq: async (id) => {
+          set((state) => ({ supportConfig: { ...state.supportConfig, faqs: state.supportConfig.faqs.filter(f => f.id !== id) } }));
+          await fetch('/api/settings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ type: 'faq_delete', data: { id } })
+          });
+      },
+
       setMailConfig: (config) => set({ mailConfig: config }),
     }),
-    { name: 'tacalabala-store', storage: createJSONStorage(() => localStorage), version: 4 }
+    { 
+        name: 'tacalabala-store', 
+        storage: createJSONStorage(() => localStorage), 
+        // IMPORTANT: Only persist CART. Everything else hydrates from Neon DB.
+        partialize: (state) => ({ cart: state.cart }) 
+    }
   )
 );
