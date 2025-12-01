@@ -22,6 +22,9 @@ import { useStore } from './store/useStore';
 import { Product } from './types';
 import { motion } from 'framer-motion';
 
+// Defined Page Types for Type Safety
+type PageType = 'home' | 'store' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout' | 'product-details' | 'privacy' | 'terms';
+
 const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = ({ onLogin, onCancel }) => {
     const [user, setUser] = useState('');
     const [pass, setPass] = useState('');
@@ -80,14 +83,66 @@ const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = (
 }
 
 const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<'home' | 'store' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout' | 'product-details' | 'privacy' | 'terms'>('home');
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { products } = useStore();
 
-  const handleNavigate = (page: any, hash?: string) => {
+  // --- ROUTING LOGIC START ---
+  
+  // Helper to determine page from URL
+  const getPageFromUrl = (): PageType => {
+      const path = window.location.pathname.substring(1); // Remove leading slash
+      if (!path) return 'home';
+      
+      const validPages: PageType[] = ['home', 'store', 'contact', 'faq', 'chi-siamo', 'admin', 'checkout', 'product-details', 'privacy', 'terms'];
+      if (validPages.includes(path as PageType)) {
+          return path as PageType;
+      }
+      return 'home';
+  };
+
+  const [currentPage, setCurrentPage] = useState<PageType>(getPageFromUrl());
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Sync URL on Mount and PopState (Back Button)
+  useEffect(() => {
+    const handlePopState = () => {
+        const newPage = getPageFromUrl();
+        setCurrentPage(newPage);
+        
+        // Restore product selection from URL param if needed
+        if (newPage === 'product-details') {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (id) {
+                const found = products.find(p => p.id === id);
+                if (found) setSelectedProduct(found);
+            }
+        }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    
+    // Initial check for deep links (e.g. shared product link)
+    if (currentPage === 'product-details') {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        if (id) {
+            const found = products.find(p => p.id === id);
+            if (found) setSelectedProduct(found);
+        }
+    }
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [products]);
+
+  const handleNavigate = (page: PageType, hash?: string) => {
     setCurrentPage(page);
     window.scrollTo(0, 0);
+    
+    // Update URL without reload
+    const url = page === 'home' ? '/' : `/${page}`;
+    window.history.pushState({}, '', url);
+
     if (page === 'home' && hash) {
       setTimeout(() => {
         const element = document.getElementById(hash);
@@ -100,13 +155,17 @@ const App: React.FC = () => {
       setSelectedProduct(product);
       setCurrentPage('product-details');
       window.scrollTo(0, 0);
+      // Update URL with ID
+      window.history.pushState({}, '', `/product-details?id=${product.id}`);
   };
 
-  const handleLogout = () => { setIsAuthenticated(false); setCurrentPage('home'); };
+  const handleLogout = () => { setIsAuthenticated(false); handleNavigate('home'); };
+
+  // --- ROUTING LOGIC END ---
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-[#0066b2] selection:text-white flex flex-col">
-      <Navbar currentPage={currentPage as any} onNavigate={handleNavigate} />
+      <Navbar currentPage={currentPage} onNavigate={handleNavigate} />
       <CartDrawer onCheckout={() => handleNavigate('checkout')} />
       <main className="flex-grow">
         {currentPage === 'home' && (
@@ -132,13 +191,12 @@ const App: React.FC = () => {
         {currentPage === 'terms' && <TermsAndConditions onBack={() => handleNavigate('home')} />}
         {currentPage === 'checkout' && <Checkout onBack={() => handleNavigate('home')} />}
         {currentPage === 'admin' && (
-            !isAuthenticated ? <Login onLogin={setIsAuthenticated} onCancel={() => setCurrentPage('home')} /> : <Admin onLogout={handleLogout} />
+            !isAuthenticated ? <Login onLogin={setIsAuthenticated} onCancel={() => handleNavigate('home')} /> : <Admin onLogout={handleLogout} />
         )}
       </main>
       <CookieConsent />
-      <Footer onNavigate={handleNavigate as any} />
+      <Footer onNavigate={handleNavigate} />
     </div>
   );
 };
 export default App;
-    
