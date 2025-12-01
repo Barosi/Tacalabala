@@ -2,6 +2,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import './index.css' // <--- QUESTA È FONDAMENTALE! Senza di lei, niente colori.
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
