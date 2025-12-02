@@ -4,7 +4,7 @@ import ProductCard from './ProductCard';
 import { useStore } from '../store/useStore';
 import { Filter, Check } from 'lucide-react';
 import { Product } from '../types';
-import { motion, LayoutGroup } from 'framer-motion';
+import { motion, LayoutGroup, AnimatePresence } from 'framer-motion';
 
 interface StoreProps {
   onProductClick?: (product: Product) => void;
@@ -44,19 +44,19 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
   const FilterPill = ({ label, active, onClick, group }: { label: string | React.ReactNode, active: boolean, onClick: () => void, group: string }) => (
       <button
           onClick={onClick}
-          className={`relative px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest z-10 flex items-center justify-center min-w-[80px] ${active ? 'text-white' : 'text-slate-500 hover:text-[#0066b2]'}`}
+          className={`relative px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest z-10 flex items-center justify-center min-w-[80px] transition-colors duration-300 ${active ? 'text-white' : 'text-slate-500 hover:text-[#0066b2]'}`}
       >
-          <motion.div
-              layoutId={`active-${group}`}
-              className="absolute inset-0 bg-[#0066b2] rounded-full shadow-md"
-              initial={false}
-              animate={{ 
-                  opacity: active ? 1 : 0,
-                  pointerEvents: active ? 'auto' : 'none'
-              }}
-              transition={{ type: "spring", stiffness: 500, damping: 40, mass: 1 }}
-              style={{ zIndex: -1 }}
-          />
+          {active && (
+              <motion.div
+                  layoutId={`active-${group}`}
+                  className="absolute inset-0 bg-[#0066b2] rounded-full shadow-md"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                  style={{ zIndex: -1 }}
+              />
+          )}
           {label}
       </button>
   );
