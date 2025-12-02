@@ -4,7 +4,7 @@ import ProductCard from './ProductCard';
 import { useStore } from '../store/useStore';
 import { Filter, Check } from 'lucide-react';
 import { Product } from '../types';
-import { motion } from 'framer-motion';
+import { motion, LayoutGroup } from 'framer-motion';
 
 interface StoreProps {
   onProductClick?: (product: Product) => void;
@@ -44,16 +44,19 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
   const FilterPill = ({ label, active, onClick, group }: { label: string | React.ReactNode, active: boolean, onClick: () => void, group: string }) => (
       <button
           onClick={onClick}
-          className={`relative px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all duration-200 z-10 flex items-center justify-center min-w-[80px] ${active ? 'text-white' : 'text-slate-500 hover:text-[#0066b2] hover:bg-slate-50'}`}
+          className={`relative px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest z-10 flex items-center justify-center min-w-[80px] ${active ? 'text-white' : 'text-slate-500 hover:text-[#0066b2]'}`}
       >
-          {active && (
-              <motion.div
-                  layoutId={`active-${group}`}
-                  className="absolute inset-0 bg-[#0066b2] rounded-full shadow-md"
-                  transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                  style={{ zIndex: -1 }}
-              />
-          )}
+          <motion.div
+              layoutId={`active-${group}`}
+              className="absolute inset-0 bg-[#0066b2] rounded-full shadow-md"
+              initial={false}
+              animate={{ 
+                  opacity: active ? 1 : 0,
+                  pointerEvents: active ? 'auto' : 'none'
+              }}
+              transition={{ type: "spring", stiffness: 500, damping: 40, mass: 1 }}
+              style={{ zIndex: -1 }}
+          />
           {label}
       </button>
   );
@@ -95,9 +98,10 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
         </motion.div>
 
         {/* --- TOOLBAR START (ONLY FILTERS) --- */}
-        <div className="sticky top-24 z-30 mb-12 flex justify-center w-full transition-all duration-300">
-            <div className="overflow-x-auto no-scrollbar pb-1 pt-1 max-w-full">
-                    <div className="flex items-center gap-1 bg-white/90 backdrop-blur-md border border-slate-200 p-1.5 rounded-full shadow-lg shadow-slate-200/50 min-w-max">
+        <LayoutGroup>
+            <div className="sticky top-24 z-30 mb-12 flex justify-center w-full transition-all duration-300">
+                <div className="overflow-x-auto no-scrollbar pb-1 pt-1 max-w-full">
+                        <div className="flex items-center gap-1 bg-white/90 backdrop-blur-md border border-slate-200 p-1.5 rounded-full shadow-lg shadow-slate-200/50 min-w-max">
                     
                     {/* Filtro Collezione */}
                     <FilterPill 
@@ -136,9 +140,10 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
                         />
                     ))}
 
-                    </div>
+                        </div>
+                </div>
             </div>
-        </div>
+        </LayoutGroup>
         {/* --- TOOLBAR END --- */}
 
         {/* Products Grid */}

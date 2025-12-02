@@ -16,9 +16,9 @@ const COUNTRIES = [
     { code: 'IT', name: 'Italia' }, { code: 'DE', name: 'Germania' }, { code: 'FR', name: 'Francia' }, { code: 'ES', name: 'Spagna' }, { code: 'UK', name: 'Regno Unito' }, { code: 'CH', name: 'Svizzera' }, { code: 'AT', name: 'Austria' }, { code: 'BE', name: 'Belgio' }, { code: 'NL', name: 'Paesi Bassi' }, { code: 'PT', name: 'Portogallo' }, { code: 'OTHER', name: 'Altro (Resto del Mondo)' }
 ];
 
-const btnLiquidClass = "w-full relative overflow-hidden group/btn bg-slate-900 text-white py-4 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-lg hover:shadow-blue-900/20 flex items-center justify-center gap-3 transform-gpu active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none";
+const btnLiquidClass = "w-full relative overflow-hidden group/btn bg-white text-[#0066b2] border border-[#0066b2] py-4 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-blue-900/20 flex items-center justify-center gap-3 transform-gpu active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none";
 const btnLiquidHover = "absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0";
-const btnLiquidContent = "relative z-10 flex items-center gap-2";
+const btnLiquidContent = "relative z-10 flex items-center gap-2 group-hover/btn:text-white transition-colors duration-500";
 
 const StripePaymentForm: React.FC<{ onSuccess: () => void; orderId: string | null }> = ({ onSuccess, orderId }) => {
     const stripe = useStripe();
@@ -195,7 +195,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                     <div className="flex gap-2 mb-2">
                         <input type="text" value={couponCode} onChange={e => setCouponCode(e.target.value.toUpperCase())} disabled={!!appliedCoupon} className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold uppercase outline-none focus:border-[#0066b2]" placeholder="CODICE" />
                         {appliedCoupon ? (
-                            <button onClick={() => {removeCoupon(); setCouponCode(''); setCouponMsg('');}} className="bg-red-500 text-white px-4 rounded-lg text-xs font-bold uppercase hover:bg-red-600 transition-colors">Rimuovi</button>
+                            <button onClick={() => {removeCoupon(); setCouponCode(''); setCouponMsg('');}} className="relative overflow-hidden group/btn bg-white text-red-600 border border-red-400 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-red-900/10 flex items-center justify-center transform-gpu active:scale-95"><span className="absolute inset-0 bg-red-600 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span><span className="relative z-10 group-hover/btn:text-white transition-colors duration-500">Rimuovi</span></button>
                         ) : (
                             <button onClick={handleApplyCoupon} className="relative overflow-hidden group/btn bg-white text-slate-900 py-2 px-4 rounded-full font-bold uppercase tracking-widest text-[9px] transition-all duration-300 shadow-sm hover:shadow-blue-900/20 border border-slate-200 flex items-center justify-center gap-2 transform-gpu active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"><span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span><span className="relative z-10 group-hover/btn:text-white transition-colors duration-500">Applica</span></button>
                         )}
