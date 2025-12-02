@@ -604,13 +604,13 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                                     onChange={e => setEditForm({...editForm, articleCode: e.target.value})}
                                                                 />
                                                             </div>
-                                                            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center">
-                                                                <label className="text-[9px] font-bold uppercase text-slate-400 mb-2 block">Prezzo</label>
+                                                            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center">
+                                                                <label className="text-[9px] font-bold uppercase text-slate-400 mb-3 block w-full">Prezzo</label>
                                                                 <div className="flex items-center justify-center gap-1">
                                                                     <span className="text-sm font-bold text-slate-900">€</span>
                                                                     <input 
                                                                         type="number"
-                                                                        className="w-16 text-center text-sm font-bold text-slate-900 bg-transparent outline-none border-b border-transparent focus:border-[#0066b2] transition-colors pb-1"
+                                                                        className="w-14 text-center text-sm font-bold text-slate-900 bg-transparent outline-none border-b border-transparent focus:border-[#0066b2] transition-colors pb-1"
                                                                         value={editForm.price}
                                                                         onChange={e => setEditForm({...editForm, price: e.target.value})}
                                                                     />
@@ -623,16 +623,16 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                             <label className="text-[10px] font-bold uppercase text-slate-400 mb-3 block">Gestione Stock</label>
                                                             <div className="grid grid-cols-4 gap-4">
                                                                 {sortedVariants.map(v => (
-                                                                    <div key={v.size} className="flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200 p-4 shadow-sm relative group overflow-hidden">
+                                                                    <div key={v.size} className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm relative group overflow-hidden flex flex-col items-center justify-center text-center">
                                                                         <div className="absolute top-0 left-0 w-full h-1 bg-[#0066b2] opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                                                        <span className="text-xs font-bold text-slate-400 order-1">{v.size}</span>
+                                                                        <span className="text-xs font-bold text-slate-400 mb-2">{v.size}</span>
                                                                         <input 
                                                                             type="number" 
-                                                                            className="w-12 text-center font-oswald font-bold text-2xl text-slate-900 outline-none bg-transparent p-0 m-0 focus:text-[#0066b2] transition-colors order-2 my-1" 
+                                                                            className="w-14 text-center font-oswald font-bold text-2xl text-slate-900 outline-none bg-transparent p-0 focus:text-[#0066b2] transition-colors mb-2" 
                                                                             value={v.stock} 
                                                                             onChange={(e) => updateProductStock(product.id, v.size as Size, parseInt(e.target.value)||0)} 
                                                                         />
-                                                                        <span className="text-[9px] uppercase font-bold text-slate-300 order-3">Pezzi</span>
+                                                                        <span className="text-[9px] uppercase font-bold text-slate-300">Pezzi</span>
                                                                     </div>
                                                                 ))}
                                                             </div>
