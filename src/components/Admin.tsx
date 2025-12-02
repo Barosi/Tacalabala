@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Product, ProductVariant, Size, FAQ, Discount, OrderStatus, ShippingConfig } from '../types';
-import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, Tag, Calendar, ShoppingBag, Truck, Check, Search, Shirt, Layers, Image as ImageIcon, Upload, Settings, Mail, Shield, AlertTriangle, ChevronDown, X } from 'lucide-react';
+import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, Tag, Calendar, ShoppingBag, Truck, Check, Search, Shirt, Layers, Image as ImageIcon, Upload, Settings, Mail, Shield, AlertTriangle, ChevronDown, X, Phone } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { sendShippingConfirmationEmail } from '../utils/emailSender';
 
@@ -11,7 +11,7 @@ const LiquidButton = ({
     onClick, 
     label, 
     icon: Icon, 
-    variant = 'dark', 
+    variant = 'primary', 
     type = 'button',
     disabled = false,
     className = ''
@@ -19,63 +19,65 @@ const LiquidButton = ({
     onClick?: () => void, 
     label: string, 
     icon?: any, 
-    variant?: 'dark' | 'light' | 'danger' | 'success', 
+    variant?: 'primary' | 'outline' | 'danger' | 'success', 
     type?: 'button' | 'submit',
     disabled?: boolean,
     className?: string
 }) => {
-    const baseClass = "relative overflow-hidden group/btn py-4 px-8 rounded-full font-bold uppercase tracking-widest text-[10px] transition-all duration-300 flex items-center justify-center gap-2 transform-gpu active:scale-95 border shadow-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed";
+    // Base styles: Increased padding and font size for better visibility
+    const baseClass = "relative overflow-hidden group/btn py-4 px-10 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 flex items-center justify-center gap-3 transform-gpu active:scale-95 border shadow-md hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed";
     
+    // Updated Color Palette to use #0066b2 (Tacalabala Blue) instead of Black
     const variants = {
-        dark: "bg-white border-slate-900 text-slate-900 hover:text-white",
-        light: "bg-white border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-900",
+        primary: "bg-white border-[#0066b2] text-[#0066b2] hover:text-white",
+        outline: "bg-white border-slate-200 text-slate-500 hover:text-[#0066b2] hover:border-[#0066b2]",
         danger: "bg-white border-red-500 text-red-500 hover:text-white",
         success: "bg-white border-green-600 text-green-600 hover:text-white"
     };
 
     const fills = {
-        dark: "bg-slate-900",
-        light: "bg-slate-100", // Non invertiamo testo su light, solo hover leggero
+        primary: "bg-[#0066b2]",
+        outline: "bg-blue-50", // Light fill for outline
         danger: "bg-red-500",
         success: "bg-green-600"
     };
 
     return (
         <button type={type} onClick={onClick} disabled={disabled} className={`${baseClass} ${variants[variant]} ${className}`}>
-            {variant !== 'light' && (
+            {variant !== 'outline' && (
                 <span className={`absolute inset-0 ${fills[variant]} translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0`}></span>
             )}
             <span className="relative z-10 flex items-center gap-2">
-                {Icon && <Icon size={16} />} {label}
+                {Icon && <Icon size={18} />} {label}
             </span>
         </button>
     );
 };
 
 const InputGroup = ({ label, children, className = '' }: { label: string, children: React.ReactNode, className?: string }) => (
-    <div className={`space-y-2 ${className}`}>
-        <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 pl-1">{label}</label>
+    <div className={`space-y-3 ${className}`}>
+        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 pl-1">{label}</label>
         {children}
     </div>
 );
 
 const StyledInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-    <input {...props} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium placeholder:text-slate-400 disabled:opacity-50" />
+    <input {...props} className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium placeholder:text-slate-400 disabled:opacity-50 focus:shadow-sm focus:bg-white" />
 );
 
 const StyledSelect = (props: React.SelectHTMLAttributes<HTMLSelectElement>) => (
     <div className="relative">
-        <select {...props} className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl p-4 pr-10 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-bold cursor-pointer" />
+        <select {...props} className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-2xl p-4 pr-10 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-bold cursor-pointer focus:bg-white" />
         <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
     </div>
 );
 
 const Card = ({ title, subtitle, icon: Icon, children, className = '' }: { title: string, subtitle?: string, icon?: any, children: React.ReactNode, className?: string }) => (
-    <div className={`bg-white p-8 md:p-10 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-slate-100 relative overflow-hidden ${className}`}>
+    <div className={`bg-white p-8 md:p-10 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-slate-100 relative overflow-hidden h-full flex flex-col ${className}`}>
         {(title || Icon) && (
-            <div className="flex items-center gap-5 mb-8 pb-6 border-b border-slate-50">
+            <div className="flex items-center gap-5 mb-8 pb-6 border-b border-slate-50 flex-shrink-0">
                 {Icon && (
-                    <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-slate-900/20">
+                    <div className="w-12 h-12 bg-[#0066b2] text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                         <Icon size={24} />
                     </div>
                 )}
@@ -85,9 +87,17 @@ const Card = ({ title, subtitle, icon: Icon, children, className = '' }: { title
                 </div>
             </div>
         )}
-        {children}
+        <div className="flex-grow">
+            {children}
+        </div>
     </div>
 );
+
+// Helper per ordinare taglie
+const sortSizes = (variants: {size: string, stock: number}[]) => {
+    const order = ['S', 'M', 'L', 'XL'];
+    return [...variants].sort((a, b) => order.indexOf(a.size) - order.indexOf(b.size));
+};
 
 // --- MODALS ---
 
@@ -114,7 +124,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
     } = useStore();
 
     const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'promotions' | 'settings'>('products');
-    const [subTabSettings, setSubTabSettings] = useState<'shipping' | 'payments' | 'email' | 'support'>('shipping');
+    // Riorganizzazione SubTabs
+    const [subTabSettings, setSubTabSettings] = useState<'shipping' | 'payments' | 'contacts' | 'faq'>('shipping');
 
     // States
     const [searchTerm, setSearchTerm] = useState('');
@@ -227,7 +238,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     <h3 className="font-oswald text-2xl font-bold uppercase text-slate-900 mb-2">{modalConfig.title}</h3>
                     <p className="text-sm text-slate-500 mb-8 font-medium">{modalConfig.message}</p>
                     <div className="flex gap-3">
-                        <LiquidButton onClick={() => setModalConfig({ ...modalConfig, isOpen: false })} label="Annulla" variant="light" className="flex-1" />
+                        <LiquidButton onClick={() => setModalConfig({ ...modalConfig, isOpen: false })} label="Annulla" variant="outline" className="flex-1" />
                         <LiquidButton onClick={modalConfig.onConfirm} label="Conferma" variant="danger" className="flex-1" />
                     </div>
                 </div>
@@ -252,8 +263,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                             <StyledInput name="tracking" placeholder="Es. 1Z999..." required />
                         </InputGroup>
                         <div className="flex gap-3 pt-4">
-                            <LiquidButton onClick={() => setTrackingModal({...trackingModal, isOpen: false})} label="Annulla" variant="light" className="flex-1" />
-                            <LiquidButton type="submit" label="Conferma" variant="dark" className="flex-1" />
+                            <LiquidButton onClick={() => setTrackingModal({...trackingModal, isOpen: false})} label="Annulla" variant="outline" className="flex-1" />
+                            <LiquidButton type="submit" label="Conferma" variant="primary" className="flex-1" />
                         </div>
                     </form>
                 </div>
@@ -267,13 +278,13 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         <h2 className="font-oswald text-4xl md:text-6xl font-bold uppercase text-slate-900 leading-[0.9]">
                             Area <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Riservata</span>
                         </h2>
-                        <p className="text-slate-500 font-bold uppercase text-xs tracking-widest mt-2">Pannello di controllo Tacalabala</p>
+                        <p className="text-slate-500 font-bold uppercase text-xs tracking-widest mt-2">Pannello di controllo</p>
                     </div>
-                    <LiquidButton onClick={onLogout} label="Logout Sicuro" icon={LogOut} variant="danger" />
+                    <LiquidButton onClick={onLogout} label="Logout" icon={LogOut} variant="danger" />
                 </div>
 
                 {/* --- TABS --- */}
-                <div className="flex gap-4 mb-12 overflow-x-auto pb-4 no-scrollbar">
+                <div className="flex gap-4 mb-12 overflow-x-auto pb-4 px-1 no-scrollbar">
                     {[
                         { id: 'products', label: 'Prodotti', icon: Package },
                         { id: 'orders', label: 'Ordini', icon: ShoppingBag },
@@ -283,9 +294,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         <button 
                             key={tab.id} 
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex items-center gap-3 px-8 py-4 rounded-full font-bold uppercase text-xs tracking-widest transition-all duration-300 whitespace-nowrap border ${activeTab === tab.id ? 'bg-slate-900 text-white border-slate-900 shadow-lg scale-105' : 'bg-white text-slate-400 border-slate-200 hover:border-slate-900 hover:text-slate-900'}`}
+                            className={`flex items-center gap-3 px-8 py-4 rounded-full font-bold uppercase text-xs tracking-widest transition-all duration-300 whitespace-nowrap border shadow-sm ${activeTab === tab.id ? 'bg-[#0066b2] text-white border-[#0066b2] shadow-lg scale-105' : 'bg-white text-slate-400 border-slate-200 hover:border-[#0066b2] hover:text-[#0066b2]'}`}
                         >
-                            <tab.icon size={16} /> {tab.label}
+                            <tab.icon size={18} /> {tab.label}
                         </button>
                     ))}
                 </div>
@@ -294,8 +305,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                 {activeTab === 'products' && (
                     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
                         <Card title="Nuovo Articolo" subtitle="Inserisci i dettagli streetwear" icon={Plus}>
-                            <form onSubmit={handleProductSubmit}>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                            <form onSubmit={handleProductSubmit} className="h-full flex flex-col">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 flex-grow">
                                     {/* Colonna SX: Info */}
                                     <div className="space-y-6">
                                         <InputGroup label="Titolo Prodotto">
@@ -315,26 +326,26 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             <InputGroup label="Stagione/Label"><StyledInput value={newProduct.season} onChange={e => setNewProduct({...newProduct, season: e.target.value})} placeholder="FW24" /></InputGroup>
                                         </div>
                                         <InputGroup label="Descrizione">
-                                            <textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-32 resize-none" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} placeholder="Descrivi il fit e i dettagli..." />
+                                            <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-40 resize-none" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} placeholder="Descrivi il fit e i dettagli..." />
                                         </InputGroup>
                                     </div>
                                     
-                                    {/* Colonna DX: Media & Stock */}
-                                    <div className="space-y-8">
-                                        <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-dashed border-slate-300">
+                                    {/* Colonna DX: Media & Stock - Allineata in altezza */}
+                                    <div className="flex flex-col gap-6 h-full">
+                                        <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-dashed border-slate-300 flex-1">
                                             <div className="flex justify-between items-center mb-4">
                                                 <span className="text-xs font-bold uppercase text-slate-400 tracking-widest">Galleria Immagini (Max 1MB)</span>
                                                 <button type="button" onClick={() => fileInputRef.current?.click()} className="text-[#0066b2] text-[10px] font-bold uppercase hover:underline flex items-center gap-1"><Upload size={12}/> Carica</button>
                                             </div>
                                             <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
-                                            <div className="grid grid-cols-4 gap-2">
+                                            <div className="grid grid-cols-4 gap-3">
                                                 {uploadImages.map((img, i) => (
-                                                    <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group">
+                                                    <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group bg-white shadow-sm">
                                                         <img src={img} className="w-full h-full object-cover" alt="" />
                                                         <button type="button" onClick={() => setUploadImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={16}/></button>
                                                     </div>
                                                 ))}
-                                                <div onClick={() => fileInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300 hover:text-[#0066b2] hover:border-[#0066b2] cursor-pointer transition-colors">
+                                                <div onClick={() => fileInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300 hover:text-[#0066b2] hover:border-[#0066b2] cursor-pointer transition-colors bg-white">
                                                     <ImageIcon size={24} />
                                                 </div>
                                             </div>
@@ -344,7 +355,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             <span className="block text-xs font-bold uppercase text-slate-400 tracking-widest mb-4">Gestione Stock per Taglia</span>
                                             <div className="grid grid-cols-2 gap-4">
                                                 {variantsState.map((v, idx) => (
-                                                    <div key={v.size} className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-100">
+                                                    <div key={v.size} className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
                                                         <input type="checkbox" checked={v.enabled} onChange={(e) => {const up = [...variantsState]; up[idx].enabled = e.target.checked; setVariantsState(up);}} className="w-5 h-5 accent-[#0066b2] rounded cursor-pointer"/>
                                                         <span className="font-bold text-sm w-8">{v.size}</span>
                                                         <input type="number" disabled={!v.enabled} value={v.stock} onChange={(e) => {const up = [...variantsState]; up[idx].stock = e.target.value; setVariantsState(up);}} className="w-full text-right bg-transparent outline-none font-mono text-slate-900 border-b border-transparent focus:border-[#0066b2]" placeholder="0" />
@@ -352,9 +363,11 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                 ))}
                                             </div>
                                         </div>
-
-                                        <LiquidButton type="submit" label="Salva Prodotto nel Database" icon={Save} variant="dark" className="w-full" />
                                     </div>
+                                </div>
+                                
+                                <div className="mt-12 flex justify-center">
+                                     <LiquidButton type="submit" label="Salva" icon={Save} variant="primary" className="w-full md:w-auto min-w-[200px]" />
                                 </div>
                             </form>
                         </Card>
@@ -367,6 +380,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                             <div className="grid gap-4">
                                 {products.filter(p => p.title.toLowerCase().includes(searchTerm.toLowerCase()) || p.articleCode.toLowerCase().includes(searchTerm.toLowerCase())).map(product => {
                                     const isExpanded = expandedProductId === product.id;
+                                    const sortedVariants = sortSizes(product.variants || []);
                                     return (
                                         <div key={product.id} className={`border rounded-[1.5rem] transition-all duration-300 overflow-hidden ${isExpanded ? 'border-[#0066b2] bg-blue-50/10 shadow-lg' : 'border-slate-100 bg-white hover:border-slate-300'}`}>
                                             <div className="p-4 flex items-center justify-between cursor-pointer" onClick={() => setExpandedProductId(isExpanded ? null : product.id)}>
@@ -386,16 +400,18 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             </div>
                                             {isExpanded && (
                                                 <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-2">
-                                                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
-                                                        <div className="flex justify-between items-center mb-4">
+                                                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                                                        <div className="flex justify-between items-center mb-4 border-b border-slate-200 pb-2">
                                                             <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Aggiorna Stock Rapido</span>
-                                                            <button onClick={(e) => { e.stopPropagation(); if(confirm('Eliminare prodotto?')) deleteProduct(product.id); }} className="text-red-500 text-[10px] font-bold uppercase hover:underline flex items-center gap-1"><Trash2 size={12} /> Elimina Articolo</button>
+                                                            <button onClick={(e) => { e.stopPropagation(); if(confirm('Eliminare prodotto?')) deleteProduct(product.id); }} className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-red-500 border border-slate-200 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors" title="Elimina Articolo">
+                                                                <Trash2 size={16} /> 
+                                                            </button>
                                                         </div>
-                                                        <div className="grid grid-cols-4 gap-2">
-                                                            {product.variants?.map(v => (
-                                                                <div key={v.size} className="bg-white border border-slate-200 rounded-lg p-2 flex flex-col items-center">
-                                                                    <span className="text-[10px] font-bold text-slate-400">{v.size}</span>
-                                                                    <input type="number" className="w-full text-center font-bold text-slate-900 outline-none border-b border-transparent focus:border-[#0066b2]" value={v.stock} onChange={(e) => updateProductStock(product.id, v.size, parseInt(e.target.value)||0)} />
+                                                        <div className="grid grid-cols-4 gap-3">
+                                                            {sortedVariants.map(v => (
+                                                                <div key={v.size} className="bg-white border border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm">
+                                                                    <span className="text-xs font-bold text-slate-500 mb-1">{v.size}</span>
+                                                                    <input type="number" className="w-12 text-center font-bold text-slate-900 outline-none border-b border-slate-200 focus:border-[#0066b2] transition-colors" value={v.stock} onChange={(e) => updateProductStock(product.id, v.size, parseInt(e.target.value)||0)} />
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -439,7 +455,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                                 updateOrderStatus(order.id, e.target.value as OrderStatus);
                                                             }
                                                         }}
-                                                        className="appearance-none bg-slate-50 border border-slate-200 rounded-full py-2 pl-4 pr-10 text-xs font-bold uppercase tracking-wider outline-none cursor-pointer hover:border-[#0066b2] transition-colors"
+                                                        className="appearance-none bg-slate-50 border border-slate-200 rounded-full py-2 pl-4 pr-10 text-xs font-bold uppercase tracking-wider outline-none cursor-pointer hover:border-[#0066b2] transition-colors focus:bg-white"
                                                     >
                                                         <option value="pending">In Attesa</option>
                                                         <option value="paid">Pagato</option>
@@ -490,9 +506,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                             <form onSubmit={handleDiscountSubmit} className="space-y-6">
                                 <div>
                                     <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 pl-1">Tipo Promozione</label>
-                                    <div className="flex bg-slate-100 p-1 rounded-xl">
-                                        <button type="button" onClick={() => setPromoType('automatic')} className={`flex-1 py-3 rounded-lg text-xs font-bold uppercase transition-all ${promoType === 'automatic' ? 'bg-[#0066b2] text-white shadow' : 'text-slate-400 hover:text-slate-600'}`}>Sconto Automatico</button>
-                                        <button type="button" onClick={() => setPromoType('coupon')} className={`flex-1 py-3 rounded-lg text-xs font-bold uppercase transition-all ${promoType === 'coupon' ? 'bg-[#0066b2] text-white shadow' : 'text-slate-400 hover:text-slate-600'}`}>Codice Coupon</button>
+                                    <div className="flex bg-slate-50 p-1 rounded-2xl border border-slate-200">
+                                        <button type="button" onClick={() => setPromoType('automatic')} className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase transition-all ${promoType === 'automatic' ? 'bg-[#0066b2] text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>Sconto Automatico</button>
+                                        <button type="button" onClick={() => setPromoType('coupon')} className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase transition-all ${promoType === 'coupon' ? 'bg-[#0066b2] text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>Codice Coupon</button>
                                     </div>
                                 </div>
                                 
@@ -516,17 +532,17 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                 </div>
 
                                 <InputGroup label="Applica A">
-                                    <div className="space-y-2">
-                                        <div className="flex gap-4">
+                                    <div className="space-y-3">
+                                        <div className="flex gap-6">
                                             <label className="flex items-center gap-2 text-xs font-bold uppercase text-slate-600 cursor-pointer">
-                                                <input type="radio" checked={newDiscount.targetType === 'all'} onChange={() => setNewDiscount({...newDiscount, targetType: 'all'})} className="accent-[#0066b2]" /> Tutto il Catalogo
+                                                <input type="radio" checked={newDiscount.targetType === 'all'} onChange={() => setNewDiscount({...newDiscount, targetType: 'all'})} className="accent-[#0066b2] w-4 h-4" /> Tutto il Catalogo
                                             </label>
                                             <label className="flex items-center gap-2 text-xs font-bold uppercase text-slate-600 cursor-pointer">
-                                                <input type="radio" checked={newDiscount.targetType === 'specific'} onChange={() => setNewDiscount({...newDiscount, targetType: 'specific'})} className="accent-[#0066b2]" /> Prodotti Specifici
+                                                <input type="radio" checked={newDiscount.targetType === 'specific'} onChange={() => setNewDiscount({...newDiscount, targetType: 'specific'})} className="accent-[#0066b2] w-4 h-4" /> Prodotti Specifici
                                             </label>
                                         </div>
                                         {newDiscount.targetType === 'specific' && (
-                                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 max-h-40 overflow-y-auto custom-scrollbar">
+                                            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 max-h-40 overflow-y-auto custom-scrollbar">
                                                 {products.map(p => (
                                                     <label key={p.id} className="flex items-center gap-3 p-2 hover:bg-white rounded-lg cursor-pointer transition-colors">
                                                         <input 
@@ -546,8 +562,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                         )}
                                     </div>
                                 </InputGroup>
-
-                                <LiquidButton type="submit" label="Salva Promozione" icon={Save} variant="dark" className="w-full" />
+                                <div className="mt-4">
+                                   <LiquidButton type="submit" label="Salva" icon={Save} variant="primary" className="w-full" />
+                                </div>
                             </form>
                         </Card>
 
@@ -560,7 +577,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${d.discountType === 'coupon' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
                                                     {d.discountType}
                                                 </span>
-                                                {d.code && <span className="bg-slate-900 text-white px-2 py-1 rounded text-[10px] font-mono font-bold">{d.code}</span>}
+                                                {d.code && <span className="bg-[#0066b2] text-white px-2 py-1 rounded text-[10px] font-mono font-bold">{d.code}</span>}
                                             </div>
                                             <h4 className="font-oswald font-bold text-xl text-slate-900 uppercase">{d.name}</h4>
                                             <p className="text-xs font-bold text-slate-400 mt-1">Sconto {d.percentage}% • Scade: {new Date(d.endDate).toLocaleDateString()}</p>
@@ -580,13 +597,13 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                             {[
                                 {id: 'shipping', label: 'Spedizioni', icon: Truck},
                                 {id: 'payments', label: 'Pagamenti', icon: CreditCard},
-                                {id: 'email', label: 'Email / Mail', icon: Mail},
-                                {id: 'support', label: 'FAQ / Supporto', icon: MessageCircle}
+                                {id: 'contacts', label: 'Contatti', icon: Mail},
+                                {id: 'faq', label: 'Supporto', icon: MessageCircle}
                             ].map(sub => (
                                 <button 
                                     key={sub.id} 
                                     onClick={() => setSubTabSettings(sub.id as any)}
-                                    className={`px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest border transition-all flex items-center gap-2 ${subTabSettings === sub.id ? 'bg-[#0066b2] border-[#0066b2] text-white' : 'bg-white border-slate-200 text-slate-500 hover:border-[#0066b2] hover:text-[#0066b2]'}`}
+                                    className={`px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest border transition-all flex items-center gap-2 shadow-sm ${subTabSettings === sub.id ? 'bg-[#0066b2] border-[#0066b2] text-white' : 'bg-white border-slate-200 text-slate-500 hover:border-[#0066b2] hover:text-[#0066b2]'}`}
                                 >
                                     <sub.icon size={14} /> {sub.label}
                                 </button>
@@ -616,7 +633,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     </div>
                                 </div>
                                 <div className="mt-8 pt-6 border-t border-slate-50">
-                                    <LiquidButton onClick={() => { setShippingConfig(shipForm); alert('Spedizioni salvate'); }} label="Salva Configurazioni" icon={Save} variant="dark" className="w-full md:w-auto" />
+                                    <LiquidButton onClick={() => { setShippingConfig(shipForm); alert('Spedizioni salvate'); }} label="Salva Configurazioni" icon={Save} variant="primary" className="w-full md:w-auto" />
                                 </div>
                             </Card>
                         )}
@@ -633,52 +650,63 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     <InputGroup label="Webhook Secret">
                                         <StyledInput type="password" value={payForm.webhookSecret} onChange={e => setPayForm({...payForm, webhookSecret: e.target.value})} placeholder="whsec_..." />
                                     </InputGroup>
-                                    <LiquidButton onClick={() => { setStripeConfig(payForm); alert('Stripe configurato'); }} label="Salva Chiavi API" icon={Shield} variant="dark" className="w-full md:w-auto" />
+                                    <LiquidButton onClick={() => { setStripeConfig(payForm); alert('Stripe configurato'); }} label="Salva Chiavi API" icon={Shield} variant="primary" className="w-full md:w-auto" />
                                 </div>
                             </Card>
                         )}
 
-                        {subTabSettings === 'email' && (
-                            <Card title="Configurazione EmailJS" subtitle="Sistema di notifiche mail" icon={Mail}>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <InputGroup label="Service ID"><StyledInput value={mailFormState.serviceId} onChange={e => setMailFormState({...mailFormState, serviceId: e.target.value})} /></InputGroup>
-                                    <InputGroup label="Template ID"><StyledInput value={mailFormState.templateId} onChange={e => setMailFormState({...mailFormState, templateId: e.target.value})} /></InputGroup>
-                                    <InputGroup label="Public Key"><StyledInput value={mailFormState.publicKey} onChange={e => setMailFormState({...mailFormState, publicKey: e.target.value})} /></InputGroup>
-                                    <InputGroup label="Email Destinatario Admin"><StyledInput value={mailFormState.emailTo} onChange={e => setMailFormState({...mailFormState, emailTo: e.target.value})} /></InputGroup>
-                                </div>
-                                <div className="mt-8 pt-6 border-t border-slate-50">
-                                    <LiquidButton onClick={() => { setMailConfig(mailFormState); alert('EmailJS salvato'); }} label="Salva Configurazione Mail" icon={Save} variant="dark" className="w-full md:w-auto" />
-                                </div>
-                            </Card>
-                        )}
-
-                        {subTabSettings === 'support' && (
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                                <Card title="Canali Supporto" icon={MessageCircle}>
-                                    <InputGroup label="Numero WhatsApp">
-                                        <StyledInput value={whatsappForm} onChange={e => setWhatsappForm(e.target.value)} placeholder="+39 333 0000000" />
-                                    </InputGroup>
-                                    <div className="mt-6">
-                                        <LiquidButton onClick={() => { setSupportConfig({ whatsappNumber: whatsappForm }); alert('WhatsApp aggiornato'); }} label="Aggiorna Numero" icon={Save} variant="dark" />
+                        {subTabSettings === 'contacts' && (
+                            <Card title="Canali di Contatto" subtitle="Configurazione EmailJS & WhatsApp" icon={Mail}>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                    <div className="space-y-6">
+                                        <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 flex items-center gap-2"><Mail size={18}/> EmailJS</h4>
+                                        <InputGroup label="Service ID"><StyledInput value={mailFormState.serviceId} onChange={e => setMailFormState({...mailFormState, serviceId: e.target.value})} /></InputGroup>
+                                        <InputGroup label="Template ID"><StyledInput value={mailFormState.templateId} onChange={e => setMailFormState({...mailFormState, templateId: e.target.value})} /></InputGroup>
+                                        <InputGroup label="Public Key"><StyledInput value={mailFormState.publicKey} onChange={e => setMailFormState({...mailFormState, publicKey: e.target.value})} /></InputGroup>
+                                        <InputGroup label="Email Admin"><StyledInput value={mailFormState.emailTo} onChange={e => setMailFormState({...mailFormState, emailTo: e.target.value})} /></InputGroup>
+                                        <div className="pt-4">
+                                            <LiquidButton onClick={() => { setMailConfig(mailFormState); alert('EmailJS salvato'); }} label="Salva Mail" icon={Save} variant="primary" />
+                                        </div>
                                     </div>
-                                </Card>
-                                <Card title="Aggiungi FAQ" icon={Check}>
-                                    <div className="space-y-4">
-                                        <InputGroup label="Domanda"><StyledInput value={newFaq.question} onChange={e => setNewFaq({...newFaq, question: e.target.value})} /></InputGroup>
-                                        <InputGroup label="Risposta">
-                                            <textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-32 resize-none" value={newFaq.answer} onChange={e => setNewFaq({...newFaq, answer: e.target.value})} />
+                                    
+                                    <div className="space-y-6 border-l border-slate-100 pl-8">
+                                        <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 flex items-center gap-2"><Phone size={18}/> WhatsApp</h4>
+                                        <p className="text-sm text-slate-500">Inserisci il numero di telefono per l'assistenza clienti diretta.</p>
+                                        <InputGroup label="Numero WhatsApp">
+                                            <StyledInput value={whatsappForm} onChange={e => setWhatsappForm(e.target.value)} placeholder="+39 333 0000000" />
                                         </InputGroup>
-                                        <LiquidButton onClick={() => { addFaq({ ...newFaq, id: '' }); setNewFaq({question:'', answer:''}); alert('FAQ Aggiunta'); }} label="Salva FAQ" icon={Plus} variant="dark" />
+                                        <div className="pt-4">
+                                            <LiquidButton onClick={() => { setSupportConfig({ whatsappNumber: whatsappForm }); alert('WhatsApp aggiornato'); }} label="Aggiorna Numero" icon={Save} variant="primary" />
+                                        </div>
                                     </div>
-                                </Card>
+                                </div>
+                            </Card>
+                        )}
+
+                        {subTabSettings === 'faq' && (
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                <div className="lg:col-span-1">
+                                    <Card title="Aggiungi FAQ" icon={Check}>
+                                        <div className="space-y-4">
+                                            <InputGroup label="Domanda"><StyledInput value={newFaq.question} onChange={e => setNewFaq({...newFaq, question: e.target.value})} /></InputGroup>
+                                            <InputGroup label="Risposta">
+                                                <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-40 resize-none" value={newFaq.answer} onChange={e => setNewFaq({...newFaq, answer: e.target.value})} />
+                                            </InputGroup>
+                                            <LiquidButton onClick={() => { addFaq({ ...newFaq, id: '' }); setNewFaq({question:'', answer:''}); alert('FAQ Aggiunta'); }} label="Salva FAQ" icon={Plus} variant="primary" />
+                                        </div>
+                                    </Card>
+                                </div>
                                 <div className="lg:col-span-2">
                                     <Card title="Lista FAQ">
-                                        <div className="grid gap-4">
+                                        <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                                             {supportConfig.faqs.map(f => (
                                                 <div key={f.id} className="bg-slate-50 border border-slate-200 rounded-[1.5rem] p-6 flex justify-between items-start">
                                                     <div>
-                                                        <h4 className="font-bold text-slate-900 text-sm mb-1">{f.question}</h4>
-                                                        <p className="text-xs text-slate-500 leading-relaxed">{f.answer}</p>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                             <span className="w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-400">{f.id}</span>
+                                                             <h4 className="font-bold text-slate-900 text-sm">{f.question}</h4>
+                                                        </div>
+                                                        <p className="text-xs text-slate-500 leading-relaxed pl-8">{f.answer}</p>
                                                     </div>
                                                     <button onClick={() => deleteFaq(f.id)} className="text-red-500 hover:text-red-700 p-2"><Trash2 size={16}/></button>
                                                 </div>

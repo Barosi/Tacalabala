@@ -41,6 +41,27 @@ const FAQSection: React.FC = () => {
     return (
         <section className="pt-32 md:pt-48 pb-16 md:pb-24 bg-slate-50 border-t border-slate-100 relative overflow-hidden">
              
+            {/* BACKGROUND: Pitch Lines + Central Fade (Uniformato a Store) */}
+            <div className="absolute inset-0 pointer-events-none z-0">
+                {/* Center Circle Graphic */}
+                <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-slate-200 rounded-full opacity-60"></div>
+                <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[20px] h-[20px] bg-slate-200 rounded-full"></div>
+                
+                {/* Axis Line with Gradient Fade & Dashed Style */}
+                <div className="absolute inset-0 flex justify-center">
+                    <div 
+                        className="w-px h-full bg-transparent border-l border-dashed border-slate-300"
+                        style={{ 
+                            maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+                            WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)'
+                        }}
+                    ></div>
+                </div>
+                
+                {/* Horizontal Line (Midfield) */}
+                <div className="absolute top-1/3 left-0 w-full h-px bg-slate-100"></div>
+            </div>
+
              {/* Header Aggiornato stile Chi Siamo */}
              <div className="container mx-auto px-6 relative z-20 text-center mb-16">
                 <motion.div 

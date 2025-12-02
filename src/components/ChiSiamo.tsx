@@ -7,15 +7,25 @@ const ChiSiamo: React.FC = () => {
   return (
     <section id="chi-siamo" className="pt-32 md:pt-48 pb-24 relative overflow-hidden bg-slate-50">
       
-      {/* Background Pulito con Texture Tattica */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]" style={{
-          backgroundImage: `radial-gradient(#0066b2 1px, transparent 1px)`,
-          backgroundSize: '20px 20px'
-      }}></div>
-      
-      <div className="absolute inset-0 pointer-events-none">
-           {/* Linea Centrale Sfumata */}
-           <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-px bg-gradient-to-b from-transparent via-slate-300 to-transparent"></div>
+      {/* BACKGROUND: Pitch Lines + Central Fade (Uniformato a Store) */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+           {/* Center Circle Graphic */}
+            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-slate-200 rounded-full opacity-60"></div>
+            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[20px] h-[20px] bg-slate-200 rounded-full"></div>
+            
+            {/* Axis Line with Gradient Fade & Dashed Style */}
+            <div className="absolute inset-0 flex justify-center">
+                <div 
+                    className="w-px h-full bg-transparent border-l border-dashed border-slate-300"
+                    style={{ 
+                        maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+                        WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)'
+                    }}
+                ></div>
+            </div>
+            
+            {/* Horizontal Line (Midfield) */}
+            <div className="absolute top-1/3 left-0 w-full h-px bg-slate-100"></div>
       </div>
 
       <div className="container mx-auto px-6 max-w-5xl relative z-10">
