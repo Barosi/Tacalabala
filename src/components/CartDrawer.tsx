@@ -172,13 +172,11 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ onCheckout }) => {
                     relative w-1/2 overflow-hidden group/btn 
                     bg-white text-[#0066b2] border border-[#0066b2]
                     py-4 rounded-full font-bold uppercase tracking-widest text-xs
-                    transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-900/20 
+                    transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-blue-900/20 
                     flex items-center justify-center gap-2 transform-gpu active:scale-95 mx-auto
                 "
               >
-                 {/* Liquid fill animation on hover */}
                  <span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
-                 
                  <span className="relative z-10 flex items-center gap-2 group-hover/btn:text-white transition-colors">
                     Checkout <ArrowRight size={16} />
                  </span>

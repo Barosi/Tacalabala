@@ -671,11 +671,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     {orders.map(order => (
                                         <div key={order.id} className="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm hover:shadow-xl hover:border-[#0066b2] transition-all duration-300 group relative overflow-hidden">
                                             
-                                            {/* Top Bar Status Line */}
-                                            <div className={`absolute top-0 left-0 w-full h-1.5 ${order.status === 'paid' ? 'bg-green-500' : order.status === 'shipped' ? 'bg-[#0066b2]' : order.status === 'cancelled' ? 'bg-red-500' : 'bg-yellow-400'}`}></div>
-
                                             {/* Grid Layout for Order Content */}
-                                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-2">
+                                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                                                 
                                                 {/* Left: ID & Status */}
                                                 <div className="lg:col-span-3 space-y-4 border-b lg:border-b-0 lg:border-r border-slate-100 pb-6 lg:pb-0 lg:pr-6">
