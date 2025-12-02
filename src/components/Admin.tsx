@@ -767,20 +767,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                     </div>
                                                     
                                                     <div className="flex justify-between items-end border-t border-slate-100 pt-4">
-                                                        <button 
-                                                            onClick={() => { 
-                                                                setModalConfig({
-                                                                    isOpen: true, 
-                                                                    title: 'Elimina Ordine', 
-                                                                    message: 'Sei sicuro di voler eliminare questo ordine definitivamente?',
-                                                                    onConfirm: () => { deleteOrder(order.id); setModalConfig(prev => ({...prev, isOpen: false})); addToast('Ordine eliminato', 'success'); }
-                                                                });
-                                                            }} 
-                                                            className="text-slate-300 hover:text-red-500 transition-colors flex items-center gap-1"
-                                                            title="Elimina Ordine"
-                                                        >
-                                                            <Trash2 size={18} />
-                                                        </button>
+                                                        <div></div>
                                                         <div className="text-right">
                                                             <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Totale Ordine</span>
                                                             <p className="font-oswald font-bold text-2xl text-[#0066b2] leading-none">€{order.total.toFixed(2)}</p>

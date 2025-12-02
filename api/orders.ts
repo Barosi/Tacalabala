@@ -87,8 +87,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           } catch(e) { console.warn("Order items missing", e); }
           
           const fullOrders = orders.map(o => ({
-              ...o,
+              id: o.id,
+              customerEmail: o.customer_email,
+              customerName: o.customer_name,
+              shippingAddress: o.shipping_address,
               total: Number(o.total),
+              shippingCost: o.shipping_cost,
+              status: o.status,
+              date: o.date,
               items: items.filter(i => i.order_id === o.id).map(i => ({
                   cartId: i.id, 
                   title: i.product_title,
