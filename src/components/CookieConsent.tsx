@@ -72,18 +72,20 @@ const CookieConsent: React.FC = () => {
             </div>
         </div>
 
-        <div className="flex flex-col items-center gap-2 w-full md:w-auto">
+        <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
              <button 
                 onClick={handleAccept}
-                className="w-full md:w-44 py-3 px-6 bg-white text-slate-900 rounded-full font-bold uppercase tracking-widest text-xs shadow-lg hover:bg-[#0066b2] hover:text-white transition-all duration-300 transform hover:scale-105"
+                className="w-full md:w-40 relative overflow-hidden group/btn bg-white text-slate-900 py-3 px-6 rounded-full font-bold uppercase tracking-widest text-xs shadow-lg hover:shadow-blue-900/20 flex items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105"
             >
-                Accetta Tutto
+                <span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                <span className="relative z-10 group-hover/btn:text-white transition-colors duration-500">Accetta Tutto</span>
             </button>
              <button 
                 onClick={handleReject}
-                className="w-full md:w-44 py-1.5 px-4 bg-transparent border border-slate-600 text-slate-500 rounded-full font-bold uppercase tracking-widest text-[7px] hover:bg-slate-800 hover:text-white hover:border-slate-500 transition-all duration-300"
+                className="w-full md:w-40 relative overflow-hidden group/btn bg-slate-800/50 border border-slate-600 text-slate-300 py-3 px-6 rounded-full font-bold uppercase tracking-widest text-xs shadow-md hover:shadow-blue-900/20 flex items-center justify-center gap-2 transition-all duration-300"
             >
-                Solo Tecnici
+                <span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                <span className="relative z-10 group-hover/btn:text-white transition-colors duration-500 group-hover/btn:border-[#0066b2]">Solo Tecnici</span>
             </button>
         </div>
 

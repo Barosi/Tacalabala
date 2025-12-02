@@ -756,7 +756,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                                 <li key={i} className="flex justify-between items-start text-xs border-b border-dashed border-slate-200 last:border-0 pb-2 last:pb-0">
                                                                     <div>
                                                                         <span className="font-bold text-slate-700">{item.quantity}x {item.title}</span>
-                                                                        <span className="block text-[10px] text-slate-400 font-bold uppercase bg-white px-1.5 rounded w-fit mt-0.5 border border-slate-100">{item.selectedSize}</span>
+                                                                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                                                            <span className="text-[9px] text-slate-400 font-bold uppercase bg-white px-1.5 rounded border border-slate-100">{item.selectedSize}</span>
+                                                                        </div>
                                                                     </div>
                                                                     <span className="font-bold text-slate-900">{item.price}</span>
                                                                 </li>
@@ -774,9 +776,10 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                                     onConfirm: () => { deleteOrder(order.id); setModalConfig(prev => ({...prev, isOpen: false})); addToast('Ordine eliminato', 'success'); }
                                                                 });
                                                             }} 
-                                                            className="text-slate-300 hover:text-red-500 transition-colors flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest"
+                                                            className="text-slate-300 hover:text-red-500 transition-colors flex items-center gap-1"
+                                                            title="Elimina Ordine"
                                                         >
-                                                            <Trash2 size={14} /> Elimina
+                                                            <Trash2 size={18} />
                                                         </button>
                                                         <div className="text-right">
                                                             <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Totale Ordine</span>

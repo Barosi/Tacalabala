@@ -115,12 +115,9 @@ export const useStore = create<StoreState>()(
                   mailConfig: data.mailConfig || get().mailConfig,
                   supportConfig: { ...get().supportConfig, ...data.supportConfig },
                   discounts: data.discounts || [],
+                  orders: data.orders || [],
                   isLoading: false
               });
-
-              fetch('/api/orders').then(r => r.json()).then(orders => {
-                  if(Array.isArray(orders)) set({ orders });
-              }).catch(console.error);
 
           } catch (e) {
               console.warn("API Unavailable. Loading Fallback.", e);
@@ -360,9 +357,29 @@ export const useStore = create<StoreState>()(
             if (!res.ok) throw new Error(data.error || 'Errore nella creazione ordine');
 
             if (data.success && data.id) {
-                const serverOrder = { ...order, id: data.id, total: data.total || order.total };
+                const serverOrder = { 
+                    ...order, 
+                    id: data.id, 
+                    total: data.total || order.total,
+                    customerEmail: order.customerEmail,
+                    customerName: order.customerName,
+                    shippingAddress: order.shippingAddress,
+                    invoiceDetails: order.invoiceDetails,
+                    date: new Date().toISOString()
+                };
                 set((state) => ({ orders: [serverOrder, ...state.orders] }));
-                await get().initialize(); 
+                
+                // Ricarica gli ordini dal database per assicurare sincronizzazione
+                try {
+                    const ordersRes = await fetch('/api/orders');
+                    const ordersData = await ordersRes.json();
+                    if (Array.isArray(ordersData)) {
+                        set({ orders: ordersData });
+                    }
+                } catch (e) {
+                    console.warn("Failed to reload orders", e);
+                }
+                
                 return serverOrder;
             }
             return null;
