@@ -1,3 +1,4 @@
+
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Pool } from '@neondatabase/serverless';
 
@@ -70,26 +71,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
   }
 
-  // PATCH for Stock Updates
+  // PATCH for Stock/Price Updates
   if (req.method === 'PATCH') {
-      const { productId, size, stock } = req.body;
+      const { productId, size, stock, price, type } = req.body;
       try {
-          // Update specific variant stock
-          await pool.query(
-              'UPDATE product_variants SET stock = $1 WHERE product_id = $2 AND size = $3',
-              [stock, productId, size]
-          );
+          // Type 'price' update
+          if (type === 'price' && price) {
+              const numericPrice = parseFloat(price.replace('€', '').replace(',', '.').trim());
+              await pool.query('UPDATE products SET price = $1 WHERE id = $2', [numericPrice, productId]);
+              return res.status(200).json({ success: true });
+          }
 
-          // Check if all variants are 0, then set is_sold_out = true
-          const stockRes = await pool.query('SELECT stock FROM product_variants WHERE product_id = $1', [productId]);
-          const totalStock = stockRes.rows.reduce((acc: number, row: any) => acc + row.stock, 0);
-          
-          await pool.query('UPDATE products SET is_sold_out = $1 WHERE id = $2', [totalStock === 0, productId]);
+          // Default: Update Stock (type 'stock' or undefined for backward compatibility)
+          if (!type || type === 'stock') {
+              // Update specific variant stock
+              await pool.query(
+                  'UPDATE product_variants SET stock = $1 WHERE product_id = $2 AND size = $3',
+                  [stock, productId, size]
+              );
 
-          return res.status(200).json({ success: true });
+              // Check if all variants are 0, then set is_sold_out = true
+              const stockRes = await pool.query('SELECT stock FROM product_variants WHERE product_id = $1', [productId]);
+              const totalStock = stockRes.rows.reduce((acc: number, row: any) => acc + row.stock, 0);
+              
+              await pool.query('UPDATE products SET is_sold_out = $1 WHERE id = $2', [totalStock === 0, productId]);
+
+              return res.status(200).json({ success: true });
+          }
+
+          return res.status(400).json({ error: 'Invalid update type' });
+
       } catch (e) {
-          console.error("Stock update failed:", e);
-          return res.status(500).json({ error: 'Failed to update stock' });
+          console.error("Update failed:", e);
+          return res.status(500).json({ error: 'Failed to update' });
       }
   }
   

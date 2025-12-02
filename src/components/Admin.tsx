@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Product, ProductVariant, Size, FAQ, Discount, OrderStatus, ShippingConfig } from '../types';
-import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, Tag, Calendar, ShoppingBag, Truck, Check, Search, Shirt, Layers, Image as ImageIcon, Upload, Settings, Mail, Shield, AlertTriangle, ChevronDown, X, Phone, Globe, ToggleLeft, ToggleRight, HelpCircle, AlertOctagon } from 'lucide-react';
+import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, Tag, Calendar, ShoppingBag, Truck, Check, Search, Shirt, Layers, Image as ImageIcon, Upload, Settings, Mail, Shield, AlertTriangle, ChevronDown, X, Phone, Globe, ToggleLeft, ToggleRight, HelpCircle, AlertOctagon, List, Edit3 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { sendShippingConfirmationEmail } from '../utils/emailSender';
 import { motion } from 'framer-motion';
@@ -96,7 +96,7 @@ const InputGroup = ({ label, children, className = '', helpText }: { label: stri
 );
 
 const StyledInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-    <input {...props} className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium placeholder:text-slate-300 disabled:opacity-50 focus:shadow-sm focus:bg-white" />
+    <input {...props} className={`w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium placeholder:text-slate-300 disabled:opacity-50 focus:shadow-sm focus:bg-white ${props.className}`} />
 );
 
 const StyledSelect = (props: React.SelectHTMLAttributes<HTMLSelectElement>) => (
@@ -149,7 +149,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
     const { 
         products, orders, discounts,
         stripeConfig, supportConfig, mailConfig, shippingConfig,
-        addProduct, deleteProduct, updateProductStock, addDiscount, deleteDiscount,
+        addProduct, deleteProduct, updateProductStock, updateProductPrice, addDiscount, deleteDiscount,
         addFaq, deleteFaq, setStripeConfig, setSupportConfig, setMailConfig, setShippingConfig,
         updateOrderStatus, deleteOrder,
     } = useStore();
@@ -163,7 +163,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
     const [trackingModal, setTrackingModal] = useState<{isOpen: boolean; orderId: string | null; email: string; name: string;}>({ isOpen: false, orderId: null, email: '', name: '' });
     
     // Forms
-    const [newProduct, setNewProduct] = useState<Partial<Product>>({ title: '', articleCode: '', brand: 'Tacalabala', kitType: '', year: '', season: '', price: '€', imageUrl: '', images: [], condition: 'Nuovo con etichetta', description: '', isSoldOut: false, tags: [], instagramUrl: '', dropDate: '' });
+    // Removing 'season' from user input, combining Kit and Year
+    const [newProduct, setNewProduct] = useState<Partial<Product>>({ title: '', articleCode: '', brand: 'Tacalabala', kitType: '', year: '', price: '', imageUrl: '', images: [], condition: 'Nuovo con etichetta', description: '', isSoldOut: false, tags: [], instagramUrl: '', dropDate: '' });
     const [variantsState, setVariantsState] = useState<{size: Size, enabled: boolean, stock: string}[]>([ { size: 'S', enabled: true, stock: '10' }, { size: 'M', enabled: true, stock: '10' }, { size: 'L', enabled: true, stock: '10' }, { size: 'XL', enabled: true, stock: '10' } ]);
     const [uploadImages, setUploadImages] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -198,6 +199,10 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
         if (!newProduct.articleCode) { alert("SKU Obbligatorio"); return; }
         const finalImages = uploadImages.length > 0 ? uploadImages : [newProduct.imageUrl || 'https://via.placeholder.com/400'];
         const finalVariants: ProductVariant[] = variantsState.filter(v => v.enabled).map(v => ({ size: v.size, stock: parseInt(v.stock) || 0 }));
+        
+        // Format Price to "€X"
+        const formattedPrice = `€${newProduct.price}`;
+
         const productToAdd: Product = {
             id: Date.now().toString(),
             articleCode: newProduct.articleCode,
@@ -205,8 +210,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             brand: 'Tacalabala',
             kitType: newProduct.kitType,
             year: newProduct.year,
-            season: newProduct.season || 'Classic',
-            price: newProduct.price || '€0',
+            season: 'Classic', // Default value since input is removed
+            price: formattedPrice,
             imageUrl: finalImages[0],
             images: finalImages,
             size: finalVariants.map(v => v.size).join(' - '),
@@ -219,7 +224,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             variants: finalVariants
         };
         addProduct(productToAdd);
-        setNewProduct({ title: '', articleCode: '', brand: 'Tacalabala', kitType: '', year: '', season: '', price: '€', imageUrl: '', images: [], condition: 'Nuovo con etichetta', description: '', isSoldOut: false, tags: [], instagramUrl: '', dropDate: '' });
+        setNewProduct({ title: '', articleCode: '', brand: 'Tacalabala', kitType: '', year: '', price: '', imageUrl: '', images: [], condition: 'Nuovo con etichetta', description: '', isSoldOut: false, tags: [], instagramUrl: '', dropDate: '' });
         setUploadImages([]);
         alert('Prodotto aggiunto!');
     };
@@ -356,19 +361,33 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                         <InputGroup label="Titolo Prodotto">
                                             <StyledInput value={newProduct.title} onChange={e => setNewProduct({...newProduct, title: e.target.value})} placeholder="Es. Milano Concrete Tee" required />
                                         </InputGroup>
+                                        
+                                        {/* SKU + Prezzo (Fixed format) */}
                                         <div className="grid grid-cols-2 gap-6">
                                             <InputGroup label="SKU (Codice)">
                                                 <StyledInput value={newProduct.articleCode} onChange={e => setNewProduct({...newProduct, articleCode: e.target.value})} placeholder="TC-001" required />
                                             </InputGroup>
-                                            <InputGroup label="Prezzo (€)">
-                                                <StyledInput value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} required />
+                                            <InputGroup label="Prezzo">
+                                                <div className="relative">
+                                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-900 font-bold z-10">€</span>
+                                                    <StyledInput 
+                                                        type="number" 
+                                                        value={newProduct.price} 
+                                                        onChange={e => setNewProduct({...newProduct, price: e.target.value})} 
+                                                        className="pl-8" 
+                                                        required 
+                                                        placeholder="45"
+                                                    />
+                                                </div>
                                             </InputGroup>
                                         </div>
-                                        <div className="grid grid-cols-3 gap-6">
+
+                                        {/* Kit Type + Anno Row */}
+                                        <div className="grid grid-cols-2 gap-6">
                                             <InputGroup label="Kit Type"><StyledInput value={newProduct.kitType} onChange={e => setNewProduct({...newProduct, kitType: e.target.value})} placeholder="Home" /></InputGroup>
                                             <InputGroup label="Anno"><StyledInput value={newProduct.year} onChange={e => setNewProduct({...newProduct, year: e.target.value})} placeholder="2024" /></InputGroup>
-                                            <InputGroup label="Stagione/Label"><StyledInput value={newProduct.season} onChange={e => setNewProduct({...newProduct, season: e.target.value})} placeholder="FW24" /></InputGroup>
                                         </div>
+
                                         <InputGroup label="Descrizione">
                                             <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-40 resize-none" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} placeholder="Descrivi il fit e i dettagli..." />
                                         </InputGroup>
@@ -422,7 +441,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                             </form>
                         </Card>
 
-                        <Card title="Inventario" subtitle="Gestisci disponibilità e rimuovi articoli" icon={Layers}>
+                        <Card title="Inventario" subtitle="Gestisci disponibilità e prezzi" icon={Layers}>
                             <div className="relative mb-8">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                                 <input type="text" placeholder="Cerca per titolo o SKU..." className="w-full bg-slate-50 border border-slate-200 rounded-full py-4 pl-12 pr-6 text-sm font-bold outline-none focus:border-[#0066b2] transition-colors" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
@@ -431,6 +450,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                 {products.filter(p => p.title.toLowerCase().includes(searchTerm.toLowerCase()) || p.articleCode.toLowerCase().includes(searchTerm.toLowerCase())).map(product => {
                                     const isExpanded = expandedProductId === product.id;
                                     const sortedVariants = sortSizes(product.variants || []);
+                                    // Price parsing for edit input
+                                    const rawPrice = product.price.replace('€', '').trim();
+
                                     return (
                                         <div key={product.id} className={`border rounded-[1.5rem] transition-all duration-300 overflow-hidden ${isExpanded ? 'border-[#0066b2] bg-blue-50/10 shadow-lg' : 'border-slate-100 bg-white hover:border-slate-300'}`}>
                                             <div className="p-4 flex items-center justify-between cursor-pointer" onClick={() => setExpandedProductId(isExpanded ? null : product.id)}>
@@ -453,10 +475,29 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             </div>
                                             {isExpanded && (
                                                 <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-2">
-                                                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                                                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-4">
+                                                        
+                                                        {/* EDIT PRICE ROW */}
+                                                        <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                                                            <span className="text-[10px] font-bold uppercase text-slate-400">Modifica Prezzo</span>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="font-bold text-slate-900">€</span>
+                                                                <input 
+                                                                    type="number" 
+                                                                    className="w-20 bg-slate-100 border border-slate-200 rounded-lg p-1.5 text-center font-bold text-slate-900 focus:border-[#0066b2] outline-none"
+                                                                    defaultValue={rawPrice}
+                                                                    onBlur={(e) => {
+                                                                        const val = e.target.value;
+                                                                        if (val !== rawPrice) updateProductPrice(product.id, `€${val}`);
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* STOCK VARIANTS */}
                                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                             {sortedVariants.map(v => (
-                                                                <div key={v.size} className="flex flex-col items-center bg-white rounded-2xl border border-slate-100 p-3 shadow-sm">
+                                                                <div key={v.size} className="flex flex-col items-center justify-center text-center bg-white rounded-2xl border border-slate-100 p-3 shadow-sm">
                                                                     <div className="w-10 h-10 rounded-full bg-[#0066b2] text-white flex items-center justify-center font-bold text-sm shadow-md mb-2">
                                                                         {v.size}
                                                                     </div>
@@ -527,13 +568,28 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 rounded-2xl p-6 border border-slate-100">
                                             <div>
                                                 <span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest block mb-2">Cliente</span>
-                                                <p className="font-bold text-slate-900 text-sm">{order.customerName}</p>
-                                                <p className="text-xs text-slate-500">{order.customerEmail}</p>
-                                                {order.trackingCode && <div className="mt-2 inline-flex items-center gap-1 bg-blue-100 text-[#0066b2] px-2 py-1 rounded text-[10px] font-bold uppercase"><Truck size={10}/> {order.courier}: {order.trackingCode}</div>}
+                                                <p className="font-bold text-slate-900 text-sm mb-1">{order.customerName}</p>
+                                                <p className="text-xs text-slate-500 mb-1">{order.customerEmail}</p>
+                                                {/* Se presenti dati fatturazione */}
+                                                {order.invoiceDetails && (
+                                                    <div className="mt-2 text-[10px] bg-white p-2 rounded border border-slate-200 text-slate-600">
+                                                        <p>CF: {order.invoiceDetails.taxId}</p>
+                                                        {order.invoiceDetails.vatNumber && <p>P.IVA: {order.invoiceDetails.vatNumber}</p>}
+                                                        {order.invoiceDetails.sdiCode && <p>SDI/PEC: {order.invoiceDetails.sdiCode}</p>}
+                                                    </div>
+                                                )}
                                             </div>
                                             <div>
                                                 <span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest block mb-2">Spedizione</span>
-                                                <p className="text-xs text-slate-600 font-medium leading-relaxed">{order.shippingAddress}</p>
+                                                <p className="text-xs text-slate-600 font-medium leading-relaxed bg-white p-3 rounded-xl border border-slate-200 mb-3">{order.shippingAddress}</p>
+                                                
+                                                {/* Tracking Info Block */}
+                                                {order.trackingCode && (
+                                                    <div className="inline-flex flex-col gap-1 w-full bg-blue-50 border border-blue-100 p-2 rounded-xl">
+                                                        <span className="text-[9px] font-bold uppercase text-[#0066b2] flex items-center gap-1"><Truck size={10}/> Spedito con {order.courier}</span>
+                                                        <span className="text-xs font-mono font-bold text-slate-900 break-all">{order.trackingCode}</span>
+                                                    </div>
+                                                )}
                                             </div>
                                             <div>
                                                 <span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest block mb-2">Riepilogo</span>
@@ -544,7 +600,10 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                         </li>
                                                     ))}
                                                 </ul>
-                                                <p className="text-right font-oswald font-bold text-lg text-[#0066b2]">Totale: €{order.total.toFixed(2)}</p>
+                                                <div className="flex justify-between items-end border-t border-slate-200 pt-2 mt-2">
+                                                    <span className="text-xs text-slate-500">Shipping: €{order.shippingCost?.toFixed(2)}</span>
+                                                    <p className="text-right font-oswald font-bold text-lg text-[#0066b2]">Totale: €{order.total.toFixed(2)}</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -731,9 +790,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                                 <div className="space-y-6">
                                     <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 flex items-center gap-2"><Mail size={18}/> EmailJS</h4>
-                                    <InputGroup label="Service ID" helpText="Dalla dashboard EmailJS -> Email Services"><StyledInput value={mailFormState.serviceId} onChange={e => setMailFormState({...mailFormState, serviceId: e.target.value})} placeholder="service_z38..." /></InputGroup>
-                                    <InputGroup label="Template ID" helpText="Dalla dashboard EmailJS -> Email Templates"><StyledInput value={mailFormState.templateId} onChange={e => setMailFormState({...mailFormState, templateId: e.target.value})} placeholder="template_7a2..." /></InputGroup>
-                                    <InputGroup label="Public Key" helpText="Dalla dashboard EmailJS -> Account -> Public Key"><StyledInput value={mailFormState.publicKey} onChange={e => setMailFormState({...mailFormState, publicKey: e.target.value})} placeholder="XyZ_123abc..." /></InputGroup>
+                                    <InputGroup label="Service ID" helpText="Dalla dashboard EmailJS -> Email Services"><StyledInput value={mailFormState.serviceId} onChange={e => setMailFormState({...mailFormState, serviceId: e.target.value})} placeholder="service_z38abc..." /></InputGroup>
+                                    <InputGroup label="Template ID" helpText="Dalla dashboard EmailJS -> Email Templates"><StyledInput value={mailFormState.templateId} onChange={e => setMailFormState({...mailFormState, templateId: e.target.value})} placeholder="template_7a2xyz..." /></InputGroup>
+                                    <InputGroup label="Public Key" helpText="Dalla dashboard EmailJS -> Account -> Public Key"><StyledInput value={mailFormState.publicKey} onChange={e => setMailFormState({...mailFormState, publicKey: e.target.value})} placeholder="XyZ_123abc456..." /></InputGroup>
                                     <InputGroup label="Email Admin"><StyledInput value={mailFormState.emailTo} onChange={e => setMailFormState({...mailFormState, emailTo: e.target.value})} placeholder="admin@tacalabala.it" /></InputGroup>
                                     <div className="pt-4 flex justify-center">
                                         <LiquidButton onClick={() => { setMailConfig(mailFormState); alert('EmailJS salvato'); }} label="Salva Mail" icon={Save} variant="primary" />
@@ -781,7 +840,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                             </div>
                         </Card>
                         
-                        <Card title="Lista FAQ">
+                        <Card title="Lista FAQ" icon={List}>
                             <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                                 {supportConfig.faqs.map(f => (
                                     <div key={f.id} className="bg-slate-50 border border-slate-200 rounded-[1.5rem] p-6 flex justify-between items-start group hover:border-[#0066b2] transition-colors">
