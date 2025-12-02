@@ -251,6 +251,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
     const [promoType, setPromoType] = useState<'automatic' | 'coupon'>('automatic');
     const [newDiscount, setNewDiscount] = useState<Partial<Discount>>({ name: '', code: '', percentage: 20, targetType: 'all', targetProductIds: [], isActive: true });
     const [discountDates, setDiscountDates] = useState({ start: new Date().toISOString().split('T')[0], end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] });
+    const [isSubmittingPromo, setIsSubmittingPromo] = useState(false);
 
 
     // --- HANDLERS ---
@@ -309,8 +310,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
         setTrackingModal({ isOpen: false, orderId: null, email: '', name: '' });
     };
 
-    const handleDiscountSubmit = (e: React.FormEvent) => {
+    const handleDiscountSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsSubmittingPromo(true);
         const endDate = new Date(discountDates.end);
         endDate.setHours(23, 59, 59, 999);
         const discount: Discount = {
@@ -325,8 +327,17 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             targetProductIds: newDiscount.targetProductIds || [],
             isActive: true
         };
-        addDiscount(discount);
-        addToast('Promozione creata!', 'success');
+        
+        const success = await addDiscount(discount);
+        setIsSubmittingPromo(false);
+
+        if (success) {
+            addToast('Promozione creata e attivata!', 'success');
+            // Reset form
+            setNewDiscount({ name: '', code: '', percentage: 20, targetType: 'all', targetProductIds: [], isActive: true });
+        } else {
+            addToast('Errore nel salvataggio della promozione', 'error');
+        }
     };
 
     // --- FORM VALIDATION HANDLERS ---
@@ -898,7 +909,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     </div>
                                 </InputGroup>
                                 <div className="mt-6 flex justify-center">
-                                   <LiquidButton type="submit" label="Salva" icon={Save} variant="primary" className="w-auto min-w-[160px]" />
+                                   <LiquidButton type="submit" label={isSubmittingPromo ? "Salvataggio..." : "Salva"} icon={Save} variant="primary" className="w-auto min-w-[160px]" disabled={isSubmittingPromo} />
                                 </div>
                             </form>
                         </Card>

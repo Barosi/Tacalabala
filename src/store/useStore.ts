@@ -19,12 +19,12 @@ interface StoreState {
   deleteProduct: (id: string) => void;
   updateProductStock: (productId: string, size: Size, newStock: number) => void;
   updateProductPrice: (productId: string, newPrice: string) => void;
-  updateProductDetails: (productId: string, details: Partial<Product>) => void; // New Method
+  updateProductDetails: (productId: string, details: Partial<Product>) => void; 
 
   // Discounts
   discounts: Discount[];
   appliedCoupon: Discount | null;
-  addDiscount: (discount: Discount) => void;
+  addDiscount: (discount: Discount) => Promise<boolean>; // Updated to return boolean
   deleteDiscount: (id: string) => void;
   applyCoupon: (code: string) => boolean;
   removeCoupon: () => void;
@@ -202,8 +202,13 @@ export const useStore = create<StoreState>()(
             const data = await res.json();
             if(data.success && data.id) {
                 set((state) => ({ discounts: [...state.discounts, { ...discount, id: data.id }] }));
+                return true;
             }
-          } catch(e) { console.warn("API failed", e); }
+            return false;
+          } catch(e) { 
+              console.warn("API failed", e);
+              return false;
+          }
       },
 
       deleteDiscount: async (id) => {
@@ -369,7 +374,6 @@ export const useStore = create<StoreState>()(
                 };
                 set((state) => ({ orders: [serverOrder, ...state.orders] }));
                 
-                // Ricarica gli ordini dal database per assicurare sincronizzazione
                 try {
                     const ordersRes = await fetch('/api/orders');
                     const ordersData = await ordersRes.json();

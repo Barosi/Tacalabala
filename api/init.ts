@@ -46,7 +46,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 answer TEXT NOT NULL
             )
         `);
-        // (Popolamento default rimosso per brevità, resta uguale a prima se vuoto)
     } catch (e) { console.warn("FAQ table setup failed", e); }
 
     // 0.2 Update Orders table schema
@@ -64,17 +63,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             ALTER TABLE products 
             ADD COLUMN IF NOT EXISTS images TEXT
         `);
-        // Nota: images sarà un JSON string array
     } catch (e) { console.warn("Products table schema update failed", e); }
 
-    // 0.4 Update Discounts table schema for Coupons
+    // 0.4 Ensure Discounts table exists
     try {
         await pool.query(`
-            ALTER TABLE discounts 
-            ADD COLUMN IF NOT EXISTS code TEXT,
-            ADD COLUMN IF NOT EXISTS discount_type TEXT DEFAULT 'automatic'
+            CREATE TABLE IF NOT EXISTS discounts (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                code TEXT,
+                discount_type TEXT DEFAULT 'automatic',
+                percentage NUMERIC,
+                start_date TIMESTAMP,
+                end_date TIMESTAMP,
+                target_type TEXT,
+                target_product_ids TEXT,
+                is_active BOOLEAN DEFAULT TRUE
+            )
         `);
-    } catch (e) { console.warn("Discounts table schema update failed", e); }
+    } catch (e) { console.warn("Discounts table creation failed", e); }
 
 
     // 1. Fetch Products
