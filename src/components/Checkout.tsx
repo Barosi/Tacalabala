@@ -20,12 +20,12 @@ const btnLiquidClass = "w-full relative overflow-hidden group/btn bg-slate-900 t
 const btnLiquidHover = "absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0";
 const btnLiquidContent = "relative z-10 flex items-center gap-2";
 
-const StripePaymentForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
+const StripePaymentForm: React.FC<{ onSuccess: () => void; orderId: string | null }> = ({ onSuccess, orderId }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [msg, setMsg] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
-    const { clearCart } = useStore();
+    const { clearCart, updateOrderStatus } = useStore();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -34,7 +34,11 @@ const StripePaymentForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) =
         setMsg(null);
         const { error, paymentIntent } = await stripe.confirmPayment({ elements, confirmParams: { return_url: window.location.origin }, redirect: 'if_required' });
         if (error) { setMsg(error.message || "Pagamento fallito"); setIsProcessing(false); }
-        else if (paymentIntent && paymentIntent.status === 'succeeded') { clearCart(); onSuccess(); }
+        else if (paymentIntent && paymentIntent.status === 'succeeded') { 
+            if (orderId) await updateOrderStatus(orderId, 'paid');
+            clearCart(); 
+            onSuccess(); 
+        }
         else { setMsg("Stato del pagamento imprevisto."); setIsProcessing(false); }
     };
     return (
@@ -164,9 +168,9 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                  <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-100"><h2 className={`font-oswald text-2xl font-bold uppercase flex items-center gap-4 ${step === 2 ? 'text-slate-900' : 'text-slate-300'}`}><span className={`w-10 h-10 flex items-center justify-center rounded-2xl text-sm font-bold shadow-md transition-colors ${step === 2 ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-400'}`}>2</span> Pagamento</h2></div>
                  {step === 2 && clientSecret && stripePromise && (
                      <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8">
-                         <div className="bg-[#fcfcfc] p-6 rounded-2xl border border-slate-100"><p className="text-[10px] font-bold uppercase text-slate-400 mb-4 tracking-widest">Metodi di Pagamento</p><PayPalScriptProvider options={{ clientId: "test", currency: "EUR" }}><PayPalButtons style={{ layout: "vertical", height: 48, shape: 'pill', color: 'gold', label: 'paypal' }} createOrder={(data, actions) => actions.order.create({ intent: "CAPTURE", purchase_units: [{ amount: { currency_code: "EUR", value: grandTotal.toFixed(2) }, description: `Ordine ${orderId}` }] })} onApprove={async (data, actions) => { if (actions.order) { await actions.order.capture(); clearCart(); handleSuccess(); }}} /></PayPalScriptProvider></div>
-                         <div className="relative flex py-2 items-center"><div className="flex-grow border-t border-slate-200"></div><span className="flex-shrink-0 mx-4 text-slate-300 text-[10px] uppercase font-bold tracking-widest">Oppure Carta</span><div className="flex-grow border-t border-slate-200"></div></div>
-                         <div className="bg-white"><Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe', variables: { colorPrimary: '#0066b2', borderRadius: '12px' } } }}><StripePaymentForm onSuccess={handleSuccess} /></Elements></div>
+                         <div className="bg-[#fcfcfc] p-6 rounded-2xl border border-slate-100"><p className="text-[10px] font-bold uppercase text-slate-400 mb-4 tracking-widest">Metodi di Pagamento</p><PayPalScriptProvider options={{ clientId: "test", currency: "EUR" }}><PayPalButtons style={{ layout: "vertical", height: 48, shape: 'pill', color: 'gold', label: 'paypal' }} createOrder={(data, actions) => actions.order.create({ intent: "CAPTURE", purchase_units: [{ amount: { currency_code: "EUR", value: grandTotal.toFixed(2) }, description: `Ordine ${orderId}` }] })} onApprove={async (data, actions) => { if (actions.order && orderId) { const { updateOrderStatus } = useStore(); await updateOrderStatus(orderId, 'paid'); await actions.order.capture(); clearCart(); handleSuccess(); }}} /></PayPalScriptProvider></div>
+                         <div className="relative flex py-2 items-center"><div className="flex-grow border-t border-slate-200"></div><span className="flex-shrink-0 mx-4 text-slate-300 text-[10px] uppercase font-bold tracking-widest">Oppure Carta di Credito</span><div className="flex-grow border-t border-slate-200"></div></div>
+                         <div className="bg-white"><Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe', variables: { colorPrimary: '#0066b2', borderRadius: '12px' } } }}><StripePaymentForm onSuccess={handleSuccess} orderId={orderId} /></Elements></div>
                      </div>
                  )}
                  {step === 2 && !clientSecret && <div className="flex flex-col items-center justify-center py-10 text-slate-400"><Loader2 className="animate-spin mb-2 text-[#0066b2]" size={32} /><p className="text-xs font-bold uppercase tracking-widest">Caricamento...</p></div>}
