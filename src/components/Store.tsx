@@ -41,16 +41,17 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
     setFilterSize('all');
   };
 
-  const FilterPill = ({ label, active, onClick, layoutId }: { label: string | React.ReactNode, active: boolean, onClick: () => void, layoutId: string }) => (
+  const FilterPill = ({ label, active, onClick, group }: { label: string | React.ReactNode, active: boolean, onClick: () => void, group: string }) => (
       <button
           onClick={onClick}
-          className={`relative px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 z-10 flex items-center justify-center min-w-[80px] ${active ? 'text-white' : 'text-slate-500 hover:text-[#0066b2]'}`}
+          className={`relative px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all duration-200 z-10 flex items-center justify-center min-w-[80px] ${active ? 'text-white' : 'text-slate-500 hover:text-[#0066b2] hover:bg-slate-50'}`}
       >
           {active && (
               <motion.div
-                  layoutId={layoutId}
-                  className="absolute inset-0 bg-[#0066b2] rounded-full -z-10 shadow-md"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  layoutId={`active-${group}`}
+                  className="absolute inset-0 bg-[#0066b2] rounded-full shadow-md"
+                  transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                  style={{ zIndex: -1 }}
               />
           )}
           {label}
@@ -64,7 +65,6 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
        <div className="absolute inset-0 pointer-events-none z-0">
            {/* Center Circle Graphic */}
             <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-slate-100 rounded-full opacity-60"></div>
-            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[20px] h-[20px] bg-slate-100 rounded-full"></div>
             
             {/* Axis Line with Gradient Fade */}
             <div className="absolute inset-0 flex justify-center">
@@ -104,7 +104,7 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
                         label="Tutte" 
                         active={filterType === 'all'} 
                         onClick={() => setFilterType('all')} 
-                        layoutId="collectionFilter"
+                        group="collection"
                     />
                     {categories.map(cat => (
                         <FilterPill 
@@ -112,7 +112,7 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
                             label={cat} 
                             active={filterType === cat} 
                             onClick={() => setFilterType(cat)} 
-                            layoutId="collectionFilter"
+                            group="collection"
                         />
                     ))}
 
@@ -124,7 +124,7 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
                         label={<Check size={14} />} 
                         active={filterSize === 'all'} 
                         onClick={() => setFilterSize('all')} 
-                        layoutId="sizeFilter"
+                        group="size"
                     />
                     {availableSizes.map(size => (
                         <FilterPill 
@@ -132,7 +132,7 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
                             label={size} 
                             active={filterSize === size} 
                             onClick={() => setFilterSize(size)} 
-                            layoutId="sizeFilter"
+                            group="size"
                         />
                     ))}
 
