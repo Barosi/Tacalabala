@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Product, ProductVariant, Size, FAQ, Discount, OrderStatus, ShippingConfig } from '../types';
-import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, Tag, Calendar, ShoppingBag, Truck, Check, Search, Shirt, Layers, Image as ImageIcon, Upload, Settings, Mail, Shield, AlertTriangle, ChevronDown, X, Phone } from 'lucide-react';
+import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, Tag, Calendar, ShoppingBag, Truck, Check, Search, Shirt, Layers, Image as ImageIcon, Upload, Settings, Mail, Shield, AlertTriangle, ChevronDown, X, Phone, Globe, ToggleLeft, ToggleRight, HelpCircle } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { sendShippingConfirmationEmail } from '../utils/emailSender';
 
-// --- COMPONENTI UI RIUTILIZZABILI ---
+// --- UI COMPONENTS ---
 
 const LiquidButton = ({ 
     onClick, 
@@ -24,10 +24,8 @@ const LiquidButton = ({
     disabled?: boolean,
     className?: string
 }) => {
-    // Base styles: Increased padding and font size for better visibility
-    const baseClass = "relative overflow-hidden group/btn py-4 px-10 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 flex items-center justify-center gap-3 transform-gpu active:scale-95 border shadow-md hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed";
+    const baseClass = "relative overflow-hidden group/btn py-3 px-8 rounded-full font-bold uppercase tracking-widest text-[10px] transition-all duration-300 flex items-center justify-center gap-2 transform-gpu active:scale-95 border shadow-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed";
     
-    // Updated Color Palette to use #0066b2 (Tacalabala Blue) instead of Black
     const variants = {
         primary: "bg-white border-[#0066b2] text-[#0066b2] hover:text-white",
         outline: "bg-white border-slate-200 text-slate-500 hover:text-[#0066b2] hover:border-[#0066b2]",
@@ -37,7 +35,7 @@ const LiquidButton = ({
 
     const fills = {
         primary: "bg-[#0066b2]",
-        outline: "bg-blue-50", // Light fill for outline
+        outline: "bg-blue-50",
         danger: "bg-red-500",
         success: "bg-green-600"
     };
@@ -48,21 +46,47 @@ const LiquidButton = ({
                 <span className={`absolute inset-0 ${fills[variant]} translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0`}></span>
             )}
             <span className="relative z-10 flex items-center gap-2">
-                {Icon && <Icon size={18} />} {label}
+                {Icon && <Icon size={16} />} {label}
             </span>
         </button>
     );
 };
 
-const InputGroup = ({ label, children, className = '' }: { label: string, children: React.ReactNode, className?: string }) => (
-    <div className={`space-y-3 ${className}`}>
-        <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 pl-1">{label}</label>
+const SegmentedControl = ({ 
+    options, 
+    value, 
+    onChange 
+}: { 
+    options: { value: string, label: string }[], 
+    value: string, 
+    onChange: (val: any) => void 
+}) => {
+    return (
+        <div className="bg-slate-100 p-1.5 rounded-2xl flex relative w-full">
+            {options.map((opt) => (
+                <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => onChange(opt.value)}
+                    className={`flex-1 py-3 px-4 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-300 relative z-10 ${value === opt.value ? 'bg-white text-[#0066b2] shadow-md transform scale-[1.02]' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                    {opt.label}
+                </button>
+            ))}
+        </div>
+    );
+};
+
+const InputGroup = ({ label, children, className = '', helpText }: { label: string, children: React.ReactNode, className?: string, helpText?: string }) => (
+    <div className={`space-y-2 ${className}`}>
+        <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 pl-1">{label}</label>
         {children}
+        {helpText && <p className="text-[10px] text-slate-400 pl-1 font-medium">{helpText}</p>}
     </div>
 );
 
 const StyledInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-    <input {...props} className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium placeholder:text-slate-400 disabled:opacity-50 focus:shadow-sm focus:bg-white" />
+    <input {...props} className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium placeholder:text-slate-300 disabled:opacity-50 focus:shadow-sm focus:bg-white" />
 );
 
 const StyledSelect = (props: React.SelectHTMLAttributes<HTMLSelectElement>) => (
@@ -83,7 +107,7 @@ const Card = ({ title, subtitle, icon: Icon, children, className = '' }: { title
                 )}
                 <div>
                     <h3 className="font-oswald text-2xl uppercase font-bold text-slate-900 leading-none">{title}</h3>
-                    {subtitle && <p className="text-slate-400 text-xs font-bold uppercase tracking-wide mt-1">{subtitle}</p>}
+                    {subtitle && <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wide mt-1">{subtitle}</p>}
                 </div>
             </div>
         )}
@@ -93,13 +117,10 @@ const Card = ({ title, subtitle, icon: Icon, children, className = '' }: { title
     </div>
 );
 
-// Helper per ordinare taglie
 const sortSizes = (variants: {size: string, stock: number}[]) => {
     const order = ['S', 'M', 'L', 'XL'];
     return [...variants].sort((a, b) => order.indexOf(a.size) - order.indexOf(b.size));
 };
-
-// --- MODALS ---
 
 const ModalOverlay = ({ children, isOpen }: { children: React.ReactNode, isOpen: boolean }) => {
     if (!isOpen) return null;
@@ -110,7 +131,7 @@ const ModalOverlay = ({ children, isOpen }: { children: React.ReactNode, isOpen:
     );
 };
 
-// --- MAIN COMPONENT ---
+// --- MAIN ADMIN ---
 
 interface AdminProps { onLogout: () => void; }
 
@@ -124,36 +145,31 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
     } = useStore();
 
     const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'promotions' | 'settings'>('products');
-    // Riorganizzazione SubTabs
     const [subTabSettings, setSubTabSettings] = useState<'shipping' | 'payments' | 'contacts' | 'faq'>('shipping');
 
-    // States
     const [searchTerm, setSearchTerm] = useState('');
     const [expandedProductId, setExpandedProductId] = useState<string | null>(null);
     const [modalConfig, setModalConfig] = useState<{isOpen: boolean; title: string; message: string; onConfirm: () => void;}>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
     const [trackingModal, setTrackingModal] = useState<{isOpen: boolean; orderId: string | null; email: string; name: string;}>({ isOpen: false, orderId: null, email: '', name: '' });
     
-    // Forms State
+    // Forms
     const [newProduct, setNewProduct] = useState<Partial<Product>>({ title: '', articleCode: '', brand: 'Tacalabala', kitType: '', year: '', season: '', price: '€', imageUrl: '', images: [], condition: 'Nuovo con etichetta', description: '', isSoldOut: false, tags: [], instagramUrl: '', dropDate: '' });
     const [variantsState, setVariantsState] = useState<{size: Size, enabled: boolean, stock: string}[]>([ { size: 'S', enabled: true, stock: '10' }, { size: 'M', enabled: true, stock: '10' }, { size: 'L', enabled: true, stock: '10' }, { size: 'XL', enabled: true, stock: '10' } ]);
     const [uploadImages, setUploadImages] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Settings Forms
     const [shipForm, setShipForm] = useState(shippingConfig);
     const [payForm, setPayForm] = useState(stripeConfig);
     const [mailFormState, setMailFormState] = useState(mailConfig);
-    const [whatsappForm, setWhatsappForm] = useState(supportConfig.whatsappNumber);
+    const [whatsappForm, setWhatsappForm] = useState({ prefix: '+39', number: supportConfig.whatsappNumber.replace('+39', '') });
     const [newFaq, setNewFaq] = useState({ question: '', answer: '' });
 
-    // Promo Form
     const [promoType, setPromoType] = useState<'automatic' | 'coupon'>('automatic');
     const [newDiscount, setNewDiscount] = useState<Partial<Discount>>({ name: '', code: '', percentage: 20, targetType: 'all', targetProductIds: [], isActive: true });
     const [discountDates, setDiscountDates] = useState({ start: new Date().toISOString().split('T')[0], end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] });
 
 
     // --- HANDLERS ---
-
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (files) {
@@ -170,10 +186,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
     const handleProductSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!newProduct.articleCode) { alert("SKU Obbligatorio"); return; }
-        
         const finalImages = uploadImages.length > 0 ? uploadImages : [newProduct.imageUrl || 'https://via.placeholder.com/400'];
         const finalVariants: ProductVariant[] = variantsState.filter(v => v.enabled).map(v => ({ size: v.size, stock: parseInt(v.stock) || 0 }));
-        
         const productToAdd: Product = {
             id: Date.now().toString(),
             articleCode: newProduct.articleCode,
@@ -231,7 +245,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
     return (
         <section className="pt-32 md:pt-48 pb-16 md:pb-24 bg-slate-50 min-h-screen">
             
-            {/* --- MODALS --- */}
             <ModalOverlay isOpen={modalConfig.isOpen}>
                 <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm p-8 text-center border border-slate-100">
                     <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500"><AlertTriangle size={32} /></div>
@@ -255,8 +268,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     }} className="text-left space-y-4">
                         <InputGroup label="Corriere">
                             <StyledSelect name="courier" required>
-                                <option value="">Seleziona...</option>
-                                <option value="DHL">DHL</option><option value="UPS">UPS</option><option value="BRT">Bartolini</option><option value="SDA">SDA/Poste</option><option value="GLS">GLS</option>
+                                <option value="">Seleziona...</option><option value="DHL">DHL</option><option value="UPS">UPS</option><option value="BRT">Bartolini</option><option value="SDA">SDA/Poste</option><option value="GLS">GLS</option>
                             </StyledSelect>
                         </InputGroup>
                         <InputGroup label="Codice Tracking">
@@ -272,7 +284,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
 
             <div className="container mx-auto px-6 max-w-7xl">
                 
-                {/* --- HEADER --- */}
                 <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
                     <div>
                         <h2 className="font-oswald text-4xl md:text-6xl font-bold uppercase text-slate-900 leading-[0.9]">
@@ -283,7 +294,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     <LiquidButton onClick={onLogout} label="Logout" icon={LogOut} variant="danger" />
                 </div>
 
-                {/* --- TABS --- */}
                 <div className="flex gap-4 mb-12 overflow-x-auto pb-4 px-1 no-scrollbar">
                     {[
                         { id: 'products', label: 'Prodotti', icon: Package },
@@ -301,13 +311,12 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     ))}
                 </div>
 
-                {/* ================= PRODUCTS TAB ================= */}
+                {/* --- PRODUCTS --- */}
                 {activeTab === 'products' && (
                     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
                         <Card title="Nuovo Articolo" subtitle="Inserisci i dettagli streetwear" icon={Plus}>
                             <form onSubmit={handleProductSubmit} className="h-full flex flex-col">
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 flex-grow">
-                                    {/* Colonna SX: Info */}
                                     <div className="space-y-6">
                                         <InputGroup label="Titolo Prodotto">
                                             <StyledInput value={newProduct.title} onChange={e => setNewProduct({...newProduct, title: e.target.value})} placeholder="Es. Milano Concrete Tee" required />
@@ -329,12 +338,10 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-40 resize-none" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} placeholder="Descrivi il fit e i dettagli..." />
                                         </InputGroup>
                                     </div>
-                                    
-                                    {/* Colonna DX: Media & Stock - Allineata in altezza */}
                                     <div className="flex flex-col gap-6 h-full">
                                         <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-dashed border-slate-300 flex-1">
                                             <div className="flex justify-between items-center mb-4">
-                                                <span className="text-xs font-bold uppercase text-slate-400 tracking-widest">Galleria Immagini (Max 1MB)</span>
+                                                <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Galleria Immagini (Max 1MB)</span>
                                                 <button type="button" onClick={() => fileInputRef.current?.click()} className="text-[#0066b2] text-[10px] font-bold uppercase hover:underline flex items-center gap-1"><Upload size={12}/> Carica</button>
                                             </div>
                                             <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
@@ -350,9 +357,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                 </div>
                                             </div>
                                         </div>
-
                                         <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200">
-                                            <span className="block text-xs font-bold uppercase text-slate-400 tracking-widest mb-4">Gestione Stock per Taglia</span>
+                                            <span className="block text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-4">Gestione Stock per Taglia</span>
                                             <div className="grid grid-cols-2 gap-4">
                                                 {variantsState.map((v, idx) => (
                                                     <div key={v.size} className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
@@ -365,7 +371,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                         </div>
                                     </div>
                                 </div>
-                                
                                 <div className="mt-12 flex justify-center">
                                      <LiquidButton type="submit" label="Salva" icon={Save} variant="primary" className="w-full md:w-auto min-w-[200px]" />
                                 </div>
@@ -393,25 +398,22 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                         <p className="text-[10px] font-mono text-slate-500">{product.articleCode}</p>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-6">
+                                                <div className="flex items-center gap-4">
                                                     <span className="font-oswald font-bold text-lg text-[#0066b2]">{product.price}</span>
+                                                    <button onClick={(e) => { e.stopPropagation(); if(confirm('Eliminare prodotto?')) deleteProduct(product.id); }} className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 border border-transparent hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors" title="Elimina Articolo">
+                                                        <Trash2 size={16} /> 
+                                                    </button>
                                                     <ChevronDown size={20} className={`text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                                                 </div>
                                             </div>
                                             {isExpanded && (
                                                 <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-2">
                                                     <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
-                                                        <div className="flex justify-between items-center mb-4 border-b border-slate-200 pb-2">
-                                                            <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Aggiorna Stock Rapido</span>
-                                                            <button onClick={(e) => { e.stopPropagation(); if(confirm('Eliminare prodotto?')) deleteProduct(product.id); }} className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-red-500 border border-slate-200 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors" title="Elimina Articolo">
-                                                                <Trash2 size={16} /> 
-                                                            </button>
-                                                        </div>
-                                                        <div className="grid grid-cols-4 gap-3">
+                                                        <div className="flex gap-2">
                                                             {sortedVariants.map(v => (
-                                                                <div key={v.size} className="bg-white border border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm">
-                                                                    <span className="text-xs font-bold text-slate-500 mb-1">{v.size}</span>
-                                                                    <input type="number" className="w-12 text-center font-bold text-slate-900 outline-none border-b border-slate-200 focus:border-[#0066b2] transition-colors" value={v.stock} onChange={(e) => updateProductStock(product.id, v.size, parseInt(e.target.value)||0)} />
+                                                                <div key={v.size} className="flex-1 bg-white border border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm">
+                                                                    <span className="text-[10px] font-bold uppercase text-slate-400 mb-1">Tg {v.size}</span>
+                                                                    <input type="number" className="w-12 text-center font-bold text-slate-900 outline-none border-b border-slate-200 focus:border-[#0066b2] transition-colors" value={v.stock} onChange={(e) => updateProductStock(product.id, v.size as Size, parseInt(e.target.value)||0)} />
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -426,10 +428,10 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     </div>
                 )}
 
-                {/* ================= ORDERS TAB ================= */}
+                {/* --- ORDERS --- */}
                 {activeTab === 'orders' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4">
-                        <Card title="Gestione Ordini" subtitle="Spedizioni e Tracking" icon={Truck}>
+                         <Card title="Gestione Ordini" subtitle="Spedizioni e Tracking" icon={Truck}>
                             <div className="space-y-4">
                                 {orders.map(order => (
                                     <div key={order.id} className="border border-slate-200 rounded-[2rem] p-6 bg-white hover:shadow-xl hover:border-[#0066b2] transition-all duration-300 group">
@@ -499,17 +501,18 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     </div>
                 )}
 
-                {/* ================= PROMOTIONS TAB ================= */}
+                {/* --- PROMOTIONS --- */}
                 {activeTab === 'promotions' && (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-in fade-in slide-in-from-bottom-4">
                         <Card title="Nuova Promo" subtitle="Crea coupon o sconti automatici" icon={Tag}>
                             <form onSubmit={handleDiscountSubmit} className="space-y-6">
                                 <div>
                                     <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 pl-1">Tipo Promozione</label>
-                                    <div className="flex bg-slate-50 p-1 rounded-2xl border border-slate-200">
-                                        <button type="button" onClick={() => setPromoType('automatic')} className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase transition-all ${promoType === 'automatic' ? 'bg-[#0066b2] text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>Sconto Automatico</button>
-                                        <button type="button" onClick={() => setPromoType('coupon')} className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase transition-all ${promoType === 'coupon' ? 'bg-[#0066b2] text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>Codice Coupon</button>
-                                    </div>
+                                    <SegmentedControl 
+                                        options={[{value: 'automatic', label: 'Sconto Automatico'}, {value: 'coupon', label: 'Codice Coupon'}]}
+                                        value={promoType}
+                                        onChange={(val) => setPromoType(val)}
+                                    />
                                 </div>
                                 
                                 <InputGroup label="Nome Promozione">
@@ -532,15 +535,13 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                 </div>
 
                                 <InputGroup label="Applica A">
-                                    <div className="space-y-3">
-                                        <div className="flex gap-6">
-                                            <label className="flex items-center gap-2 text-xs font-bold uppercase text-slate-600 cursor-pointer">
-                                                <input type="radio" checked={newDiscount.targetType === 'all'} onChange={() => setNewDiscount({...newDiscount, targetType: 'all'})} className="accent-[#0066b2] w-4 h-4" /> Tutto il Catalogo
-                                            </label>
-                                            <label className="flex items-center gap-2 text-xs font-bold uppercase text-slate-600 cursor-pointer">
-                                                <input type="radio" checked={newDiscount.targetType === 'specific'} onChange={() => setNewDiscount({...newDiscount, targetType: 'specific'})} className="accent-[#0066b2] w-4 h-4" /> Prodotti Specifici
-                                            </label>
-                                        </div>
+                                    <div className="space-y-4">
+                                        <SegmentedControl 
+                                            options={[{value: 'all', label: 'Tutto il Catalogo'}, {value: 'specific', label: 'Prodotti Specifici'}]}
+                                            value={newDiscount.targetType || 'all'}
+                                            onChange={(val) => setNewDiscount({...newDiscount, targetType: val})}
+                                        />
+                                        
                                         {newDiscount.targetType === 'specific' && (
                                             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 max-h-40 overflow-y-auto custom-scrollbar">
                                                 {products.map(p => (
@@ -562,8 +563,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                         )}
                                     </div>
                                 </InputGroup>
-                                <div className="mt-4">
-                                   <LiquidButton type="submit" label="Salva" icon={Save} variant="primary" className="w-full" />
+                                <div className="mt-6 flex justify-center">
+                                   <LiquidButton type="submit" label="Salva" icon={Save} variant="primary" className="w-auto min-w-[160px]" />
                                 </div>
                             </form>
                         </Card>
@@ -590,7 +591,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     </div>
                 )}
 
-                {/* ================= SETTINGS TAB ================= */}
+                {/* --- SETTINGS --- */}
                 {activeTab === 'settings' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4">
                         <div className="flex gap-4 mb-8">
@@ -632,7 +633,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                         </InputGroup>
                                     </div>
                                 </div>
-                                <div className="mt-8 pt-6 border-t border-slate-50">
+                                <div className="mt-8 pt-6 border-t border-slate-50 flex justify-center">
                                     <LiquidButton onClick={() => { setShippingConfig(shipForm); alert('Spedizioni salvate'); }} label="Salva Configurazioni" icon={Save} variant="primary" className="w-full md:w-auto" />
                                 </div>
                             </Card>
@@ -640,17 +641,26 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
 
                         {subTabSettings === 'payments' && (
                             <Card title="Configurazione Stripe" subtitle="Gestisci chiavi API" icon={CreditCard}>
-                                <div className="space-y-6 max-w-2xl">
+                                <div className="space-y-6 max-w-2xl mx-auto">
+                                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-center justify-between">
+                                        <span className="text-xs font-bold uppercase text-[#0066b2] flex items-center gap-2"><Globe size={16} /> Modalità Live</span>
+                                        <button onClick={() => setPayForm({...payForm, isEnabled: !payForm.isEnabled})} className={`w-12 h-6 rounded-full p-1 transition-colors ${payForm.isEnabled ? 'bg-[#0066b2]' : 'bg-slate-300'}`}>
+                                            <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${payForm.isEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                                        </button>
+                                    </div>
+                                    
                                     <InputGroup label="Stripe Public Key">
-                                        <StyledInput type="password" value={payForm.publicKey} onChange={e => setPayForm({...payForm, publicKey: e.target.value})} placeholder="pk_live_..." />
+                                        <StyledInput type="password" value={payForm.publicKey} onChange={e => setPayForm({...payForm, publicKey: e.target.value})} placeholder={payForm.isEnabled ? "pk_live_..." : "pk_test_..."} />
                                     </InputGroup>
                                     <InputGroup label="Stripe Secret Key">
-                                        <StyledInput type="password" value={payForm.secretKey} onChange={e => setPayForm({...payForm, secretKey: e.target.value})} placeholder="sk_live_..." />
+                                        <StyledInput type="password" value={payForm.secretKey} onChange={e => setPayForm({...payForm, secretKey: e.target.value})} placeholder={payForm.isEnabled ? "sk_live_..." : "sk_test_..."} />
                                     </InputGroup>
                                     <InputGroup label="Webhook Secret">
                                         <StyledInput type="password" value={payForm.webhookSecret} onChange={e => setPayForm({...payForm, webhookSecret: e.target.value})} placeholder="whsec_..." />
                                     </InputGroup>
-                                    <LiquidButton onClick={() => { setStripeConfig(payForm); alert('Stripe configurato'); }} label="Salva Chiavi API" icon={Shield} variant="primary" className="w-full md:w-auto" />
+                                    <div className="pt-6 flex justify-center">
+                                       <LiquidButton onClick={() => { setStripeConfig(payForm); alert('Stripe configurato'); }} label="Salva Chiavi API" icon={Shield} variant="primary" className="w-full md:w-auto" />
+                                    </div>
                                 </div>
                             </Card>
                         )}
@@ -660,23 +670,34 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                                     <div className="space-y-6">
                                         <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 flex items-center gap-2"><Mail size={18}/> EmailJS</h4>
-                                        <InputGroup label="Service ID"><StyledInput value={mailFormState.serviceId} onChange={e => setMailFormState({...mailFormState, serviceId: e.target.value})} /></InputGroup>
-                                        <InputGroup label="Template ID"><StyledInput value={mailFormState.templateId} onChange={e => setMailFormState({...mailFormState, templateId: e.target.value})} /></InputGroup>
-                                        <InputGroup label="Public Key"><StyledInput value={mailFormState.publicKey} onChange={e => setMailFormState({...mailFormState, publicKey: e.target.value})} /></InputGroup>
-                                        <InputGroup label="Email Admin"><StyledInput value={mailFormState.emailTo} onChange={e => setMailFormState({...mailFormState, emailTo: e.target.value})} /></InputGroup>
-                                        <div className="pt-4">
+                                        <InputGroup label="Service ID" helpText="Dalla dashboard EmailJS -> Email Services"><StyledInput value={mailFormState.serviceId} onChange={e => setMailFormState({...mailFormState, serviceId: e.target.value})} placeholder="service_xxx" /></InputGroup>
+                                        <InputGroup label="Template ID" helpText="Dalla dashboard EmailJS -> Email Templates"><StyledInput value={mailFormState.templateId} onChange={e => setMailFormState({...mailFormState, templateId: e.target.value})} placeholder="template_xxx" /></InputGroup>
+                                        <InputGroup label="Public Key" helpText="Dalla dashboard EmailJS -> Account -> Public Key"><StyledInput value={mailFormState.publicKey} onChange={e => setMailFormState({...mailFormState, publicKey: e.target.value})} placeholder="user_xxx" /></InputGroup>
+                                        <InputGroup label="Email Admin"><StyledInput value={mailFormState.emailTo} onChange={e => setMailFormState({...mailFormState, emailTo: e.target.value})} placeholder="tua@email.com" /></InputGroup>
+                                        <div className="pt-4 flex justify-center">
                                             <LiquidButton onClick={() => { setMailConfig(mailFormState); alert('EmailJS salvato'); }} label="Salva Mail" icon={Save} variant="primary" />
                                         </div>
                                     </div>
                                     
                                     <div className="space-y-6 border-l border-slate-100 pl-8">
                                         <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 flex items-center gap-2"><Phone size={18}/> WhatsApp</h4>
-                                        <p className="text-sm text-slate-500">Inserisci il numero di telefono per l'assistenza clienti diretta.</p>
-                                        <InputGroup label="Numero WhatsApp">
-                                            <StyledInput value={whatsappForm} onChange={e => setWhatsappForm(e.target.value)} placeholder="+39 333 0000000" />
-                                        </InputGroup>
-                                        <div className="pt-4">
-                                            <LiquidButton onClick={() => { setSupportConfig({ whatsappNumber: whatsappForm }); alert('WhatsApp aggiornato'); }} label="Aggiorna Numero" icon={Save} variant="primary" />
+                                        <p className="text-xs text-slate-500 font-medium">Numero per l'assistenza clienti diretta.</p>
+                                        
+                                        <div className="flex gap-4">
+                                            <div className="w-24">
+                                                <InputGroup label="Prefisso">
+                                                     <StyledInput value={whatsappForm.prefix} onChange={e => setWhatsappForm({...whatsappForm, prefix: e.target.value})} placeholder="+39" />
+                                                </InputGroup>
+                                            </div>
+                                            <div className="flex-1">
+                                                <InputGroup label="Numero">
+                                                     <StyledInput value={whatsappForm.number} onChange={e => setWhatsappForm({...whatsappForm, number: e.target.value})} placeholder="333 0000000" />
+                                                </InputGroup>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="pt-4 flex justify-center">
+                                            <LiquidButton onClick={() => { setSupportConfig({ whatsappNumber: `${whatsappForm.prefix}${whatsappForm.number}` }); alert('WhatsApp aggiornato'); }} label="Salva Numero" icon={Save} variant="primary" />
                                         </div>
                                     </div>
                                 </div>
@@ -684,36 +705,37 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         )}
 
                         {subTabSettings === 'faq' && (
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                <div className="lg:col-span-1">
-                                    <Card title="Aggiungi FAQ" icon={Check}>
-                                        <div className="space-y-4">
-                                            <InputGroup label="Domanda"><StyledInput value={newFaq.question} onChange={e => setNewFaq({...newFaq, question: e.target.value})} /></InputGroup>
-                                            <InputGroup label="Risposta">
-                                                <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-40 resize-none" value={newFaq.answer} onChange={e => setNewFaq({...newFaq, answer: e.target.value})} />
-                                            </InputGroup>
+                            <div className="grid grid-cols-1 gap-8">
+                                <Card title="Aggiungi FAQ" icon={HelpCircle}>
+                                    <div className="space-y-4 max-w-2xl mx-auto">
+                                        <InputGroup label="Domanda"><StyledInput value={newFaq.question} onChange={e => setNewFaq({...newFaq, question: e.target.value})} /></InputGroup>
+                                        <InputGroup label="Risposta">
+                                            <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-32 resize-none" value={newFaq.answer} onChange={e => setNewFaq({...newFaq, answer: e.target.value})} />
+                                        </InputGroup>
+                                        <div className="flex justify-center pt-4">
                                             <LiquidButton onClick={() => { addFaq({ ...newFaq, id: '' }); setNewFaq({question:'', answer:''}); alert('FAQ Aggiunta'); }} label="Salva FAQ" icon={Plus} variant="primary" />
                                         </div>
-                                    </Card>
-                                </div>
-                                <div className="lg:col-span-2">
-                                    <Card title="Lista FAQ">
-                                        <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                                            {supportConfig.faqs.map(f => (
-                                                <div key={f.id} className="bg-slate-50 border border-slate-200 rounded-[1.5rem] p-6 flex justify-between items-start">
-                                                    <div>
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                             <span className="w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-400">{f.id}</span>
-                                                             <h4 className="font-bold text-slate-900 text-sm">{f.question}</h4>
-                                                        </div>
-                                                        <p className="text-xs text-slate-500 leading-relaxed pl-8">{f.answer}</p>
-                                                    </div>
-                                                    <button onClick={() => deleteFaq(f.id)} className="text-red-500 hover:text-red-700 p-2"><Trash2 size={16}/></button>
+                                    </div>
+                                </Card>
+                                
+                                <Card title="Lista FAQ">
+                                    <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                        {supportConfig.faqs.map(f => (
+                                            <div key={f.id} className="bg-slate-50 border border-slate-200 rounded-[1.5rem] p-6 flex justify-between items-start group hover:border-[#0066b2] transition-colors">
+                                                <div className="flex gap-4">
+                                                     <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[#0066b2] shadow-sm flex-shrink-0">
+                                                        <HelpCircle size={20} />
+                                                     </div>
+                                                     <div>
+                                                         <h4 className="font-bold text-slate-900 text-sm mb-1">{f.question}</h4>
+                                                         <p className="text-xs text-slate-500 leading-relaxed font-medium">{f.answer}</p>
+                                                     </div>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    </Card>
-                                </div>
+                                                <button onClick={() => deleteFaq(f.id)} className="text-slate-300 hover:text-red-500 p-2 transition-colors"><Trash2 size={16}/></button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Card>
                             </div>
                         )}
                     </div>
