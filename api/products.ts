@@ -1,4 +1,3 @@
-
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Pool } from '@neondatabase/serverless';
 
@@ -6,15 +5,13 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-// Helper per generare ID incrementale TC-XXX
 async function generateNextProductId(client: any): Promise<string> {
     const res = await client.query('SELECT id FROM products ORDER BY id DESC LIMIT 1');
     if (res.rows.length === 0) return 'TC-001';
     
-    const lastId = res.rows[0].id; // Es: TC-042
-    // Estrai parte numerica
+    const lastId = res.rows[0].id; 
     const match = lastId.match(/TC-(\d+)/);
-    if (!match) return `TC-${Date.now()}`; // Fallback se formato diverso
+    if (!match) return `TC-${Date.now()}`; 
     
     const nextNum = parseInt(match[1]) + 1;
     return `TC-${nextNum.toString().padStart(3, '0')}`;
@@ -27,19 +24,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const p = req.body;
         await client.query('BEGIN');
 
-        // Genera ID Incrementale
         const newId = await generateNextProductId(client);
-        const articleCode = p.articleCode || `${newId}-ART`; // Default SKU if missing
+        // Article Code is now mandatory from frontend, but we keep fallback just in case
+        const articleCode = p.articleCode || `${newId}-ART`; 
 
         const priceNum = parseFloat(p.price.replace('€', '').replace(',', '.').trim());
         
+        // Serializza array immagini
+        const imagesJson = JSON.stringify(p.images || [p.imageUrl]);
+
         await client.query(
-            `INSERT INTO products (id, article_code, title, brand, kit_type, year, season, price, image_url, condition, description, is_sold_out, tags, instagram_url, drop_date)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
-            [newId, articleCode, p.title, p.brand, p.kitType, p.year, p.season, priceNum, p.imageUrl, p.condition, p.description, p.isSoldOut, p.tags, p.instagramUrl, p.dropDate || null]
+            `INSERT INTO products (id, article_code, title, brand, kit_type, year, season, price, image_url, images, condition, description, is_sold_out, tags, instagram_url, drop_date)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+            [newId, articleCode, p.title, p.brand, p.kitType, p.year, p.season, priceNum, p.imageUrl, imagesJson, p.condition, p.description, p.isSoldOut, p.tags, p.instagramUrl, p.dropDate || null]
         );
 
-        // Insert Variants
         if (p.variants && p.variants.length > 0) {
             for (const v of p.variants) {
                 await client.query(
@@ -51,7 +50,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         await client.query('COMMIT');
         
-        // Ritorna il prodotto creato con il nuovo ID per aggiornare lo store frontend
         return res.status(201).json({ success: true, product: { ...p, id: newId, articleCode } });
     } catch (e) {
         await client.query('ROLLBACK');
@@ -76,12 +74,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'PATCH') {
       const { productId, size, stock } = req.body;
       try {
+          // Update specific variant stock
           await pool.query(
               'UPDATE product_variants SET stock = $1 WHERE product_id = $2 AND size = $3',
               [stock, productId, size]
           );
+
+          // Check if all variants are 0, then set is_sold_out = true
+          const stockRes = await pool.query('SELECT stock FROM product_variants WHERE product_id = $1', [productId]);
+          const totalStock = stockRes.rows.reduce((acc: number, row: any) => acc + row.stock, 0);
+          
+          await pool.query('UPDATE products SET is_sold_out = $1 WHERE id = $2', [totalStock === 0, productId]);
+
           return res.status(200).json({ success: true });
       } catch (e) {
+          console.error("Stock update failed:", e);
           return res.status(500).json({ error: 'Failed to update stock' });
       }
   }

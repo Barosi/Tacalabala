@@ -8,27 +8,30 @@ export interface ProductVariant {
 
 export interface Product {
   id: string;
-  articleCode?: string; // SKU / Codice interno
+  articleCode: string; // SKU obbligatorio
   title: string;
   brand?: string; 
   kitType?: string; 
-  year?: string;
+  year?: string; 
   season: string; 
-  price: string; // es. "€45"
-  imageUrl: string;
+  price: string; 
+  imageUrl: string; // Immagine principale (fallback)
+  images?: string[]; // Galleria immagini (Base64 o URL)
   size: string; 
-  condition: string; // BNIB, Excellent, Good...
+  condition: string; 
   description: string;
   isSoldOut: boolean;
   tags: string[];
   instagramUrl?: string;
-  dropDate?: string; // ISO String for Coming Soon logic
+  dropDate?: string; 
   variants?: ProductVariant[];
 }
 
 export interface Discount {
   id: string;
   name: string;
+  code?: string; // Codice Coupon (es. SUMMER20)
+  discountType: 'automatic' | 'coupon'; // Distinzione tipo
   percentage: number;
   startDate: string; 
   endDate: string;   
@@ -39,7 +42,7 @@ export interface Discount {
 
 export interface ShippingConfig {
   italyPrice: number;
-  italyThreshold: number; // Free shipping over this amount
+  italyThreshold: number; 
   foreignPrice: number;
   foreignThreshold: number;
 }

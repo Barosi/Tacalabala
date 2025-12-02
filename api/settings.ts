@@ -24,7 +24,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         try {
             await client.query('BEGIN');
 
-            // Gestione Configurazioni salvate come JSON in app_settings
             if (['shipping', 'stripe', 'emailjs', 'support'].includes(type)) {
                 await client.query(
                     `INSERT INTO app_settings (key, value) VALUES ($1, $2) 
@@ -35,7 +34,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 return res.status(200).json({ success: true });
             }
 
-            // Gestione FAQ
             if (type === 'faq_add') {
                 const newId = await generateNextId(client, 'faqs', 'FAQ');
                 await client.query('INSERT INTO faqs (id, question, answer) VALUES ($1, $2, $3)', [newId, data.question, data.answer]);
@@ -48,13 +46,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 return res.status(200).json({ success: true });
             }
 
-            // Gestione Sconti
             if (type === 'discount_add') {
                 const newId = await generateNextId(client, 'discounts', 'DSC');
                 await client.query(
-                    `INSERT INTO discounts (id, name, percentage, start_date, end_date, target_type, target_product_ids, is_active)
-                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-                    [newId, data.name, data.percentage, data.startDate, data.endDate, data.targetType, JSON.stringify(data.targetProductIds), data.isActive]
+                    `INSERT INTO discounts (id, name, code, discount_type, percentage, start_date, end_date, target_type, target_product_ids, is_active)
+                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+                    [newId, data.name, data.code, data.discountType, data.percentage, data.startDate, data.endDate, data.targetType, JSON.stringify(data.targetProductIds), data.isActive]
                 );
                 await client.query('COMMIT');
                 return res.status(200).json({ success: true, id: newId });

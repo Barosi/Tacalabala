@@ -1,8 +1,8 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Product, CartItem, Size, Order, StripeConfig, SupportConfig, FAQ, Discount, OrderStatus, ShippingConfig, User } from '../types';
-import { PRODUCTS } from '../constants'; // Fallback Data
+import { Product, CartItem, Size, Order, StripeConfig, SupportConfig, FAQ, Discount, OrderStatus, ShippingConfig } from '../types';
+import { PRODUCTS } from '../constants'; 
 
 export interface MailConfig {
     serviceId: string;
@@ -21,8 +21,11 @@ interface StoreState {
 
   // Discounts
   discounts: Discount[];
+  appliedCoupon: Discount | null;
   addDiscount: (discount: Discount) => void;
   deleteDiscount: (id: string) => void;
+  applyCoupon: (code: string) => boolean;
+  removeCoupon: () => void;
   calculatePrice: (product: Product) => { finalPrice: number, originalPrice: number, hasDiscount: boolean, discountPercent: number };
 
   // Cart
@@ -34,11 +37,12 @@ interface StoreState {
   updateQuantity: (cartId: string, delta: number) => void;
   clearCart: () => void;
   cartTotal: () => number;
+  cartDiscountAmount: () => number;
 
   // Orders
   orders: Order[];
-  addOrder: (order: Order) => Promise<Order | null>; // Return Order object
-  updateOrderStatus: (id: string, status: OrderStatus) => void;
+  addOrder: (order: Order) => Promise<Order | null>; 
+  updateOrderStatus: (id: string, status: OrderStatus, trackingCode?: string, courier?: string) => void;
   deleteOrder: (id: string) => void;
   
   // Settings
@@ -76,6 +80,7 @@ export const useStore = create<StoreState>()(
       orders: [], 
       cart: [],
       discounts: [], 
+      appliedCoupon: null,
       isCartOpen: false,
       isLoading: true,
       
@@ -95,14 +100,10 @@ export const useStore = create<StoreState>()(
 
       mailConfig: { serviceId: '', templateId: '', publicKey: '', emailTo: '' },
 
-      // --- ASYNC INITIALIZATION ---
       initialize: async () => {
           try {
-              // Cache: no-store to ensure we get fresh stock data
               const res = await fetch('/api/init', { cache: 'no-store' });
-              if (!res.ok) {
-                  throw new Error(`API returned status ${res.status}`);
-              }
+              if (!res.ok) throw new Error(`API returned status ${res.status}`);
               const data = await res.json();
               
               set({
@@ -110,36 +111,24 @@ export const useStore = create<StoreState>()(
                   shippingConfig: data.shippingConfig || get().shippingConfig,
                   stripeConfig: data.stripeConfig || get().stripeConfig,
                   mailConfig: data.mailConfig || get().mailConfig,
-                  supportConfig: { 
-                      ...get().supportConfig, 
-                      ...data.supportConfig 
-                  },
+                  supportConfig: { ...get().supportConfig, ...data.supportConfig },
                   discounts: data.discounts || [],
                   isLoading: false
               });
 
-              // Lazy load orders
               fetch('/api/orders').then(r => r.json()).then(orders => {
                   if(Array.isArray(orders)) set({ orders });
               }).catch(console.error);
 
           } catch (e) {
-              console.warn("API Unavailable (likely local/preview mode). Loading Fallback Data.", e);
-              // Fallback to local constants
-              set({ 
-                  products: PRODUCTS,
-                  isLoading: false,
-                  // Ensure basic configs exist so page doesn't break
-                  shippingConfig: get().shippingConfig,
-                  supportConfig: get().supportConfig
-              });
+              console.warn("API Unavailable. Loading Fallback.", e);
+              set({ products: PRODUCTS, isLoading: false });
           }
       },
 
       setProducts: (products) => set({ products }),
       
       addProduct: async (product) => {
-          // Temporarily add locally to UI (optimistic), but we will reload from server to get correct ID
           try {
             const res = await fetch('/api/products', {
                 method: 'POST',
@@ -148,7 +137,6 @@ export const useStore = create<StoreState>()(
             });
             const data = await res.json();
             if (data.success && data.product) {
-                // Prepend the REAL product with the server-generated ID
                 set((state) => ({ products: [data.product, ...state.products] }));
             }
           } catch(e) { console.warn("API write failed", e); }
@@ -156,9 +144,7 @@ export const useStore = create<StoreState>()(
 
       deleteProduct: async (id) => {
           set((state) => ({ products: state.products.filter(p => p.id !== id) }));
-          try {
-            await fetch(`/api/products?id=${id}`, { method: 'DELETE' });
-          } catch(e) { console.warn("API delete failed", e); }
+          try { await fetch(`/api/products?id=${id}`, { method: 'DELETE' }); } catch(e) {}
       },
       
       updateProductStock: async (productId, size, newStock) => {
@@ -203,8 +189,28 @@ export const useStore = create<StoreState>()(
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: 'discount_delete', data: { id } })
             });
-          } catch(e) { console.warn("API failed", e); }
+          } catch(e) {}
       },
+
+      applyCoupon: (code) => {
+          const { discounts } = get();
+          const now = new Date();
+          const coupon = discounts.find(d => 
+              d.discountType === 'coupon' && 
+              d.code?.toUpperCase() === code.toUpperCase() &&
+              d.isActive &&
+              new Date(d.startDate) <= now &&
+              new Date(d.endDate) >= now
+          );
+
+          if (coupon) {
+              set({ appliedCoupon: coupon });
+              return true;
+          }
+          return false;
+      },
+
+      removeCoupon: () => set({ appliedCoupon: null }),
 
       calculatePrice: (product: Product) => {
           const { discounts } = get();
@@ -215,20 +221,21 @@ export const useStore = create<StoreState>()(
              return { finalPrice: originalPrice, originalPrice: originalPrice, hasDiscount: false, discountPercent: 0 };
           }
 
-          const applicableDiscounts = discounts.filter(d => {
+          // Solo Promo Automatiche qui
+          const applicablePromos = discounts.filter(d => {
+              if (d.discountType !== 'automatic' || !d.isActive) return false;
               const start = new Date(d.startDate);
               const end = new Date(d.endDate);
-              const isActiveTime = now >= start && now <= end;
-              if (!isActiveTime || !d.isActive) return false;
+              if (now < start || now > end) return false;
               if (d.targetType === 'all') return true;
               if (d.targetType === 'specific' && d.targetProductIds?.includes(product.id)) return true;
               return false;
           });
 
-          if (applicableDiscounts.length > 0) {
-              const bestDiscount = applicableDiscounts.reduce((prev, current) => (prev.percentage > current.percentage) ? prev : current);
-              const discountAmount = (originalPrice * bestDiscount.percentage) / 100;
-              return { finalPrice: originalPrice - discountAmount, originalPrice: originalPrice, hasDiscount: true, discountPercent: bestDiscount.percentage };
+          if (applicablePromos.length > 0) {
+              const bestPromo = applicablePromos.reduce((prev, current) => (prev.percentage > current.percentage) ? prev : current);
+              const discountAmount = (originalPrice * bestPromo.percentage) / 100;
+              return { finalPrice: originalPrice - discountAmount, originalPrice: originalPrice, hasDiscount: true, discountPercent: bestPromo.percentage };
           }
           return { finalPrice: originalPrice, originalPrice: originalPrice, hasDiscount: false, discountPercent: 0 };
       },
@@ -264,13 +271,53 @@ export const useStore = create<StoreState>()(
         if (newQty < 1) return state; 
         return { cart: state.cart.map(i => i.cartId === cartId ? { ...i, quantity: newQty } : i) };
       }),
-      clearCart: () => set({ cart: [] }),
+      clearCart: () => set({ cart: [], appliedCoupon: null }),
+      
       cartTotal: () => {
-        const { cart, calculatePrice } = get();
-        return cart.reduce((acc, item) => {
-          const { finalPrice } = calculatePrice(item);
+        const { cart, calculatePrice, appliedCoupon } = get();
+        
+        let subtotal = cart.reduce((acc, item) => {
+          const { finalPrice } = calculatePrice(item); // Applica promo automatiche
           return acc + (finalPrice * item.quantity);
         }, 0);
+
+        // Applica Coupon se presente
+        if (appliedCoupon) {
+            let discountAmount = 0;
+            if (appliedCoupon.targetType === 'all') {
+                discountAmount = (subtotal * appliedCoupon.percentage) / 100;
+            } else {
+                // Sconto solo su prodotti specifici
+                cart.forEach(item => {
+                    if (appliedCoupon.targetProductIds?.includes(item.id)) {
+                        const { finalPrice } = calculatePrice(item);
+                        discountAmount += (finalPrice * item.quantity * appliedCoupon.percentage) / 100;
+                    }
+                });
+            }
+            subtotal = Math.max(0, subtotal - discountAmount);
+        }
+
+        return subtotal;
+      },
+
+      cartDiscountAmount: () => {
+          const { cart, calculatePrice, appliedCoupon } = get();
+          if (!appliedCoupon) return 0;
+          
+          let discountAmount = 0;
+          if (appliedCoupon.targetType === 'all') {
+               const subtotal = cart.reduce((acc, item) => acc + (calculatePrice(item).finalPrice * item.quantity), 0);
+               discountAmount = (subtotal * appliedCoupon.percentage) / 100;
+          } else {
+               cart.forEach(item => {
+                   if (appliedCoupon.targetProductIds?.includes(item.id)) {
+                       const { finalPrice } = calculatePrice(item);
+                       discountAmount += (finalPrice * item.quantity * appliedCoupon.percentage) / 100;
+                   }
+               });
+          }
+          return discountAmount;
       },
 
       addOrder: async (order) => {
@@ -282,117 +329,72 @@ export const useStore = create<StoreState>()(
             });
             const data = await res.json();
             
-            if (!res.ok) {
-                // Lancia errore con messaggio dal server (es. Stock esaurito)
-                throw new Error(data.error || 'Errore nella creazione ordine');
-            }
+            if (!res.ok) throw new Error(data.error || 'Errore nella creazione ordine');
 
             if (data.success && data.id) {
-                // Ordine creato con successo e ID confermato
                 const serverOrder = { ...order, id: data.id, total: data.total || order.total };
                 set((state) => ({ orders: [serverOrder, ...state.orders] }));
-                
-                // CRITICO: Ricarica tutti i prodotti per aggiornare lo stock visibile
-                // Questo assicura che il decremento nel DB sia riflesso subito nel frontend
                 await get().initialize(); 
-
                 return serverOrder;
             }
             return null;
         } catch (e: any) {
             console.error('Failed to sync order', e);
-            throw e; // Rilancia per essere catturato dal componente UI
+            throw e;
         }
       },
 
-      updateOrderStatus: async (id, status) => {
-          set((state) => ({ orders: state.orders.map(o => o.id === id ? { ...o, status } : o) }));
+      updateOrderStatus: async (id, status, trackingCode, courier) => {
+          set((state) => ({ 
+              orders: state.orders.map(o => o.id === id ? { ...o, status, trackingCode, courier } : o) 
+          }));
           try {
             await fetch('/api/orders', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, status })
+                body: JSON.stringify({ id, status, trackingCode, courier })
             });
           } catch(e) { console.warn("API failed", e); }
       },
 
       deleteOrder: async (id) => {
           set((state) => ({ orders: state.orders.filter(o => o.id !== id) }));
-          try {
-            await fetch(`/api/orders?id=${id}`, { method: 'DELETE' });
-          } catch(e) { console.warn("API failed", e); }
+          try { await fetch(`/api/orders?id=${id}`, { method: 'DELETE' }); } catch(e) {}
       },
 
       setStripeConfig: async (config) => {
           set({ stripeConfig: config });
-          try {
-            await fetch('/api/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: 'stripe', data: config })
-            });
-          } catch(e) { console.warn("API failed", e); }
+          try { await fetch('/api/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({type: 'stripe', data: config})}); } catch(e){}
       },
       
       setShippingConfig: async (config) => {
           set({ shippingConfig: config });
-          try {
-            await fetch('/api/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: 'shipping', data: config })
-            });
-          } catch(e) { console.warn("API failed", e); }
+          try { await fetch('/api/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({type: 'shipping', data: config})}); } catch(e){}
       },
       
       setSupportConfig: async (config) => {
           set((state) => ({ supportConfig: { ...state.supportConfig, ...config } }));
-          // If update includes whatsappNumber, save it to DB
           if (config.whatsappNumber) {
-            try {
-                await fetch('/api/settings', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'support', data: { whatsappNumber: config.whatsappNumber } })
-                });
-            } catch(e) { console.warn("API failed", e); }
+            try { await fetch('/api/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({type: 'support', data: { whatsappNumber: config.whatsappNumber }})}); } catch(e){}
           }
       },
       
       addFaq: async (faq) => {
           try {
-            const res = await fetch('/api/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: 'faq_add', data: faq })
-            });
+            const res = await fetch('/api/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({type: 'faq_add', data: faq})});
             const data = await res.json();
-            if(data.success && data.id) {
-                 set((state) => ({ supportConfig: { ...state.supportConfig, faqs: [...state.supportConfig.faqs, { ...faq, id: data.id }] } }));
-            }
-          } catch(e) { console.warn("API failed", e); }
+            if(data.success) set((state) => ({ supportConfig: { ...state.supportConfig, faqs: [...state.supportConfig.faqs, { ...faq, id: data.id }] } }));
+          } catch(e){}
       },
 
       deleteFaq: async (id) => {
           set((state) => ({ supportConfig: { ...state.supportConfig, faqs: state.supportConfig.faqs.filter(f => f.id !== id) } }));
-          try {
-            await fetch('/api/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: 'faq_delete', data: { id } })
-            });
-          } catch(e) { console.warn("API failed", e); }
+          try { await fetch('/api/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({type: 'faq_delete', data: { id }})}); } catch(e){}
       },
 
       setMailConfig: async (config) => {
           set({ mailConfig: config });
-          try {
-            await fetch('/api/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: 'emailjs', data: config })
-            });
-          } catch(e) { console.warn("API failed", e); }
+          try { await fetch('/api/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({type: 'emailjs', data: config})}); } catch(e){}
       },
 
       login: async (username, password) => {
@@ -403,14 +405,9 @@ export const useStore = create<StoreState>()(
                   body: JSON.stringify({ username, password })
               });
               const data = await res.json();
-              if (res.ok && data.success) {
-                  return true;
-              }
+              if (res.ok && data.success) return true;
               return false;
-          } catch (e) {
-              console.error(e);
-              return false;
-          }
+          } catch (e) { return false; }
       }
     }),
     { 
