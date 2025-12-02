@@ -163,7 +163,7 @@ const Card = ({ title, subtitle, icon: Icon, children, className = '' }: { title
                 )}
                 <div>
                     <h3 className="font-oswald text-2xl uppercase font-bold text-slate-900 leading-none">{title}</h3>
-                    {subtitle && <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wide mt-1">{subtitle}</p>}
+                    {subtitle && <p className="text-slate-400 text-sm font-bold uppercase tracking-wide mt-1">{subtitle}</p>}
                 </div>
             </div>
         )}
@@ -207,7 +207,22 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [expandedProductId, setExpandedProductId] = useState<string | null>(null);
-    const [modalConfig, setModalConfig] = useState<{isOpen: boolean; title: string; message: string; onConfirm: () => void;}>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
+    
+    // Modal Config with variant support
+    const [modalConfig, setModalConfig] = useState<{
+        isOpen: boolean; 
+        title: string; 
+        message: string; 
+        variant?: 'danger' | 'info'; 
+        onConfirm: () => void;
+    }>({ 
+        isOpen: false, 
+        title: '', 
+        message: '', 
+        variant: 'danger', 
+        onConfirm: () => {} 
+    });
+
     const [trackingModal, setTrackingModal] = useState<{isOpen: boolean; orderId: string | null; email: string; name: string;}>({ isOpen: false, orderId: null, email: '', name: '' });
     
     // Toasts State
@@ -314,12 +329,42 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
         addToast('Promozione creata!', 'success');
     };
 
+    // --- FORM VALIDATION HANDLERS ---
+    const handleSaveMail = () => {
+        if (!mailFormState.serviceId || !mailFormState.templateId || !mailFormState.publicKey || !mailFormState.emailTo) {
+            addToast('Compila tutti i campi Email', 'error');
+            return;
+        }
+        setMailConfig(mailFormState);
+        addToast('Configurazione Email Salvata', 'success');
+    };
+
+    const handleSaveWhatsApp = () => {
+        if (!whatsappForm.prefix || !whatsappForm.number) {
+            addToast('Prefisso e Numero sono obbligatori', 'error');
+            return;
+        }
+        setSupportConfig({ whatsappNumber: `${whatsappForm.prefix}${whatsappForm.number}` });
+        addToast('Numero WhatsApp Aggiornato', 'success');
+    };
+
+    const handleSaveFaq = () => {
+        if (!newFaq.question || !newFaq.answer) {
+            addToast('Domanda e Risposta obbligatorie', 'error');
+            return;
+        }
+        addFaq({ ...newFaq, id: '' });
+        setNewFaq({ question: '', answer: '' });
+        addToast('FAQ Aggiunta', 'success');
+    };
+
     const handleStripeModeChange = (val: string) => {
         if (val === 'true') {
             setModalConfig({
                 isOpen: true,
-                title: 'Attiva Live Mode?',
-                message: 'Stai per attivare i pagamenti reali. Le transazioni verranno addebitate.',
+                title: 'Attiva Live Mode',
+                message: 'Stai passando alla modalità di produzione. Tutte le transazioni saranno reali e comporteranno addebiti.',
+                variant: 'info', // Using INFO variant for less aggressive styling
                 onConfirm: () => { setPayForm({...payForm, isEnabled: true}); setModalConfig(prev => ({...prev, isOpen: false})); }
             });
         } else {
@@ -361,16 +406,25 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                 </AnimatePresence>
             </div>
 
+            {/* DYNAMIC CONFIRMATION MODAL */}
             <ModalOverlay isOpen={modalConfig.isOpen}>
                 <div className="bg-white rounded-[2rem] shadow-2xl p-8 text-center border border-slate-100 relative overflow-hidden">
-                     {/* Decorative Elements */}
-                    <div className="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
-                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500 shadow-sm"><AlertTriangle size={32} /></div>
+                    {/* Dynamic Icon Container */}
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm transition-colors ${modalConfig.variant === 'info' ? 'bg-blue-50 text-[#0066b2]' : 'bg-red-50 text-red-500'}`}>
+                        {modalConfig.variant === 'info' ? <Globe size={32} /> : <AlertTriangle size={32} />}
+                    </div>
+                    
                     <h3 className="font-oswald text-2xl font-bold uppercase text-slate-900 mb-2">{modalConfig.title}</h3>
                     <p className="text-sm text-slate-500 mb-8 font-medium leading-relaxed">{modalConfig.message}</p>
+                    
                     <div className="flex gap-3">
                         <LiquidButton onClick={() => setModalConfig({ ...modalConfig, isOpen: false })} label="Annulla" variant="outline" className="flex-1" />
-                        <LiquidButton onClick={modalConfig.onConfirm} label="Conferma" variant="danger" className="flex-1" />
+                        <LiquidButton 
+                            onClick={modalConfig.onConfirm} 
+                            label="Conferma" 
+                            variant={modalConfig.variant === 'info' ? 'primary' : 'danger'} 
+                            className="flex-1" 
+                        />
                     </div>
                 </div>
             </ModalOverlay>
@@ -564,6 +618,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                                 isOpen: true,
                                                                 title: 'Elimina Prodotto',
                                                                 message: 'Sei sicuro di voler rimuovere questo articolo? L\'azione è irreversibile.',
+                                                                variant: 'danger',
                                                                 onConfirm: () => { deleteProduct(product.id); setModalConfig(prev => ({...prev, isOpen: false})); addToast('Prodotto eliminato', 'success'); }
                                                             });
                                                         }} 
@@ -972,7 +1027,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     <InputGroup label="Public Key" helpText="Dalla dashboard EmailJS -> Account -> Public Key"><StyledInput value={mailFormState.publicKey} onChange={e => setMailFormState({...mailFormState, publicKey: e.target.value})} placeholder="XyZ_123abc456..." /></InputGroup>
                                     <InputGroup label="Email Admin"><StyledInput value={mailFormState.emailTo} onChange={e => setMailFormState({...mailFormState, emailTo: e.target.value})} placeholder="admin@tacalabala.it" /></InputGroup>
                                     <div className="pt-4 flex justify-center">
-                                        <LiquidButton onClick={() => { setMailConfig(mailFormState); addToast('EmailJS salvato', 'success'); }} label="Salva Mail" icon={Save} variant="primary" />
+                                        <LiquidButton onClick={handleSaveMail} label="Salva Mail" icon={Save} variant="primary" />
                                     </div>
                                 </div>
                                 
@@ -992,7 +1047,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     </div>
                                     
                                     <div className="pt-4 flex justify-center">
-                                        <LiquidButton onClick={() => { setSupportConfig({ whatsappNumber: `${whatsappForm.prefix}${whatsappForm.number}` }); addToast('WhatsApp aggiornato', 'success'); }} label="Salva Numero" icon={Save} variant="primary" />
+                                        <LiquidButton onClick={handleSaveWhatsApp} label="Salva Numero" icon={Save} variant="primary" />
                                     </div>
                                 </div>
                             </div>
@@ -1010,7 +1065,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-32 resize-none" value={newFaq.answer} onChange={e => setNewFaq({...newFaq, answer: e.target.value})} />
                                 </InputGroup>
                                 <div className="flex justify-center pt-4">
-                                    <LiquidButton onClick={() => { addFaq({ ...newFaq, id: '' }); setNewFaq({question:'', answer:''}); addToast('FAQ Aggiunta', 'success'); }} label="Salva FAQ" icon={Plus} variant="primary" />
+                                    <LiquidButton onClick={handleSaveFaq} label="Salva FAQ" icon={Plus} variant="primary" />
                                 </div>
                             </div>
                         </Card>
