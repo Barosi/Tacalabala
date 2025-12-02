@@ -151,8 +151,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }));
     } catch (e) { console.warn("Discounts table missing", e); }
 
+    // 6. Fetch Orders
+    let orders: any[] = [];
+    try {
+        const { rows: ordersRaw } = await pool.query('SELECT * FROM orders ORDER BY date DESC');
+        let items: any[] = [];
+        try {
+            const resItems = await pool.query('SELECT * FROM order_items');
+            items = resItems.rows;
+        } catch(e) { console.warn("Order items missing", e); }
+
+        orders = ordersRaw.map(o => ({
+            id: o.id,
+            customerEmail: o.customer_email,
+            customerName: o.customer_name,
+            shippingAddress: o.shipping_address,
+            total: Number(o.total),
+            shippingCost: o.shipping_cost,
+            status: o.status,
+            date: o.date,
+            items: items.filter(i => i.order_id === o.id).map(i => ({
+                cartId: i.id, 
+                title: i.product_title,
+                price: `€${Number(i.product_price).toFixed(2)}`,
+                selectedSize: i.selected_size,
+                quantity: i.quantity,
+                id: i.product_id, imageUrl: '', season: '' 
+            })),
+            invoiceDetails: (o.invoice_tax_id) ? {
+                taxId: o.invoice_tax_id,
+                vatNumber: o.invoice_vat_number,
+                sdiCode: o.invoice_sdi_code
+            } : undefined,
+            trackingCode: o.tracking_code,
+            courier: o.courier
+        }));
+    } catch (e) { console.warn("Orders table missing or empty", e); }
+
     return res.status(200).json({
         products,
+        orders,
         shippingConfig: settingsMap['shipping'] || null,
         stripeConfig: settingsMap['stripe'] || null,
         mailConfig: settingsMap['emailjs'] || null,
