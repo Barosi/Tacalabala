@@ -862,23 +862,33 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         </Card>
 
                         <Card title="Attive" subtitle="Lista promozioni correnti" icon={Calendar}>
-                            <div className="space-y-4">
-                                {discounts.map(d => (
-                                    <div key={d.id} className="bg-slate-50 border border-slate-200 rounded-[1.5rem] p-6 flex justify-between items-center group hover:border-[#0066b2] transition-colors">
-                                        <div>
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${d.discountType === 'coupon' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
-                                                    {d.discountType}
-                                                </span>
-                                                {d.code && <span className="bg-[#0066b2] text-white px-2 py-1 rounded text-[10px] font-mono font-bold">{d.code}</span>}
-                                            </div>
-                                            <h4 className="font-oswald font-bold text-xl text-slate-900 uppercase">{d.name}</h4>
-                                            <p className="text-xs font-bold text-slate-400 mt-1">Sconto {d.percentage}% • Scade: {new Date(d.endDate).toLocaleDateString()}</p>
-                                        </div>
-                                        <button onClick={() => { deleteDiscount(d.id); addToast('Promo eliminata', 'success'); }} className="w-10 h-10 bg-white border border-slate-200 text-slate-300 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"><Trash2 size={16}/></button>
+                            {discounts.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-20 text-center">
+                                    <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 text-slate-300 border border-slate-100">
+                                        <Tag size={48} strokeWidth={1} />
                                     </div>
-                                ))}
-                            </div>
+                                    <h3 className="font-oswald text-2xl font-bold uppercase text-slate-900 mb-2">Nessuna Promo</h3>
+                                    <p className="text-slate-400 text-sm max-w-xs mx-auto">Non hai ancora creato nessuna promozione. Crea la tua prima promo nel modulo qui sopra.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {discounts.map(d => (
+                                        <div key={d.id} className="bg-slate-50 border border-slate-200 rounded-[1.5rem] p-6 flex justify-between items-center group hover:border-[#0066b2] transition-colors">
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${d.discountType === 'coupon' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
+                                                        {d.discountType}
+                                                    </span>
+                                                    {d.code && <span className="bg-[#0066b2] text-white px-2 py-1 rounded text-[10px] font-mono font-bold">{d.code}</span>}
+                                                </div>
+                                                <h4 className="font-oswald font-bold text-xl text-slate-900 uppercase">{d.name}</h4>
+                                                <p className="text-xs font-bold text-slate-400 mt-1">Sconto {d.percentage}% • Scade: {new Date(d.endDate).toLocaleDateString()}</p>
+                                            </div>
+                                            <button onClick={() => { deleteDiscount(d.id); addToast('Promo eliminata', 'success'); }} className="w-10 h-10 bg-white border border-slate-200 text-slate-300 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"><Trash2 size={16}/></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </Card>
                     </div>
                 )}
