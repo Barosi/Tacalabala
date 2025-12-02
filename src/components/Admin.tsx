@@ -243,11 +243,11 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
         const files = e.target.files;
         if (files) {
             const newImages: string[] = [];
-            Array.from(files).forEach(file => {
+            Array.from(files).forEach((file: File) => {
                 if (file.size > 1024 * 1024) { addToast(`File ${file.name} troppo grande. Max 1MB.`, 'error'); return; }
                 const reader = new FileReader();
                 reader.onloadend = () => { if (typeof reader.result === 'string') newImages.push(reader.result); if (newImages.length === files.length) setUploadImages(prev => [...prev, ...newImages]); };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(file as Blob);
             });
         }
     };
@@ -356,7 +356,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             <div className="fixed bottom-6 right-6 z-[120] flex flex-col gap-3 pointer-events-none">
                 <AnimatePresence>
                     {toasts.map(toast => (
-                        <ToastNotification key={toast.id} toast={toast} remove={removeToast} />
+                        <ToastNotification key={toast.id} toast={toast as Toast} remove={removeToast} />
                     ))}
                 </AnimatePresence>
             </div>
