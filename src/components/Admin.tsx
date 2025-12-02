@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Product, ProductVariant, Size, FAQ, Discount, OrderStatus, ShippingConfig } from '../types';
-import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, Tag, Calendar, ShoppingBag, Truck, Check, Search, Shirt, Layers, Image as ImageIcon, Upload, Settings, Mail, Shield, AlertTriangle, ChevronDown, X, Phone, Globe, ToggleLeft, ToggleRight, HelpCircle } from 'lucide-react';
+import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, Tag, Calendar, ShoppingBag, Truck, Check, Search, Shirt, Layers, Image as ImageIcon, Upload, Settings, Mail, Shield, AlertTriangle, ChevronDown, X, Phone, Globe, ToggleLeft, ToggleRight, HelpCircle, AlertOctagon } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { sendShippingConfirmationEmail } from '../utils/emailSender';
 import { motion } from 'framer-motion';
@@ -154,8 +154,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
         updateOrderStatus, deleteOrder,
     } = useStore();
 
-    const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'promotions' | 'settings'>('products');
-    const [subTabSettings, setSubTabSettings] = useState<'shipping' | 'payments' | 'contacts' | 'faq'>('shipping');
+    // Flattened Navigation Tabs
+    const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'promotions' | 'shipping' | 'payments' | 'contacts' | 'faq'>('products');
 
     const [searchTerm, setSearchTerm] = useState('');
     const [expandedProductId, setExpandedProductId] = useState<string | null>(null);
@@ -252,6 +252,18 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
         alert('Promozione creata!');
     };
 
+    const handleStripeModeChange = (val: string) => {
+        if (val === 'true') {
+            if (confirm("ATTENZIONE: Stai per attivare la modalità LIVE. I pagamenti saranno reali e verranno addebitati. Sei sicuro?")) {
+                setPayForm({...payForm, isEnabled: true});
+            } else {
+                // User cancelled, do nothing (value stays false)
+            }
+        } else {
+            setPayForm({...payForm, isEnabled: false});
+        }
+    };
+
     return (
         <section className="pt-32 md:pt-48 pb-16 md:pb-24 bg-slate-50 min-h-screen">
             
@@ -304,18 +316,21 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     <LiquidButton onClick={onLogout} label="Logout" icon={LogOut} variant="danger" />
                 </div>
 
-                {/* --- FLUID NAVIGATION BAR --- */}
-                <div className="flex p-1.5 bg-slate-200/50 rounded-full mb-12 relative max-w-4xl mx-auto backdrop-blur-sm border border-slate-200">
+                {/* --- FLUID NAVIGATION BAR (UNIFIED) --- */}
+                <div className="flex p-1.5 bg-slate-200/50 rounded-full mb-12 relative max-w-full mx-auto backdrop-blur-sm border border-slate-200 overflow-x-auto no-scrollbar">
                     {[
                         { id: 'products', label: 'Prodotti' },
                         { id: 'orders', label: 'Ordini' },
-                        { id: 'promotions', label: 'Promozioni' },
-                        { id: 'settings', label: 'Impostazioni' },
+                        { id: 'promotions', label: 'Promo' },
+                        { id: 'shipping', label: 'Spedizioni' },
+                        { id: 'payments', label: 'Pagamenti' },
+                        { id: 'contacts', label: 'Contatti' },
+                        { id: 'faq', label: 'FAQ' },
                     ].map(tab => (
                         <button 
                             key={tab.id} 
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex-1 relative py-4 px-4 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest transition-colors duration-300 z-10 ${activeTab === tab.id ? 'text-[#0066b2]' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`flex-1 relative py-4 px-6 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest transition-colors duration-300 z-10 whitespace-nowrap min-w-fit ${activeTab === tab.id ? 'text-[#0066b2]' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             {activeTab === tab.id && (
                                 <motion.div 
@@ -361,22 +376,27 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
 
                                     {/* Column Right: Media & Variants */}
                                     <div className="flex flex-col gap-6 h-full">
+                                        
+                                        {/* Image Upload Redesigned */}
                                         <div className="flex flex-col flex-1">
                                             <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-2 pl-1">Galleria Immagini (Max 1MB)</span>
-                                            <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-dashed border-slate-300 flex-grow">
-                                                <div className="flex justify-end mb-4">
-                                                    <button type="button" onClick={() => fileInputRef.current?.click()} className="text-[#0066b2] text-[10px] font-bold uppercase hover:underline flex items-center gap-1"><Upload size={12}/> Carica</button>
-                                                </div>
+                                            <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 flex-grow">
                                                 <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
-                                                <div className="grid grid-cols-4 gap-3">
+                                                
+                                                <div className="grid grid-cols-3 gap-4">
                                                     {uploadImages.map((img, i) => (
-                                                        <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group bg-white shadow-sm">
+                                                        <div key={i} className="relative aspect-square rounded-2xl overflow-hidden border border-slate-200 group bg-white shadow-sm">
                                                             <img src={img} className="w-full h-full object-cover" alt="" />
-                                                            <button type="button" onClick={() => setUploadImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={16}/></button>
+                                                            <button type="button" onClick={() => setUploadImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={24}/></button>
                                                         </div>
                                                     ))}
-                                                    <div onClick={() => fileInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300 hover:text-[#0066b2] hover:border-[#0066b2] cursor-pointer transition-colors bg-white">
-                                                        <ImageIcon size={24} />
+                                                    
+                                                    {/* Clean Add Button inside grid */}
+                                                    <div onClick={() => fileInputRef.current?.click()} className="aspect-square rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 hover:text-[#0066b2] hover:border-[#0066b2] hover:bg-white cursor-pointer transition-all gap-2 group">
+                                                        <div className="p-3 bg-white rounded-full shadow-sm group-hover:shadow-md transition-shadow">
+                                                            <ImageIcon size={24} />
+                                                        </div>
+                                                        <span className="text-[10px] font-bold uppercase tracking-widest">Aggiungi</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -415,7 +435,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                         <div key={product.id} className={`border rounded-[1.5rem] transition-all duration-300 overflow-hidden ${isExpanded ? 'border-[#0066b2] bg-blue-50/10 shadow-lg' : 'border-slate-100 bg-white hover:border-slate-300'}`}>
                                             <div className="p-4 flex items-center justify-between cursor-pointer" onClick={() => setExpandedProductId(isExpanded ? null : product.id)}>
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-16 h-16 bg-slate-50 rounded-xl overflow-hidden border border-slate-200">
+                                                    <div className="w-16 h-16 bg-slate-50 rounded-xl overflow-hidden border border-slate-200 flex-shrink-0">
                                                         <img src={product.imageUrl} alt="" className="w-full h-full object-cover" />
                                                     </div>
                                                     <div>
@@ -434,20 +454,19 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             {isExpanded && (
                                                 <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-2">
                                                     <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
-                                                        <div className="flex flex-wrap gap-4">
+                                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                             {sortedVariants.map(v => (
-                                                                <div key={v.size} className="flex items-center gap-3">
-                                                                    <div className="w-8 h-8 rounded-full bg-[#0066b2] text-white flex items-center justify-center font-bold text-xs shadow-md">
+                                                                <div key={v.size} className="flex flex-col items-center bg-white rounded-2xl border border-slate-100 p-3 shadow-sm">
+                                                                    <div className="w-10 h-10 rounded-full bg-[#0066b2] text-white flex items-center justify-center font-bold text-sm shadow-md mb-2">
                                                                         {v.size}
                                                                     </div>
-                                                                    <div className="relative">
-                                                                        <input 
-                                                                            type="number" 
-                                                                            className="w-16 bg-white border border-slate-200 rounded-lg px-2 py-1 text-center font-bold text-slate-900 text-sm focus:border-[#0066b2] outline-none" 
-                                                                            value={v.stock} 
-                                                                            onChange={(e) => updateProductStock(product.id, v.size as Size, parseInt(e.target.value)||0)} 
-                                                                        />
-                                                                    </div>
+                                                                    <input 
+                                                                        type="number" 
+                                                                        className="w-full text-center font-bold text-xl text-slate-900 outline-none bg-transparent border-b-2 border-slate-100 focus:border-[#0066b2] transition-colors py-1" 
+                                                                        value={v.stock} 
+                                                                        onChange={(e) => updateProductStock(product.id, v.size as Size, parseInt(e.target.value)||0)} 
+                                                                    />
+                                                                    <span className="text-[9px] uppercase font-bold text-slate-400 mt-1">Pezzi</span>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -625,161 +644,163 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     </div>
                 )}
 
-                {/* --- SETTINGS --- */}
-                {activeTab === 'settings' && (
+                {/* --- SETTINGS: SHIPPING --- */}
+                {activeTab === 'shipping' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4">
-                        <div className="flex gap-4 mb-8">
-                            {[
-                                {id: 'shipping', label: 'Spedizioni', icon: Truck},
-                                {id: 'payments', label: 'Pagamenti', icon: CreditCard},
-                                {id: 'contacts', label: 'Contatti', icon: Mail},
-                                {id: 'faq', label: 'Supporto', icon: MessageCircle}
-                            ].map(sub => (
-                                <button 
-                                    key={sub.id} 
-                                    onClick={() => setSubTabSettings(sub.id as any)}
-                                    className={`px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest border transition-all flex items-center gap-2 shadow-sm ${subTabSettings === sub.id ? 'bg-[#0066b2] border-[#0066b2] text-white' : 'bg-white border-slate-200 text-slate-500 hover:border-[#0066b2] hover:text-[#0066b2]'}`}
-                                >
-                                    <sub.icon size={14} /> {sub.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        {subTabSettings === 'shipping' && (
-                            <Card title="Configurazione Spedizioni" icon={Truck}>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="space-y-4">
-                                        <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 border-b border-slate-100 pb-2">Italia</h4>
-                                        <InputGroup label="Costo Spedizione Standard (€)">
-                                            <StyledInput type="number" value={shipForm.italyPrice} onChange={e => setShipForm({...shipForm, italyPrice: Number(e.target.value)})} />
-                                        </InputGroup>
-                                        <InputGroup label="Soglia Spedizione Gratuita (€)">
-                                            <StyledInput type="number" value={shipForm.italyThreshold} onChange={e => setShipForm({...shipForm, italyThreshold: Number(e.target.value)})} />
-                                        </InputGroup>
-                                    </div>
-                                    <div className="space-y-4">
-                                        <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 border-b border-slate-100 pb-2">Estero (EU/World)</h4>
-                                        <InputGroup label="Costo Spedizione (€)">
-                                            <StyledInput type="number" value={shipForm.foreignPrice} onChange={e => setShipForm({...shipForm, foreignPrice: Number(e.target.value)})} />
-                                        </InputGroup>
-                                        <InputGroup label="Soglia Spedizione Gratuita (€)">
-                                            <StyledInput type="number" value={shipForm.foreignThreshold} onChange={e => setShipForm({...shipForm, foreignThreshold: Number(e.target.value)})} />
-                                        </InputGroup>
-                                    </div>
-                                </div>
-                                <div className="mt-8 pt-6 border-t border-slate-50 flex justify-center">
-                                    <LiquidButton onClick={() => { setShippingConfig(shipForm); alert('Spedizioni salvate'); }} label="Salva Configurazioni" icon={Save} variant="primary" className="w-full md:w-auto" />
-                                </div>
-                            </Card>
-                        )}
-
-                        {subTabSettings === 'payments' && (
-                            <Card title="Configurazione Stripe" subtitle="Gestisci chiavi API" icon={CreditCard}>
-                                <div className="space-y-6 max-w-2xl mx-auto">
-                                    <div className="bg-blue-50 p-6 rounded-[1.5rem] border border-blue-100 flex flex-col md:flex-row items-center justify-between gap-4">
-                                        <span className="text-xs font-bold uppercase text-[#0066b2] flex items-center gap-2"><Globe size={16} /> Ambiente Stripe</span>
-                                        <div className="w-full md:w-48">
-                                            <SegmentedControl 
-                                                options={[{value: 'false', label: 'Test Mode'}, {value: 'true', label: 'Live Mode'}]}
-                                                value={String(payForm.isEnabled)}
-                                                onChange={(val) => setPayForm({...payForm, isEnabled: val === 'true'})}
-                                                className="bg-white/50"
-                                            />
-                                        </div>
-                                    </div>
-                                    
-                                    <InputGroup label="Stripe Public Key">
-                                        <StyledInput type="password" value={payForm.publicKey} onChange={e => setPayForm({...payForm, publicKey: e.target.value})} placeholder={payForm.isEnabled ? "pk_live_..." : "pk_test_..."} />
+                        <Card title="Configurazione Spedizioni" icon={Truck}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-4">
+                                    <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 border-b border-slate-100 pb-2">Italia</h4>
+                                    <InputGroup label="Costo Spedizione Standard (€)">
+                                        <StyledInput type="number" value={shipForm.italyPrice} onChange={e => setShipForm({...shipForm, italyPrice: Number(e.target.value)})} />
                                     </InputGroup>
-                                    <InputGroup label="Stripe Secret Key">
-                                        <StyledInput type="password" value={payForm.secretKey} onChange={e => setPayForm({...payForm, secretKey: e.target.value})} placeholder={payForm.isEnabled ? "sk_live_..." : "sk_test_..."} />
+                                    <InputGroup label="Soglia Spedizione Gratuita (€)">
+                                        <StyledInput type="number" value={shipForm.italyThreshold} onChange={e => setShipForm({...shipForm, italyThreshold: Number(e.target.value)})} />
                                     </InputGroup>
-                                    <InputGroup label="Webhook Secret">
-                                        <StyledInput type="password" value={payForm.webhookSecret} onChange={e => setPayForm({...payForm, webhookSecret: e.target.value})} placeholder="whsec_..." />
+                                </div>
+                                <div className="space-y-4">
+                                    <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 border-b border-slate-100 pb-2">Estero (EU/World)</h4>
+                                    <InputGroup label="Costo Spedizione (€)">
+                                        <StyledInput type="number" value={shipForm.foreignPrice} onChange={e => setShipForm({...shipForm, foreignPrice: Number(e.target.value)})} />
                                     </InputGroup>
-                                    <div className="pt-6 flex justify-center">
-                                       <LiquidButton onClick={() => { setStripeConfig(payForm); alert('Stripe configurato'); }} label="Salva Chiavi API" icon={Shield} variant="primary" className="w-full md:w-auto" />
-                                    </div>
+                                    <InputGroup label="Soglia Spedizione Gratuita (€)">
+                                        <StyledInput type="number" value={shipForm.foreignThreshold} onChange={e => setShipForm({...shipForm, foreignThreshold: Number(e.target.value)})} />
+                                    </InputGroup>
                                 </div>
-                            </Card>
-                        )}
-
-                        {subTabSettings === 'contacts' && (
-                            <Card title="Canali di Contatto" subtitle="Configurazione EmailJS & WhatsApp" icon={Mail}>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                    <div className="space-y-6">
-                                        <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 flex items-center gap-2"><Mail size={18}/> EmailJS</h4>
-                                        <InputGroup label="Service ID" helpText="Dalla dashboard EmailJS -> Email Services"><StyledInput value={mailFormState.serviceId} onChange={e => setMailFormState({...mailFormState, serviceId: e.target.value})} placeholder="service_xxx" /></InputGroup>
-                                        <InputGroup label="Template ID" helpText="Dalla dashboard EmailJS -> Email Templates"><StyledInput value={mailFormState.templateId} onChange={e => setMailFormState({...mailFormState, templateId: e.target.value})} placeholder="template_xxx" /></InputGroup>
-                                        <InputGroup label="Public Key" helpText="Dalla dashboard EmailJS -> Account -> Public Key"><StyledInput value={mailFormState.publicKey} onChange={e => setMailFormState({...mailFormState, publicKey: e.target.value})} placeholder="user_xxx" /></InputGroup>
-                                        <InputGroup label="Email Admin"><StyledInput value={mailFormState.emailTo} onChange={e => setMailFormState({...mailFormState, emailTo: e.target.value})} placeholder="tua@email.com" /></InputGroup>
-                                        <div className="pt-4 flex justify-center">
-                                            <LiquidButton onClick={() => { setMailConfig(mailFormState); alert('EmailJS salvato'); }} label="Salva Mail" icon={Save} variant="primary" />
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="space-y-6 border-l border-slate-100 pl-8">
-                                        <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 flex items-center gap-2"><Phone size={18}/> WhatsApp</h4>
-                                        <p className="text-xs text-slate-500 font-medium">Numero per l'assistenza clienti diretta.</p>
-                                        
-                                        <div className="flex gap-4">
-                                            <div className="w-24">
-                                                <InputGroup label="Prefisso">
-                                                     <StyledInput value={whatsappForm.prefix} onChange={e => setWhatsappForm({...whatsappForm, prefix: e.target.value})} placeholder="+39" />
-                                                </InputGroup>
-                                            </div>
-                                            <div className="flex-1">
-                                                <InputGroup label="Numero">
-                                                     <StyledInput value={whatsappForm.number} onChange={e => setWhatsappForm({...whatsappForm, number: e.target.value})} placeholder="333 0000000" />
-                                                </InputGroup>
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="pt-4 flex justify-center">
-                                            <LiquidButton onClick={() => { setSupportConfig({ whatsappNumber: `${whatsappForm.prefix}${whatsappForm.number}` }); alert('WhatsApp aggiornato'); }} label="Salva Numero" icon={Save} variant="primary" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </Card>
-                        )}
-
-                        {subTabSettings === 'faq' && (
-                            <div className="grid grid-cols-1 gap-8">
-                                <Card title="Aggiungi FAQ" icon={HelpCircle}>
-                                    <div className="space-y-4 max-w-2xl mx-auto">
-                                        <InputGroup label="Domanda"><StyledInput value={newFaq.question} onChange={e => setNewFaq({...newFaq, question: e.target.value})} /></InputGroup>
-                                        <InputGroup label="Risposta">
-                                            <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-32 resize-none" value={newFaq.answer} onChange={e => setNewFaq({...newFaq, answer: e.target.value})} />
-                                        </InputGroup>
-                                        <div className="flex justify-center pt-4">
-                                            <LiquidButton onClick={() => { addFaq({ ...newFaq, id: '' }); setNewFaq({question:'', answer:''}); alert('FAQ Aggiunta'); }} label="Salva FAQ" icon={Plus} variant="primary" />
-                                        </div>
-                                    </div>
-                                </Card>
-                                
-                                <Card title="Lista FAQ">
-                                    <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                                        {supportConfig.faqs.map(f => (
-                                            <div key={f.id} className="bg-slate-50 border border-slate-200 rounded-[1.5rem] p-6 flex justify-between items-start group hover:border-[#0066b2] transition-colors">
-                                                <div className="flex gap-4">
-                                                     <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[#0066b2] shadow-sm flex-shrink-0">
-                                                        <HelpCircle size={20} />
-                                                     </div>
-                                                     <div>
-                                                         <h4 className="font-bold text-slate-900 text-sm mb-1">{f.question}</h4>
-                                                         <p className="text-xs text-slate-500 leading-relaxed font-medium">{f.answer}</p>
-                                                     </div>
-                                                </div>
-                                                <button onClick={() => deleteFaq(f.id)} className="text-slate-300 hover:text-red-500 p-2 transition-colors"><Trash2 size={16}/></button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </Card>
                             </div>
-                        )}
+                            <div className="mt-8 pt-6 border-t border-slate-50 flex justify-center">
+                                <LiquidButton onClick={() => { setShippingConfig(shipForm); alert('Spedizioni salvate'); }} label="Salva Configurazioni" icon={Save} variant="primary" className="w-full md:w-auto" />
+                            </div>
+                        </Card>
                     </div>
                 )}
 
+                {/* --- SETTINGS: PAYMENTS --- */}
+                {activeTab === 'payments' && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4">
+                        <Card title="Configurazione Stripe" subtitle="Gestisci chiavi API" icon={CreditCard}>
+                            <div className="space-y-6 max-w-2xl mx-auto">
+                                
+                                {/* MODE INDICATOR */}
+                                <div className={`p-4 rounded-xl border flex items-center gap-4 ${payForm.isEnabled ? 'bg-green-50 border-green-200' : 'bg-slate-100 border-slate-200'}`}>
+                                    <div className={`w-3 h-3 rounded-full ${payForm.isEnabled ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`}></div>
+                                    <div className="flex-1">
+                                        <p className="font-bold uppercase text-xs tracking-widest text-slate-900">
+                                            {payForm.isEnabled ? 'LIVE MODE ACTIVE' : 'TEST MODE ACTIVE'}
+                                        </p>
+                                        <p className="text-[10px] text-slate-500 font-medium">
+                                            {payForm.isEnabled ? 'Le transazioni sono reali e verranno addebitate.' : 'Nessun addebito reale. Usa le carte di test Stripe.'}
+                                        </p>
+                                    </div>
+                                    <AlertOctagon size={20} className={payForm.isEnabled ? 'text-green-500' : 'text-slate-400'} />
+                                </div>
+
+                                <div className="bg-blue-50 p-6 rounded-[1.5rem] border border-blue-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                                    <span className="text-xs font-bold uppercase text-[#0066b2] flex items-center gap-2"><Globe size={16} /> Seleziona Ambiente</span>
+                                    <div className="w-full md:w-48">
+                                        <SegmentedControl 
+                                            options={[{value: 'false', label: 'Test Mode'}, {value: 'true', label: 'Live Mode'}]}
+                                            value={String(payForm.isEnabled)}
+                                            onChange={handleStripeModeChange}
+                                            className="bg-white/50"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <InputGroup label="Stripe Public Key">
+                                    <StyledInput type="password" value={payForm.publicKey} onChange={e => setPayForm({...payForm, publicKey: e.target.value})} placeholder={payForm.isEnabled ? "pk_live_..." : "pk_test_..."} />
+                                </InputGroup>
+                                <InputGroup label="Stripe Secret Key">
+                                    <StyledInput type="password" value={payForm.secretKey} onChange={e => setPayForm({...payForm, secretKey: e.target.value})} placeholder={payForm.isEnabled ? "sk_live_..." : "sk_test_..."} />
+                                </InputGroup>
+                                <InputGroup label="Webhook Secret">
+                                    <StyledInput type="password" value={payForm.webhookSecret} onChange={e => setPayForm({...payForm, webhookSecret: e.target.value})} placeholder="whsec_..." />
+                                </InputGroup>
+                                <div className="pt-6 flex justify-center">
+                                   <LiquidButton onClick={() => { setStripeConfig(payForm); alert('Stripe configurato'); }} label="Salva Chiavi API" icon={Shield} variant="primary" className="w-full md:w-auto" />
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                )}
+
+                {/* --- SETTINGS: CONTACTS --- */}
+                {activeTab === 'contacts' && (
+                    <div className="animate-in fade-in slide-in-from-bottom-4">
+                        <Card title="Canali di Contatto" subtitle="Configurazione EmailJS & WhatsApp" icon={Mail}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                <div className="space-y-6">
+                                    <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 flex items-center gap-2"><Mail size={18}/> EmailJS</h4>
+                                    <InputGroup label="Service ID" helpText="Dalla dashboard EmailJS -> Email Services"><StyledInput value={mailFormState.serviceId} onChange={e => setMailFormState({...mailFormState, serviceId: e.target.value})} placeholder="service_z38..." /></InputGroup>
+                                    <InputGroup label="Template ID" helpText="Dalla dashboard EmailJS -> Email Templates"><StyledInput value={mailFormState.templateId} onChange={e => setMailFormState({...mailFormState, templateId: e.target.value})} placeholder="template_7a2..." /></InputGroup>
+                                    <InputGroup label="Public Key" helpText="Dalla dashboard EmailJS -> Account -> Public Key"><StyledInput value={mailFormState.publicKey} onChange={e => setMailFormState({...mailFormState, publicKey: e.target.value})} placeholder="XyZ_123abc..." /></InputGroup>
+                                    <InputGroup label="Email Admin"><StyledInput value={mailFormState.emailTo} onChange={e => setMailFormState({...mailFormState, emailTo: e.target.value})} placeholder="admin@tacalabala.it" /></InputGroup>
+                                    <div className="pt-4 flex justify-center">
+                                        <LiquidButton onClick={() => { setMailConfig(mailFormState); alert('EmailJS salvato'); }} label="Salva Mail" icon={Save} variant="primary" />
+                                    </div>
+                                </div>
+                                
+                                <div className="space-y-6 border-l border-slate-100 pl-8">
+                                    <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 flex items-center gap-2"><Phone size={18}/> WhatsApp</h4>
+                                    <p className="text-xs text-slate-500 font-medium">Numero per l'assistenza clienti diretta.</p>
+                                    
+                                    <div className="flex gap-4">
+                                        <div className="w-24">
+                                            <InputGroup label="Prefisso">
+                                                 <StyledInput value={whatsappForm.prefix} onChange={e => setWhatsappForm({...whatsappForm, prefix: e.target.value})} placeholder="+39" />
+                                            </InputGroup>
+                                        </div>
+                                        <div className="flex-1">
+                                            <InputGroup label="Numero">
+                                                 <StyledInput value={whatsappForm.number} onChange={e => setWhatsappForm({...whatsappForm, number: e.target.value})} placeholder="333 0000000" />
+                                            </InputGroup>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="pt-4 flex justify-center">
+                                        <LiquidButton onClick={() => { setSupportConfig({ whatsappNumber: `${whatsappForm.prefix}${whatsappForm.number}` }); alert('WhatsApp aggiornato'); }} label="Salva Numero" icon={Save} variant="primary" />
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                )}
+
+                {/* --- SETTINGS: FAQ --- */}
+                {activeTab === 'faq' && (
+                    <div className="grid grid-cols-1 gap-8 animate-in fade-in slide-in-from-bottom-4">
+                        <Card title="Aggiungi FAQ" icon={HelpCircle}>
+                            <div className="space-y-4 max-w-2xl mx-auto">
+                                <InputGroup label="Domanda"><StyledInput value={newFaq.question} onChange={e => setNewFaq({...newFaq, question: e.target.value})} /></InputGroup>
+                                <InputGroup label="Risposta">
+                                    <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-32 resize-none" value={newFaq.answer} onChange={e => setNewFaq({...newFaq, answer: e.target.value})} />
+                                </InputGroup>
+                                <div className="flex justify-center pt-4">
+                                    <LiquidButton onClick={() => { addFaq({ ...newFaq, id: '' }); setNewFaq({question:'', answer:''}); alert('FAQ Aggiunta'); }} label="Salva FAQ" icon={Plus} variant="primary" />
+                                </div>
+                            </div>
+                        </Card>
+                        
+                        <Card title="Lista FAQ">
+                            <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                {supportConfig.faqs.map(f => (
+                                    <div key={f.id} className="bg-slate-50 border border-slate-200 rounded-[1.5rem] p-6 flex justify-between items-start group hover:border-[#0066b2] transition-colors">
+                                        <div className="flex gap-4">
+                                             <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[#0066b2] shadow-sm flex-shrink-0">
+                                                <HelpCircle size={20} />
+                                             </div>
+                                             <div>
+                                                 <h4 className="font-bold text-slate-900 text-sm mb-1">{f.question}</h4>
+                                                 <p className="text-xs text-slate-500 leading-relaxed font-medium">{f.answer}</p>
+                                             </div>
+                                        </div>
+                                        <button onClick={() => deleteFaq(f.id)} className="text-slate-300 hover:text-red-500 p-2 transition-colors"><Trash2 size={16}/></button>
+                                    </div>
+                                ))}
+                            </div>
+                        </Card>
+                    </div>
+                )}
             </div>
         </section>
     );
