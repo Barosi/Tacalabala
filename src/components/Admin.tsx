@@ -13,7 +13,7 @@ interface Toast {
     type: 'success' | 'error';
 }
 
-const ToastNotification = ({ toast, remove }: { toast: Toast; remove: (id: number) => void }) => {
+const ToastNotification = ({ toast, remove }: { toast: Toast; remove: (id: number) => void; key?: string | number }) => {
     useEffect(() => {
         const timer = setTimeout(() => remove(toast.id), 4000);
         return () => clearTimeout(timer);
