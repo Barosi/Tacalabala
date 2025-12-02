@@ -44,8 +44,8 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
   };
 
   const getLogoClasses = () => {
-      const isCompact = isScrolled || currentPage !== 'home';
-      return isCompact ? 'h-20 md:h-24' : 'h-24 md:h-32';
+      // Always return the large size as requested
+      return 'h-24 md:h-32';
   }
 
   return (

@@ -7,11 +7,10 @@ const ChiSiamo: React.FC = () => {
   return (
     <section id="chi-siamo" className="pt-32 md:pt-48 pb-24 relative overflow-hidden bg-slate-50">
       
-      {/* BACKGROUND: Pitch Lines + Central Fade (Uniformato a Store) */}
+      {/* BACKGROUND: Pitch Lines + Central Fade */}
       <div className="absolute inset-0 pointer-events-none z-0">
-           {/* Center Circle Graphic */}
+           {/* Center Circle Graphic - ONLY RING, NO DOT */}
             <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-slate-200 rounded-full opacity-60"></div>
-            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[20px] h-[20px] bg-slate-200 rounded-full"></div>
             
             {/* Axis Line with Gradient Fade & Dashed Style */}
             <div className="absolute inset-0 flex justify-center">
@@ -50,7 +49,7 @@ const ChiSiamo: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="mb-16" // Spazio ridotto verso la sezione successiva
+          className="mb-16" 
         >
              <div className="bg-white/60 backdrop-blur-md rounded-[3rem] p-8 md:p-12 border border-white/60 shadow-xl shadow-slate-200/40 text-center relative overflow-hidden max-w-4xl mx-auto">
                 
@@ -71,7 +70,7 @@ const ChiSiamo: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="pt-4" // Padding ridotto al minimo
+            className="pt-4" 
         >
              <div className="flex flex-col items-center text-center mb-10">
                  <span className="inline-block py-1 px-4 border border-[#0066b2] rounded-full bg-white text-[#0066b2] font-bold tracking-[0.2em] text-[10px] uppercase mb-4 shadow-sm">
@@ -93,7 +92,8 @@ const ChiSiamo: React.FC = () => {
                     </div>
                     
                     <div className="flex items-center gap-4 mb-6">
-                        <div className="w-16 h-16 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-oswald font-bold text-2xl border-2 border-slate-900 group-hover:bg-white group-hover:text-slate-900 transition-colors">
+                        {/* NUMBER COLOR CHANGED TO TACALABALA BLUE */}
+                        <div className="w-16 h-16 bg-[#0066b2] text-white rounded-2xl flex items-center justify-center font-oswald font-bold text-2xl border-2 border-[#0066b2] group-hover:bg-white group-hover:text-[#0066b2] transition-colors">
                             7
                         </div>
                         <div>
@@ -117,7 +117,8 @@ const ChiSiamo: React.FC = () => {
                     </div>
                     
                     <div className="flex items-center gap-4 mb-6">
-                        <div className="w-16 h-16 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-oswald font-bold text-2xl border-2 border-slate-900 group-hover:bg-white group-hover:text-slate-900 transition-colors">
+                        {/* NUMBER COLOR CHANGED TO TACALABALA BLUE */}
+                        <div className="w-16 h-16 bg-[#0066b2] text-white rounded-2xl flex items-center justify-center font-oswald font-bold text-2xl border-2 border-[#0066b2] group-hover:bg-white group-hover:text-[#0066b2] transition-colors">
                           10  
                         </div>
                         <div>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowLeft, Scale, ShoppingBag, Truck, RefreshCw, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Scale, ShoppingBag, Truck, RefreshCw, AlertCircle, Gavel } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface TermsAndConditionsProps {
@@ -83,7 +83,7 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({ onBack }) => {
             </p>
 
             <h3 className="flex items-center gap-3 font-oswald text-2xl uppercase font-bold text-slate-900 mt-12 mb-6">
-                6. Legge Applicabile
+                <Gavel size={24} className="text-[#0066b2]" /> 6. Legge Applicabile
             </h3>
             <p>
                 Questi termini sono regolati dalla legge italiana. Per qualsiasi controversia sarà competente il Foro di Milano, o il foro di residenza del consumatore se previsto dalle norme vigenti.

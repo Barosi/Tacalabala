@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
 import { Product, Size } from '../types';
-import { ShoppingBag, Shirt, AlertCircle, Check, Loader2, Tag, Lock, Clock, Eye } from 'lucide-react';
+import { ShoppingBag, Loader2, Tag, Lock, Clock, Eye, AlertCircle, Check } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { motion } from 'framer-motion';
 
 interface ProductCardProps {
   product: Product;
@@ -21,7 +22,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   const priceInfo = calculatePrice(product);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
-      e.stopPropagation(); // Stop bubbling to prevent opening detail page
+      e.stopPropagation(); 
       e.preventDefault();
       setButtonState('loading');
       setTimeout(() => {
@@ -86,25 +87,39 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
       </div>
 
       <div className="p-8 flex flex-col flex-grow bg-white relative">
-        <div className="flex justify-between items-start mb-4">
-            {/* Improved Label Visibility: Smaller font, no hard truncation */}
-            <span className="text-[#0066b2] text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-1 flex-shrink min-w-0">
-                <Shirt size={12} className="flex-shrink-0" /> <span className="whitespace-nowrap">{product.season}</span>
+        
+        {/* CENTERED SEASON LABEL + SIZE SELECTOR */}
+        <div className="flex flex-col items-center gap-2 mb-4">
+             {/* Edition Label Centered */}
+            <span className="text-[#0066b2] text-[9px] font-bold uppercase tracking-[0.2em] text-center">
+                {product.season}
             </span>
             
-            {/* Size Selector - Hidden if Coming Soon */}
+            {/* Size Selector - Centered Pills */}
             {!isComingSoon && (
-                <div className="flex gap-1 flex-shrink-0 ml-2" onClick={(e) => e.stopPropagation()}>
+                <div className="flex gap-1 bg-slate-100 rounded-full p-1" onClick={(e) => e.stopPropagation()}>
                     {(['S', 'M', 'L', 'XL'] as Size[]).map((s) => {
                         const variant = product.variants?.find(v => v.size === s);
                         const sizeDisabled = !variant || variant.stock === 0;
+                        const isSelected = selectedSize === s;
+                        
                         return (
                             <button
                                 key={s}
                                 disabled={sizeDisabled}
                                 onClick={(e) => { e.preventDefault(); setSelectedSize(s); }}
-                                className={`w-6 h-6 text-[10px] font-bold rounded flex items-center justify-center transition-all ${selectedSize === s ? 'bg-black text-white scale-110 shadow-md' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'} ${sizeDisabled ? 'opacity-30 cursor-not-allowed line-through' : ''}`}
+                                className={`
+                                    relative w-6 h-6 text-[10px] font-bold rounded-full flex items-center justify-center transition-all z-10
+                                    ${sizeDisabled ? 'opacity-30 cursor-not-allowed line-through text-slate-400' : isSelected ? 'text-white' : 'text-slate-500 hover:text-black'}
+                                `}
                             >
+                                {isSelected && (
+                                    <motion.div
+                                        layoutId={`size-card-${product.id}`}
+                                        className="absolute inset-0 bg-[#0066b2] rounded-full -z-10 shadow-sm"
+                                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                    />
+                                )}
                                 {s}
                             </button>
                         )
@@ -113,15 +128,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
             )}
         </div>
         
-        <h3 className="text-black font-oswald text-2xl uppercase tracking-wide leading-tight mb-2 group-hover:text-[#0066b2] transition-colors">
+        <h3 className="text-black font-oswald text-2xl uppercase tracking-wide leading-tight mb-2 text-center group-hover:text-[#0066b2] transition-colors">
           {isComingSoon ? '???' : product.title}
         </h3>
         
-        <div className="min-h-[20px] mb-4">
+        <div className="min-h-[20px] mb-4 text-center">
              {!isComingSoon && (isSizeSoldOut ? (
-                 <p className="text-[10px] text-red-500 font-bold uppercase flex items-center gap-1"><AlertCircle size={12} /> Taglia Esaurita</p>
+                 <p className="text-[10px] text-red-500 font-bold uppercase inline-flex items-center gap-1"><AlertCircle size={12} /> Taglia Esaurita</p>
              ) : (
-                 <p className="text-[10px] text-green-600 font-bold uppercase flex items-center gap-1 opacity-80"><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>Disponibilità: {stockCount} pezzi</p>
+                 <p className="text-[10px] text-green-600 font-bold uppercase inline-flex items-center gap-1 opacity-80"><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>Disponibilità: {stockCount} pezzi</p>
              ))}
         </div>
 

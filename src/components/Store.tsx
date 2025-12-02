@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import ProductCard from './ProductCard';
 import { useStore } from '../store/useStore';
-import { Filter, SlidersHorizontal, ChevronDown, Check, Ruler, Layers, SortAsc, SortDesc, Calendar } from 'lucide-react';
+import { Filter, Check } from 'lucide-react';
 import { Product } from '../types';
 import { motion } from 'framer-motion';
 
@@ -14,7 +14,6 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
   const { products } = useStore();
   const [filterType, setFilterType] = useState<string>('all');
   const [filterSize, setFilterSize] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'new' | 'price-asc' | 'price-desc'>('new');
   
   // Custom Streetwear categories
   const categories = ['Concept', 'Lifestyle', 'Vintage', 'Limited'];
@@ -22,11 +21,10 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
   // Available sizes
   const availableSizes = ['S', 'M', 'L', 'XL'];
 
-  // Filter & Sort Logic
+  // Filter Logic (Default Sort: Newest by ID desc)
   const filteredProducts = products
     .filter(p => {
         if (filterType === 'all') return true;
-        // Mock filtering logic
         if (filterType === 'Concept') return p.tags?.includes('Concept') || p.kitType === 'Special';
         if (filterType === 'Lifestyle') return p.tags?.includes('Lifestyle') || p.season.includes('Lifestyle');
         if (filterType === 'Vintage') return p.year && parseInt(p.year) < 2010;
@@ -36,16 +34,28 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
         if (filterSize === 'all') return true;
         return p.variants?.some(v => v.size === filterSize && v.stock > 0);
     })
-    .sort((a, b) => {
-        if (sortBy === 'price-asc') return parseFloat(a.price.replace(/[^0-9.]/g, '')) - parseFloat(b.price.replace(/[^0-9.]/g, ''));
-        if (sortBy === 'price-desc') return parseFloat(b.price.replace(/[^0-9.]/g, '')) - parseFloat(a.price.replace(/[^0-9.]/g, ''));
-        return parseInt(b.id) - parseInt(a.id); // Default new
-    });
+    .sort((a, b) => parseInt(b.id) - parseInt(a.id));
 
   const handleReset = () => {
     setFilterType('all');
     setFilterSize('all');
   };
+
+  const FilterPill = ({ label, active, onClick, layoutId }: { label: string | React.ReactNode, active: boolean, onClick: () => void, layoutId: string }) => (
+      <button
+          onClick={onClick}
+          className={`relative px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 z-10 flex items-center justify-center min-w-[80px] ${active ? 'text-white' : 'text-slate-500 hover:text-[#0066b2]'}`}
+      >
+          {active && (
+              <motion.div
+                  layoutId={layoutId}
+                  className="absolute inset-0 bg-[#0066b2] rounded-full -z-10 shadow-md"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+          )}
+          {label}
+      </button>
+  );
 
   return (
     <section className="pt-32 md:pt-48 pb-24 bg-white min-h-screen relative overflow-hidden">
@@ -70,13 +80,13 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
 
       <div className="container mx-auto px-6 max-w-7xl relative z-10">
         
-        {/* Header - Styled like Chi Siamo & FAQ */}
+        {/* Header */}
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-center mb-16"
+            className="text-center mb-10"
         >
             <h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase mb-4 text-slate-900 leading-[1.1]">
                 Official <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Shop</span>
@@ -84,90 +94,56 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
             <p className="text-slate-500 uppercase tracking-widest text-xs font-bold">La collezione completa</p>
         </motion.div>
 
-        {/* Filters Toolbar */}
-        <div className="flex flex-col mb-12 sticky top-28 z-30 bg-white/90 backdrop-blur-md p-6 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50">
-            
-            {/* Top Row: Sorting (Left aligned) */}
-            <div className="flex items-center gap-4 mb-6">
-                 <div className="flex items-center gap-2 text-[#0066b2]">
-                    <SlidersHorizontal size={16} />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Ordina per</span>
-                 </div>
-                 <div className="relative group">
-                    <select 
-                        value={sortBy} 
-                        onChange={(e) => setSortBy(e.target.value as any)}
-                        className="appearance-none bg-slate-50 border border-slate-200 rounded-full py-2 pl-4 pr-8 text-xs font-bold uppercase tracking-wide text-slate-700 outline-none focus:border-[#0066b2] cursor-pointer hover:bg-slate-100 transition-colors"
-                    >
-                        <option value="new">Novità</option>
-                        <option value="price-asc">Prezzo: Basso - Alto</option>
-                        <option value="price-desc">Prezzo: Alto - Basso</option>
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
-            </div>
+        {/* --- TOOLBAR START (ONLY FILTERS) --- */}
+        <div className="sticky top-24 z-30 mb-12 flex justify-center w-full transition-all duration-300">
+            <div className="overflow-x-auto no-scrollbar pb-1 pt-1 max-w-full">
+                    <div className="flex items-center gap-1 bg-white/90 backdrop-blur-md border border-slate-200 p-1.5 rounded-full shadow-lg shadow-slate-200/50 min-w-max">
+                    
+                    {/* Filtro Collezione */}
+                    <FilterPill 
+                        label="Tutte" 
+                        active={filterType === 'all'} 
+                        onClick={() => setFilterType('all')} 
+                        layoutId="collectionFilter"
+                    />
+                    {categories.map(cat => (
+                        <FilterPill 
+                            key={cat} 
+                            label={cat} 
+                            active={filterType === cat} 
+                            onClick={() => setFilterType(cat)} 
+                            layoutId="collectionFilter"
+                        />
+                    ))}
 
-            {/* Filter Rows: Collection & Size Inline */}
-            <div className="flex flex-col xl:flex-row xl:items-center gap-8 w-full">
-                
-                {/* 1. Collezione Filter */}
-                <div className="flex flex-col md:flex-row md:items-center gap-4">
-                    <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider flex items-center gap-1.5 min-w-fit">
-                        <Layers size={12} /> Collezione
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                        {/* 'View All' Removed as requested */}
-                        <button
-                            onClick={() => setFilterType('all')}
-                            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 border ${filterType === 'all' ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:border-[#0066b2]'}`}
-                        >
-                            Tutte
-                        </button>
-                        {categories.map(cat => (
-                            <button
-                                key={cat}
-                                onClick={() => setFilterType(cat)}
-                                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 border ${filterType === cat ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:border-[#0066b2]'}`}
-                            >
-                                {cat}
-                            </button>
-                        ))}
+                    {/* Divisore Verticale */}
+                    <div className="w-px h-6 bg-slate-200 mx-2"></div>
+
+                    {/* Filtro Taglie */}
+                    <FilterPill 
+                        label={<Check size={14} />} 
+                        active={filterSize === 'all'} 
+                        onClick={() => setFilterSize('all')} 
+                        layoutId="sizeFilter"
+                    />
+                    {availableSizes.map(size => (
+                        <FilterPill 
+                            key={size} 
+                            label={size} 
+                            active={filterSize === size} 
+                            onClick={() => setFilterSize(size)} 
+                            layoutId="sizeFilter"
+                        />
+                    ))}
+
                     </div>
-                </div>
-
-                {/* Vertical Divider (Visible on XL) */}
-                <div className="hidden xl:block h-8 w-px bg-slate-200 border-l border-dashed border-slate-300"></div>
-
-                {/* 2. Size Filter (Next to Collection) */}
-                <div className="flex flex-col md:flex-row md:items-center gap-4">
-                    <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider flex items-center gap-1.5 min-w-fit">
-                        <Ruler size={12} /> Taglia
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                        <button
-                             onClick={() => setFilterSize('all')}
-                             className={`w-10 h-10 flex items-center justify-center rounded-xl text-xs font-bold transition-all duration-300 border ${filterSize === 'all' ? 'bg-slate-900 text-white border-slate-900 shadow-sm' : 'bg-white text-slate-400 border-slate-200 hover:border-[#0066b2]'}`}
-                             title="Qualsiasi Taglia"
-                        >
-                            <Check size={16} />
-                        </button>
-                        {availableSizes.map(size => (
-                            <button
-                                key={size}
-                                onClick={() => setFilterSize(size)}
-                                className={`w-10 h-10 flex items-center justify-center rounded-xl text-xs font-bold transition-all duration-300 border ${filterSize === size ? 'bg-[#0066b2] text-white border-[#0066b2] shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:border-[#0066b2]'}`}
-                            >
-                                {size}
-                            </button>
-                        ))}
-                    </div>
-                </div>
             </div>
         </div>
+        {/* --- TOOLBAR END --- */}
 
         {/* Products Grid */}
         {filteredProducts.length === 0 ? (
-            <div className="text-center py-20 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
+            <div className="text-center py-20 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200 animate-in fade-in zoom-in duration-500">
                 <Filter size={48} className="mx-auto text-slate-300 mb-4" />
                 <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">Nessun prodotto corrisponde ai filtri.</p>
                 <button onClick={handleReset} className="mt-4 text-[#0066b2] text-xs font-bold uppercase border-b border-[#0066b2] pb-0.5 hover:text-slate-900 hover:border-slate-900 transition-all">
@@ -175,7 +151,7 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
                 </button>
             </div>
         ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8 md:gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8 md:gap-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
                 {filteredProducts.map(product => (
                     <div key={product.id} className="h-full">
                         <ProductCard product={product} onClick={() => onProductClick?.(product)} />
