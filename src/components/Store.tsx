@@ -1,14 +1,59 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import ProductCard from './ProductCard';
 import { useStore } from '../store/useStore';
 import { Filter, Check } from 'lucide-react';
 import { Product } from '../types';
-import { motion, LayoutGroup, AnimatePresence } from 'framer-motion';
+import { motion, LayoutGroup } from 'framer-motion';
 
 interface StoreProps {
   onProductClick?: (product: Product) => void;
 }
+
+// Componente isolato per i segmenti di filtro
+// LayoutGroup con ID univoco garantisce che l'animazione sia confinata a questo gruppo
+const StoreSegmentedControl = ({ 
+    options, 
+    value, 
+    onChange, 
+    uniqueKey 
+}: { 
+    options: { value: string, label: string | React.ReactNode }[], 
+    value: string, 
+    onChange: (val: string) => void, 
+    uniqueKey: string 
+}) => {
+    return (
+        <LayoutGroup id={uniqueKey}>
+            <div className="flex items-center gap-1 p-1">
+                {options.map((opt) => {
+                    const isActive = value === opt.value;
+                    return (
+                        <button
+                            key={opt.value}
+                            onClick={() => onChange(opt.value)}
+                            className={`
+                                relative px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest z-10 flex items-center justify-center min-w-[70px]
+                                transition-colors duration-300 outline-none
+                                ${isActive ? 'text-white' : 'text-slate-500 hover:text-[#0066b2]'}
+                            `}
+                        >
+                            {isActive && (
+                                <motion.div
+                                    layoutId="activePill"
+                                    className="absolute inset-0 bg-[#0066b2] rounded-full shadow-md"
+                                    transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                                    style={{ zIndex: -1 }}
+                                />
+                            )}
+                            <span className="relative z-10">{opt.label}</span>
+                        </button>
+                    );
+                })}
+            </div>
+        </LayoutGroup>
+    );
+};
 
 const Store: React.FC<StoreProps> = ({ onProductClick }) => {
   const { products } = useStore();
@@ -21,45 +66,37 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
   // Available sizes
   const availableSizes = ['S', 'M', 'L', 'XL'];
 
-  // Filter Logic (Default Sort: Newest by ID desc)
-  const filteredProducts = products
-    .filter(p => {
-        if (filterType === 'all') return true;
-        if (filterType === 'Concept') return p.tags?.includes('Concept') || p.kitType === 'Special';
-        if (filterType === 'Lifestyle') return p.tags?.includes('Lifestyle') || p.season.includes('Lifestyle');
-        if (filterType === 'Vintage') return p.year && parseInt(p.year) < 2010;
-        return true; 
-    })
-    .filter(p => {
-        if (filterSize === 'all') return true;
-        return p.variants?.some(v => v.size === filterSize && v.stock > 0);
-    })
-    .sort((a, b) => parseInt(b.id) - parseInt(a.id));
+  // Filter Logic Memoized for Performance
+  const filteredProducts = useMemo(() => {
+      return products
+        .filter(p => {
+            if (filterType === 'all') return true;
+            if (filterType === 'Concept') return p.tags?.includes('Concept') || p.kitType === 'Special';
+            if (filterType === 'Lifestyle') return p.tags?.includes('Lifestyle') || p.season.includes('Lifestyle');
+            if (filterType === 'Vintage') return p.year && parseInt(p.year) < 2010;
+            return true; 
+        })
+        .filter(p => {
+            if (filterSize === 'all') return true;
+            return p.variants?.some(v => v.size === filterSize && v.stock > 0);
+        })
+        .sort((a, b) => parseInt(b.id) - parseInt(a.id));
+  }, [products, filterType, filterSize]);
 
   const handleReset = () => {
     setFilterType('all');
     setFilterSize('all');
   };
 
-  const FilterPill = ({ label, active, onClick, group }: { label: string | React.ReactNode, active: boolean, onClick: () => void, group: string }) => (
-      <button
-          onClick={onClick}
-          className={`relative px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest z-10 flex items-center justify-center min-w-[80px] transition-colors duration-300 ${active ? 'text-white' : 'text-slate-500 hover:text-[#0066b2]'}`}
-      >
-          {active && (
-              <motion.div
-                  layoutId={`active-${group}`}
-                  className="absolute inset-0 bg-[#0066b2] rounded-full shadow-md"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                  style={{ zIndex: -1 }}
-              />
-          )}
-          {label}
-      </button>
-  );
+  const collectionOptions = [
+      { value: 'all', label: 'Tutte' },
+      ...categories.map(c => ({ value: c, label: c }))
+  ];
+
+  const sizeOptions = [
+      { value: 'all', label: <Check size={14} /> },
+      ...availableSizes.map(s => ({ value: s, label: s }))
+  ];
 
   return (
     <section className="pt-32 md:pt-48 pb-24 bg-white min-h-screen relative overflow-hidden">
@@ -97,54 +134,33 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
             <p className="text-slate-500 uppercase tracking-widest text-xs font-bold">La collezione completa</p>
         </motion.div>
 
-        {/* --- TOOLBAR START (ONLY FILTERS) --- */}
-        <LayoutGroup>
-            <div className="sticky top-24 z-30 mb-12 flex justify-center w-full transition-all duration-300">
-                <div className="overflow-x-auto no-scrollbar pb-1 pt-1 max-w-full">
-                        <div className="flex items-center gap-1 bg-white/90 backdrop-blur-md border border-slate-200 p-1.5 rounded-full shadow-lg shadow-slate-200/50 min-w-max">
+        {/* --- TOOLBAR --- */}
+        <div className="sticky top-24 z-30 mb-12 flex justify-center w-full transition-all duration-300">
+            <div className="overflow-x-auto no-scrollbar pb-1 pt-1 max-w-full">
+                <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md border border-slate-200 p-2 rounded-full shadow-lg shadow-slate-200/50 min-w-max">
                     
-                    {/* Filtro Collezione */}
-                    <FilterPill 
-                        label="Tutte" 
-                        active={filterType === 'all'} 
-                        onClick={() => setFilterType('all')} 
-                        group="collection"
+                    {/* Gruppo 1: Collezione */}
+                    <StoreSegmentedControl 
+                        options={collectionOptions} 
+                        value={filterType} 
+                        onChange={setFilterType} 
+                        uniqueKey="collection-filter" 
                     />
-                    {categories.map(cat => (
-                        <FilterPill 
-                            key={cat} 
-                            label={cat} 
-                            active={filterType === cat} 
-                            onClick={() => setFilterType(cat)} 
-                            group="collection"
-                        />
-                    ))}
 
                     {/* Divisore Verticale */}
-                    <div className="w-px h-6 bg-slate-200 mx-2"></div>
+                    <div className="w-px h-8 bg-slate-200"></div>
 
-                    {/* Filtro Taglie */}
-                    <FilterPill 
-                        label={<Check size={14} />} 
-                        active={filterSize === 'all'} 
-                        onClick={() => setFilterSize('all')} 
-                        group="size"
+                    {/* Gruppo 2: Taglie */}
+                    <StoreSegmentedControl 
+                        options={sizeOptions} 
+                        value={filterSize} 
+                        onChange={setFilterSize} 
+                        uniqueKey="size-filter" 
                     />
-                    {availableSizes.map(size => (
-                        <FilterPill 
-                            key={size} 
-                            label={size} 
-                            active={filterSize === size} 
-                            onClick={() => setFilterSize(size)} 
-                            group="size"
-                        />
-                    ))}
 
-                        </div>
                 </div>
             </div>
-        </LayoutGroup>
-        {/* --- TOOLBAR END --- */}
+        </div>
 
         {/* Products Grid */}
         {filteredProducts.length === 0 ? (
