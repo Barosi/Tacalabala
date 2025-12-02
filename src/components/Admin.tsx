@@ -4,6 +4,7 @@ import { Product, ProductVariant, Size, FAQ, Discount, OrderStatus, ShippingConf
 import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, Tag, Calendar, ShoppingBag, Truck, Check, Search, Shirt, Layers, Image as ImageIcon, Upload, Settings, Mail, Shield, AlertTriangle, ChevronDown, X, Phone, Globe, ToggleLeft, ToggleRight, HelpCircle } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { sendShippingConfirmationEmail } from '../utils/emailSender';
+import { motion } from 'framer-motion';
 
 // --- UI COMPONENTS ---
 
@@ -55,21 +56,30 @@ const LiquidButton = ({
 const SegmentedControl = ({ 
     options, 
     value, 
-    onChange 
+    onChange,
+    className = ''
 }: { 
     options: { value: string, label: string }[], 
     value: string, 
-    onChange: (val: any) => void 
+    onChange: (val: any) => void,
+    className?: string
 }) => {
     return (
-        <div className="bg-slate-100 p-1.5 rounded-2xl flex relative w-full">
+        <div className={`bg-slate-100 p-1.5 rounded-2xl flex relative w-full ${className}`}>
             {options.map((opt) => (
                 <button
                     key={opt.value}
                     type="button"
                     onClick={() => onChange(opt.value)}
-                    className={`flex-1 py-3 px-4 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-300 relative z-10 ${value === opt.value ? 'bg-white text-[#0066b2] shadow-md transform scale-[1.02]' : 'text-slate-400 hover:text-slate-600'}`}
+                    className={`flex-1 py-3 px-4 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-300 relative z-10 ${value === opt.value ? 'text-[#0066b2] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                 >
+                    {value === opt.value && (
+                        <motion.div 
+                            layoutId={`segment-${options[0].value}`}
+                            className="absolute inset-0 bg-white rounded-xl shadow-sm z-[-1]"
+                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        />
+                    )}
                     {opt.label}
                 </button>
             ))}
@@ -294,19 +304,27 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     <LiquidButton onClick={onLogout} label="Logout" icon={LogOut} variant="danger" />
                 </div>
 
-                <div className="flex gap-4 mb-12 overflow-x-auto pb-4 px-1 no-scrollbar">
+                {/* --- FLUID NAVIGATION BAR --- */}
+                <div className="flex p-1.5 bg-slate-200/50 rounded-full mb-12 relative max-w-4xl mx-auto backdrop-blur-sm border border-slate-200">
                     {[
-                        { id: 'products', label: 'Prodotti', icon: Package },
-                        { id: 'orders', label: 'Ordini', icon: ShoppingBag },
-                        { id: 'promotions', label: 'Promozioni', icon: Tag },
-                        { id: 'settings', label: 'Impostazioni', icon: Settings },
+                        { id: 'products', label: 'Prodotti' },
+                        { id: 'orders', label: 'Ordini' },
+                        { id: 'promotions', label: 'Promozioni' },
+                        { id: 'settings', label: 'Impostazioni' },
                     ].map(tab => (
                         <button 
                             key={tab.id} 
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex items-center gap-3 px-8 py-4 rounded-full font-bold uppercase text-xs tracking-widest transition-all duration-300 whitespace-nowrap border shadow-sm ${activeTab === tab.id ? 'bg-[#0066b2] text-white border-[#0066b2] shadow-lg scale-105' : 'bg-white text-slate-400 border-slate-200 hover:border-[#0066b2] hover:text-[#0066b2]'}`}
+                            className={`flex-1 relative py-4 px-4 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest transition-colors duration-300 z-10 ${activeTab === tab.id ? 'text-[#0066b2]' : 'text-slate-400 hover:text-slate-600'}`}
                         >
-                            <tab.icon size={18} /> {tab.label}
+                            {activeTab === tab.id && (
+                                <motion.div 
+                                    layoutId="activeTab"
+                                    className="absolute inset-0 bg-white rounded-full shadow-md z-[-1]"
+                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                />
+                            )}
+                            {tab.label}
                         </button>
                     ))}
                 </div>
@@ -316,8 +334,10 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
                         <Card title="Nuovo Articolo" subtitle="Inserisci i dettagli streetwear" icon={Plus}>
                             <form onSubmit={handleProductSubmit} className="h-full flex flex-col">
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 flex-grow">
-                                    <div className="space-y-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 flex-grow items-start">
+                                    
+                                    {/* Column Left: Info */}
+                                    <div className="space-y-6 h-full">
                                         <InputGroup label="Titolo Prodotto">
                                             <StyledInput value={newProduct.title} onChange={e => setNewProduct({...newProduct, title: e.target.value})} placeholder="Es. Milano Concrete Tee" required />
                                         </InputGroup>
@@ -338,30 +358,35 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-40 resize-none" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} placeholder="Descrivi il fit e i dettagli..." />
                                         </InputGroup>
                                     </div>
+
+                                    {/* Column Right: Media & Variants */}
                                     <div className="flex flex-col gap-6 h-full">
-                                        <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-dashed border-slate-300 flex-1">
-                                            <div className="flex justify-between items-center mb-4">
-                                                <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Galleria Immagini (Max 1MB)</span>
-                                                <button type="button" onClick={() => fileInputRef.current?.click()} className="text-[#0066b2] text-[10px] font-bold uppercase hover:underline flex items-center gap-1"><Upload size={12}/> Carica</button>
-                                            </div>
-                                            <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
-                                            <div className="grid grid-cols-4 gap-3">
-                                                {uploadImages.map((img, i) => (
-                                                    <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group bg-white shadow-sm">
-                                                        <img src={img} className="w-full h-full object-cover" alt="" />
-                                                        <button type="button" onClick={() => setUploadImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={16}/></button>
+                                        <div className="flex flex-col flex-1">
+                                            <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-2 pl-1">Galleria Immagini (Max 1MB)</span>
+                                            <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-dashed border-slate-300 flex-grow">
+                                                <div className="flex justify-end mb-4">
+                                                    <button type="button" onClick={() => fileInputRef.current?.click()} className="text-[#0066b2] text-[10px] font-bold uppercase hover:underline flex items-center gap-1"><Upload size={12}/> Carica</button>
+                                                </div>
+                                                <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
+                                                <div className="grid grid-cols-4 gap-3">
+                                                    {uploadImages.map((img, i) => (
+                                                        <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group bg-white shadow-sm">
+                                                            <img src={img} className="w-full h-full object-cover" alt="" />
+                                                            <button type="button" onClick={() => setUploadImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={16}/></button>
+                                                        </div>
+                                                    ))}
+                                                    <div onClick={() => fileInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300 hover:text-[#0066b2] hover:border-[#0066b2] cursor-pointer transition-colors bg-white">
+                                                        <ImageIcon size={24} />
                                                     </div>
-                                                ))}
-                                                <div onClick={() => fileInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300 hover:text-[#0066b2] hover:border-[#0066b2] cursor-pointer transition-colors bg-white">
-                                                    <ImageIcon size={24} />
                                                 </div>
                                             </div>
                                         </div>
+
                                         <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200">
                                             <span className="block text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-4">Gestione Stock per Taglia</span>
                                             <div className="grid grid-cols-2 gap-4">
                                                 {variantsState.map((v, idx) => (
-                                                    <div key={v.size} className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+                                                    <div key={v.size} className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm opacity-90 hover:opacity-100 transition-opacity">
                                                         <input type="checkbox" checked={v.enabled} onChange={(e) => {const up = [...variantsState]; up[idx].enabled = e.target.checked; setVariantsState(up);}} className="w-5 h-5 accent-[#0066b2] rounded cursor-pointer"/>
                                                         <span className="font-bold text-sm w-8">{v.size}</span>
                                                         <input type="number" disabled={!v.enabled} value={v.stock} onChange={(e) => {const up = [...variantsState]; up[idx].stock = e.target.value; setVariantsState(up);}} className="w-full text-right bg-transparent outline-none font-mono text-slate-900 border-b border-transparent focus:border-[#0066b2]" placeholder="0" />
@@ -409,11 +434,20 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             {isExpanded && (
                                                 <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-2">
                                                     <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
-                                                        <div className="flex gap-2">
+                                                        <div className="flex flex-wrap gap-4">
                                                             {sortedVariants.map(v => (
-                                                                <div key={v.size} className="flex-1 bg-white border border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm">
-                                                                    <span className="text-[10px] font-bold uppercase text-slate-400 mb-1">Tg {v.size}</span>
-                                                                    <input type="number" className="w-12 text-center font-bold text-slate-900 outline-none border-b border-slate-200 focus:border-[#0066b2] transition-colors" value={v.stock} onChange={(e) => updateProductStock(product.id, v.size as Size, parseInt(e.target.value)||0)} />
+                                                                <div key={v.size} className="flex items-center gap-3">
+                                                                    <div className="w-8 h-8 rounded-full bg-[#0066b2] text-white flex items-center justify-center font-bold text-xs shadow-md">
+                                                                        {v.size}
+                                                                    </div>
+                                                                    <div className="relative">
+                                                                        <input 
+                                                                            type="number" 
+                                                                            className="w-16 bg-white border border-slate-200 rounded-lg px-2 py-1 text-center font-bold text-slate-900 text-sm focus:border-[#0066b2] outline-none" 
+                                                                            value={v.stock} 
+                                                                            onChange={(e) => updateProductStock(product.id, v.size as Size, parseInt(e.target.value)||0)} 
+                                                                        />
+                                                                    </div>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -642,11 +676,16 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         {subTabSettings === 'payments' && (
                             <Card title="Configurazione Stripe" subtitle="Gestisci chiavi API" icon={CreditCard}>
                                 <div className="space-y-6 max-w-2xl mx-auto">
-                                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-center justify-between">
-                                        <span className="text-xs font-bold uppercase text-[#0066b2] flex items-center gap-2"><Globe size={16} /> Modalità Live</span>
-                                        <button onClick={() => setPayForm({...payForm, isEnabled: !payForm.isEnabled})} className={`w-12 h-6 rounded-full p-1 transition-colors ${payForm.isEnabled ? 'bg-[#0066b2]' : 'bg-slate-300'}`}>
-                                            <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform ${payForm.isEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
-                                        </button>
+                                    <div className="bg-blue-50 p-6 rounded-[1.5rem] border border-blue-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                                        <span className="text-xs font-bold uppercase text-[#0066b2] flex items-center gap-2"><Globe size={16} /> Ambiente Stripe</span>
+                                        <div className="w-full md:w-48">
+                                            <SegmentedControl 
+                                                options={[{value: 'false', label: 'Test Mode'}, {value: 'true', label: 'Live Mode'}]}
+                                                value={String(payForm.isEnabled)}
+                                                onChange={(val) => setPayForm({...payForm, isEnabled: val === 'true'})}
+                                                className="bg-white/50"
+                                            />
+                                        </div>
                                     </div>
                                     
                                     <InputGroup label="Stripe Public Key">
