@@ -1,21 +1,12 @@
 
 import React from 'react';
-import { Instagram, ArrowUp } from 'lucide-react';
+import { Instagram, ArrowUp, Mail } from 'lucide-react';
 import { INSTAGRAM_URL } from '../constants';
-import { FaCcVisa, FaCcMastercard, FaCcAmex, FaCcApplePay } from "react-icons/fa";
+import { FaCcVisa, FaCcMastercard, FaCcAmex, FaCcApplePay, FaPaypal } from "react-icons/fa";
 
 interface FooterProps {
-    onNavigate: (page: 'privacy' | 'terms') => void;
+    onNavigate: (page: 'home' | 'store' | 'contact' | 'faq' | 'chi-siamo' | 'admin' | 'checkout' | 'product-details' | 'privacy' | 'terms') => void;
 }
-
-const PaymentIcons = () => (
-    <div className="flex gap-4 items-center opacity-50 grayscale hover:grayscale-0 transition-all duration-300">
-        <FaCcVisa className="text-2xl text-white" title="Visa" />
-        <FaCcMastercard className="text-2xl text-white" title="Mastercard" />
-        <FaCcAmex className="text-2xl text-white" title="American Express" />
-        <FaCcApplePay className="text-2xl text-white" title="Apple Pay" />
-    </div>
-);
 
 const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   const scrollToTop = () => {
@@ -23,50 +14,73 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   };
 
   return (
-    <footer className="bg-slate-900 text-white pt-12 pb-8 relative overflow-hidden border-t border-slate-800">
+    <>
+    <footer className="bg-slate-900 text-slate-400 py-16 border-t border-slate-800 relative overflow-hidden">
       
       <div className="container mx-auto px-6 max-w-7xl relative z-10">
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             
-            {/* Left: Brand & Copy */}
-            <div className="text-center md:text-left space-y-4">
-                <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">
-                    © {new Date().getFullYear()} Tacalabala Milano
-                </p>
-                <div className="text-[10px] text-slate-600 leading-tight space-y-1">
-                    <p>Sede Legale: Via del Calcio 10, 20100 Milano (MI)</p>
-                    <p>P.IVA / C.F.: 12345678901</p>
-                    <p>REA: MI-123456</p>
-                    <p>PEC: tacalabala@legalmail.it</p>
+       {/* 1. Dati Societari */}
+            <div>
+                 <h3 className="font-bold text-white text-xs uppercase tracking-widest mb-6">Azienda</h3>
+                 <ul className="space-y-4 text-xs">
+                    <li>Tacalabala S.r.l.</li>
+                    <li>Via del Calcio 10, Milano</li>
+                    <li>P.IVA: 12345678901</li>
+                    <li>REA: MI-123456</li>
+                 </ul>
+            </div>
+
+
+            {/* 2. Link Utili */}
+            <div>
+                <h3 className="font-bold text-white text-xs uppercase tracking-widest mb-6">Supporto</h3>
+                <ul className="space-y-4 text-xs">
+                    <li><button onClick={() => onNavigate('faq')} className="hover:text-white transition-colors text-left">FAQ</button></li>
+                    <li><button onClick={() => onNavigate('terms')} className="hover:text-white transition-colors text-left">Termini e Condizioni</button></li>
+                    <li><button onClick={() => onNavigate('privacy')} className="hover:text-white transition-colors text-left">Privacy Policy</button></li>
+                </ul>
+            </div>
+
+          {/* 3. Brand */}
+            <div className="md:col-span-1 space-y-6">
+               <h3 className="font-bold text-white text-xs uppercase tracking-widest mb-6">Social</h3>
+                <div className="flex gap-4">
+                     <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-white hover:text-black transition-all">
+                        <Instagram size={18} />
+                    </a>
+                    <a href="mailto:info@tacalabala.it" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-white hover:text-black transition-all">
+                        <Mail size={18} />
+                    </a>
                 </div>
             </div>
 
-            {/* Center: Social & Links */}
-            <div className="flex flex-col items-center justify-center gap-4">
-                 <a href={INSTAGRAM_URL} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white transition-colors mb-2">
-                    <Instagram size={20} />
-                </a>
-                <div className="flex flex-col md:flex-row gap-4 md:gap-8">
-                    <button onClick={() => onNavigate('privacy')} className="text-[10px] text-slate-500 hover:text-white uppercase tracking-[0.2em] font-bold transition-colors">Privacy & Cookie Policy</button>
-                    <button onClick={() => onNavigate('terms')} className="text-[10px] text-slate-500 hover:text-white uppercase tracking-[0.2em] font-bold transition-colors">Termini e Condizioni</button>
+            {/* 4. Pagamenti e Newsletter (Placeholder) */}
+            <div>
+                <h3 className="font-bold text-white text-xs uppercase tracking-widest mb-6">Pagamenti Sicuri</h3>
+                <div className="flex flex-wrap gap-3 mb-8">
+                    <FaCcVisa className="text-2xl text-slate-500 hover:text-white transition-colors" />
+                    <FaCcMastercard className="text-2xl text-slate-500 hover:text-white transition-colors" />
+                    <FaCcAmex className="text-2xl text-slate-500 hover:text-white transition-colors" />
+                    <FaCcApplePay className="text-2xl text-slate-500 hover:text-white transition-colors" />
+                    <FaPaypal className="text-xl text-slate-500 hover:text-white transition-colors" />
                 </div>
             </div>
+        </div>
 
-            {/* Right: Payment & Up */}
-            <div className="flex items-center justify-center md:justify-end gap-8">
-                <PaymentIcons />
-                <button 
-                    onClick={scrollToTop}
-                    className="w-10 h-10 rounded-full border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
-                    title="Torna su"
-                >
-                    <ArrowUp size={16} /> 
-                </button>
-            </div>
+        {/* Bottom Bar */}
+        <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-[10px] uppercase font-bold tracking-widest opacity-50">© {new Date().getFullYear()} Tacalabala Milano. All rights reserved.</p>
+            <button 
+                onClick={scrollToTop}
+                className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest hover:text-white transition-colors"
+            >
+                Torna su <ArrowUp size={14} /> 
+            </button>
         </div>
       </div>
     </footer>
+    </>
   );
 };
 

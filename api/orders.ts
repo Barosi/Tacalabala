@@ -24,7 +24,7 @@ function calculateServerPrice(product: any, discounts: any[]) {
     const originalPrice = parseFloat(product.price.toString().replace('€', '').replace(',', '.').trim());
     const now = new Date();
 
-    // Se è un drop futuro, prezzo pieno (o bloccato, ma qui assumiamo acquistabile se arrivato al backend)
+    // Se è un drop futuro, prezzo pieno
     if (product.drop_date && new Date(product.drop_date) > now) {
         return originalPrice;
     }
@@ -37,7 +37,7 @@ function calculateServerPrice(product: any, discounts: any[]) {
         
         if (d.target_type === 'all') return true;
         
-        // Parsing target_product_ids se è stringa o array
+        // Parsing target_product_ids
         let targetIds = d.target_product_ids;
         if (typeof targetIds === 'string') {
             try { targetIds = JSON.parse(targetIds); } catch(e) { targetIds = []; }
@@ -48,13 +48,29 @@ function calculateServerPrice(product: any, discounts: any[]) {
     });
 
     if (applicableDiscounts.length > 0) {
-        // Applica lo sconto migliore
         const bestDiscount = applicableDiscounts.reduce((prev, current) => (prev.percentage > current.percentage) ? prev : current);
         const discountAmount = (originalPrice * bestDiscount.percentage) / 100;
         return originalPrice - discountAmount;
     }
 
     return originalPrice;
+}
+
+// Helper per RIPRISTINARE lo stock
+async function restoreStockForOrder(client: any, orderId: string) {
+    // 1. Prendi gli items dell'ordine
+    const resItems = await client.query('SELECT product_id, selected_size, quantity FROM order_items WHERE order_id = $1', [orderId]);
+    const items = resItems.rows;
+
+    for (const item of items) {
+        // Incrementa lo stock
+        await client.query(
+            `UPDATE product_variants 
+             SET stock = stock + $1 
+             WHERE product_id = $2 AND size = $3`,
+            [item.quantity, item.product_id, item.selected_size]
+        );
+    }
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -95,7 +111,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
   }
 
-  // POST: Create Order (SECURE SERVER-SIDE CALCULATION)
+  // POST: Create Order
   if (req.method === 'POST') {
       const client = await pool.connect();
       try {
@@ -107,7 +123,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
           await client.query('BEGIN');
 
-          // 1. Fetch Configs (Shipping & Discounts)
           const settingsRes = await client.query("SELECT * FROM app_settings WHERE key IN ('shipping')");
           const discountsRes = await client.query("SELECT * FROM discounts");
           
@@ -116,35 +131,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           if (shippingRow) shippingConfig = shippingRow.value;
 
           const activeDiscounts = discountsRes.rows;
-
-          // 2. Fetch Products involved in the order to get REAL prices
           const productIds = items.map((i: any) => i.id);
-          // Usa ANY per array in postgres
           const productsRes = await client.query('SELECT * FROM products WHERE id = ANY($1)', [productIds]);
           const dbProducts = productsRes.rows;
 
           let calculatedSubtotal = 0;
           const verifiedItems = [];
 
-          // 3. Loop items, Validate Stock, Calculate Price
           for (const item of items) {
-              // SECURITY CHECK: Quantità deve essere positiva intera
               if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
                   throw new Error(`Quantità non valida per articolo ${item.id}`);
               }
 
               const dbProduct = dbProducts.find((p: any) => p.id === item.id);
-              
-              if (!dbProduct) {
-                  throw new Error(`Prodotto ${item.title} non più disponibile.`);
-              }
+              if (!dbProduct) throw new Error(`Prodotto ${item.title} non disponibile.`);
+              if (dbProduct.is_sold_out) throw new Error(`Prodotto ${dbProduct.title} esaurito.`);
 
-              if (dbProduct.is_sold_out) {
-                   throw new Error(`Prodotto ${dbProduct.title} è esaurito.`);
-              }
-
-              // ATOMIC STOCK CHECK & UPDATE
-              // Decrementa stock SOLO se stock >= quantity. Restituisce rowCount.
               const stockUpdateRes = await client.query(
                   `UPDATE product_variants 
                    SET stock = stock - $1 
@@ -153,25 +155,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               );
 
               if (stockUpdateRes.rowCount === 0) {
-                  throw new Error(`Taglia ${item.selectedSize} esaurita per ${dbProduct.title}. Rimuovilo dal carrello.`);
+                  throw new Error(`Taglia ${item.selectedSize} esaurita per ${dbProduct.title}.`);
               }
 
-              // Prezzo reale dal DB
               const realUnitPrice = calculateServerPrice(dbProduct, activeDiscounts);
               calculatedSubtotal += realUnitPrice * item.quantity;
 
               verifiedItems.push({
                   ...item,
                   finalPrice: realUnitPrice,
-                  title: dbProduct.title // Usa titolo dal DB per sicurezza
+                  title: dbProduct.title
               });
           }
 
-          // 4. Calculate Shipping
           const isItaly = shippingAddress.toLowerCase().includes('italia') || shippingAddress.toLowerCase().includes('italy');
           let shippingCost = 0;
-          
-          // Logica semplificata basata sulla stringa indirizzo
           if (isItaly) {
               shippingCost = calculatedSubtotal >= shippingConfig.italyThreshold ? 0 : shippingConfig.italyPrice;
           } else {
@@ -179,8 +177,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           }
 
           const grandTotal = calculatedSubtotal + shippingCost;
-
-          // 5. Insert Order
           const newOrderId = await generateNextOrderId(client);
 
           await client.query(
@@ -190,7 +186,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                invoiceDetails?.taxId, invoiceDetails?.vatNumber, invoiceDetails?.sdiCode]
           );
 
-          // 6. Insert Order Items
           for (const item of verifiedItems) {
               await client.query(
                   `INSERT INTO order_items (order_id, product_id, product_title, product_price, selected_size, quantity)
@@ -205,39 +200,73 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       } catch (e: any) {
           await client.query('ROLLBACK');
           console.error("Order failed:", e);
-          // Restituisci l'errore specifico (es. Stock esaurito) al frontend
-          return res.status(400).json({ error: e.message || 'Errore durante la creazione dell\'ordine.' });
+          return res.status(400).json({ error: e.message || 'Errore creazione ordine.' });
       } finally {
           client.release();
       }
   }
 
-  // PATCH: Update Status and Tracking
+  // PATCH: Update Status
   if (req.method === 'PATCH') {
       const { id, status, trackingCode, courier } = req.body;
+      const client = await pool.connect();
       try {
+          await client.query('BEGIN');
+          
+          // Check previous status to handle restocking if cancelling
+          const prevOrderRes = await client.query('SELECT status FROM orders WHERE id = $1', [id]);
+          if (prevOrderRes.rows.length === 0) throw new Error("Order not found");
+          const prevStatus = prevOrderRes.rows[0].status;
+
+          // Se passo a CANCELLED da uno stato che non è già cancelled, RESTOCK
+          if (status === 'cancelled' && prevStatus !== 'cancelled') {
+              await restoreStockForOrder(client, id);
+          }
+
           if (status === 'shipped' && trackingCode) {
-               await pool.query(
+               await client.query(
                    'UPDATE orders SET status = $1, tracking_code = $2, courier = $3 WHERE id = $4', 
                    [status, trackingCode, courier, id]
                );
           } else {
-               await pool.query('UPDATE orders SET status = $1 WHERE id = $2', [status, id]);
+               await client.query('UPDATE orders SET status = $1 WHERE id = $2', [status, id]);
           }
+
+          await client.query('COMMIT');
           return res.status(200).json({ success: true });
       } catch (e) {
+          await client.query('ROLLBACK');
           return res.status(500).json({ error: 'Failed to update status' });
+      } finally {
+          client.release();
       }
   }
 
-  // DELETE: Remove Order
+  // DELETE: Remove Order and RESTOCK
   if (req.method === 'DELETE') {
       const { id } = req.query;
+      const client = await pool.connect();
       try {
-          await pool.query('DELETE FROM orders WHERE id = $1', [id]);
+          await client.query('BEGIN');
+          
+          // 1. Controlla lo stato per decidere se ripristinare lo stock
+          const orderRes = await client.query('SELECT status FROM orders WHERE id = $1', [id]);
+          if (orderRes.rows.length > 0) {
+              const status = orderRes.rows[0].status;
+              // Se l'ordine non era già cancellato, ripristina lo stock prima di eliminare
+              if (status !== 'cancelled') {
+                  await restoreStockForOrder(client, id as string);
+              }
+          }
+
+          await client.query('DELETE FROM orders WHERE id = $1', [id]);
+          await client.query('COMMIT');
           return res.status(200).json({ success: true });
       } catch (e) {
+          await client.query('ROLLBACK');
           return res.status(500).json({ error: 'Failed to delete order' });
+      } finally {
+          client.release();
       }
   }
 }

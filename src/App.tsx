@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ProductGrid from './components/ProductGrid';
-import About from './components/About';
 import Contact from './components/Contact';
 import FAQSection from './components/FAQSection';
 import ChiSiamo from './components/ChiSiamo';
@@ -196,7 +195,6 @@ const App: React.FC = () => {
           <>
             <Hero />
             <div id="products"><ProductGrid products={products} onProductClick={handleOpenProduct} /></div>
-            <About />
             <SupportSection />
           </>
         )}

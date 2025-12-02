@@ -48,15 +48,29 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
   };
 
   return (
-    <section className="pt-32 md:pt-48 pb-24 bg-white min-h-screen relative">
-       {/* Background Axis */}
-       <div className="absolute inset-0 flex justify-center pointer-events-none z-0">
-          <div className="w-px h-full bg-slate-100 border-l border-dashed border-slate-300"></div>
+    <section className="pt-32 md:pt-48 pb-24 bg-white min-h-screen relative overflow-hidden">
+       
+       {/* BACKGROUND: Pitch Lines + Central Fade */}
+       <div className="absolute inset-0 pointer-events-none z-0">
+           {/* Center Circle Graphic */}
+            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-slate-100 rounded-full opacity-60"></div>
+            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[20px] h-[20px] bg-slate-100 rounded-full"></div>
+            
+            {/* Axis Line with Gradient Fade */}
+            <div className="absolute inset-0 flex justify-center">
+                <div 
+                    className="w-px h-full bg-slate-200 border-l border-dashed border-slate-300"
+                    style={{ maskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)' }}
+                ></div>
+            </div>
+            
+            {/* Horizontal Line (Midfield) */}
+            <div className="absolute top-1/3 left-0 w-full h-px bg-slate-100"></div>
       </div>
 
       <div className="container mx-auto px-6 max-w-7xl relative z-10">
         
-        {/* Header - Styled like Chi Siamo */}
+        {/* Header - Styled like Chi Siamo & FAQ */}
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

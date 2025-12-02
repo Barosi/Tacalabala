@@ -1,176 +1,124 @@
 
 import React from 'react';
-import { PenTool, Shirt, Heart, User } from 'lucide-react';
-import { motion, Variants } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { PenTool, LayoutTemplate } from 'lucide-react';
 
 const ChiSiamo: React.FC = () => {
-  // Configurazione Animazione Fluida - Semplificata per Vercel/Production
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { 
-        duration: 0.6, 
-        ease: "easeOut"
-      } 
-    }
-  };
-
-  // Blue Card Style matching About.tsx (Updated icon size)
-  const cardClass = "bg-[#0066b2] text-white border border-[#0066b2] p-8 md:p-12 rounded-[2rem] shadow-xl shadow-blue-900/10 hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden h-full flex flex-col items-center justify-center";
-  // Reduced Icon Size to 100/120 to be less overwhelming
-  const bgIconClass = "absolute -right-6 -top-6 text-white opacity-10 group-hover:scale-110 transition-transform duration-500 pointer-events-none";
-
   return (
-    <section id="about" className="pt-32 md:pt-48 pb-16 md:pb-24 overflow-hidden relative">
+    <section id="chi-siamo" className="pt-32 md:pt-48 pb-24 relative overflow-hidden bg-slate-50">
       
-      {/* Background: Gradient matching Hero + Mesh Texture */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-slate-50 z-0"></div>
-      
-      {/* Decorative Geometry */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-[10%] -left-[10%] w-[60vw] h-[60vw] rounded-full border border-slate-200 opacity-40"></div>
-          <div className="absolute -bottom-[20%] -right-[10%] w-[70vw] h-[70vw] rounded-full border border-[#0066b2]/10 opacity-30"></div>
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-px bg-slate-200 border-l border-dashed border-slate-300"></div>
-      </div>
-      
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-0" style={{
-          backgroundImage: `radial-gradient(#0066b2 1.5px, transparent 1.5px)`,
-          backgroundSize: '24px 24px'
+      {/* Background Pulito con Texture Tattica */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]" style={{
+          backgroundImage: `radial-gradient(#0066b2 1px, transparent 1px)`,
+          backgroundSize: '20px 20px'
       }}></div>
+      
+      <div className="absolute inset-0 pointer-events-none">
+           {/* Linea Centrale Sfumata */}
+           <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-px bg-gradient-to-b from-transparent via-slate-300 to-transparent"></div>
+      </div>
 
-      <div className="container mx-auto px-6 max-w-7xl relative z-10">
+      <div className="container mx-auto px-6 max-w-5xl relative z-10">
         
-        {/* --- HEADER & STORYTELLING --- */}
+        {/* --- 1. TITOLO (FUORI DAL CONTAINER) --- */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-center max-w-4xl mx-auto mb-24"
+          className="text-center mb-12"
         >
-             {/* TITOLO */}
-             <h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase mb-12 text-slate-900 leading-[1.1] tracking-tight">
+             <h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase text-slate-900 leading-[1.1] tracking-tight">
                 In trasferta e <br className="hidden md:block" />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2] inline-block pt-2">giù in Città</span>
-             </h2>
-             
-             {/* STORYTELLING - Typography Refined: Lighter, Smaller, Elegant */}
-             <div className="space-y-6 text-slate-700 text-base md:text-lg font-light leading-loose tracking-wide text-left md:text-center max-w-3xl mx-auto">
-                <p>
-                    <strong className="text-slate-900 font-medium">Tacalabala</strong> non è solo un brand, è un manifesto d'appartenenza. Nati tra i gradoni di San Siro e cresciuti nelle strade di Milano, abbiamo sentito l'esigenza di colmare il vuoto tra la curva e la passerella.
-                </p>
-                <p>
-                    La nostra missione è semplice ma ambiziosa: prendere l'estetica sacra della maglia nerazzurra e fonderla con i codici del design urbano contemporaneo. <span className="font-semibold text-[#0066b2]">Non facciamo repliche, creiamo visioni.</span>
-                </p>
-                <p>
-                    Ogni cucitura racconta una trasferta, ogni grafica celebra una leggenda. Siamo indipendenti, siamo visionari, ma soprattutto, siamo tifosi.
-                </p>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">giù in Città</span>
+            </h2>
+        </motion.div>
+
+        {/* --- 2. DESCRIZIONE (NEL CONTAINER GLASS) --- */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          className="mb-16" // Spazio ridotto verso la sezione successiva
+        >
+             <div className="bg-white/60 backdrop-blur-md rounded-[3rem] p-8 md:p-12 border border-white/60 shadow-xl shadow-slate-200/40 text-center relative overflow-hidden max-w-4xl mx-auto">
+                
+                <div className="text-slate-600 text-base md:text-lg font-light leading-relaxed space-y-6 relative z-10">
+                    <p>
+                        <strong className="text-slate-900 font-medium">Tacalabala</strong> non è solo un brand, è un manifesto d'appartenenza. Nati tra i gradoni di San Siro e cresciuti nelle strade di Milano.
+                    </p>
+                    <p>
+                        La nostra missione è semplice ma ambiziosa: prendere l'estetica sacra della maglia nerazzurra e fonderla con i codici del design urbano contemporaneo. <span className="font-semibold text-[#0066b2]">Non facciamo repliche, creiamo visioni.</span>
+                    </p>
+                </div>
              </div>
         </motion.div>
 
-        {/* --- VALUES CARDS (Staggered Animation) --- */}
-        <motion.div 
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24"
-        >
-            
-            {/* Card 1 */}
-            <motion.div variants={itemVariants}>
-                <div className={cardClass}>
-                    <div className={bgIconClass}><PenTool size={100} strokeWidth={1} /></div>
-                    <div className="relative z-10 flex flex-col items-center text-center">
-                        <div className="w-20 h-20 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-8 shadow-inner">
-                            <PenTool size={28} className="text-white" />
-                        </div>
-                        <h3 className="text-white font-oswald text-2xl uppercase mb-4">Design Unico</h3>
-                        <p className="text-blue-100 text-sm leading-relaxed font-light">Grafiche esclusive create dai nostri designer. Nessun template, solo pura creatività milanese.</p>
-                    </div>
-                </div>
-            </motion.div>
-
-            {/* Card 2 */}
-            <motion.div variants={itemVariants}>
-                <div className={cardClass}>
-                    <div className={bgIconClass}><Shirt size={100} strokeWidth={1} /></div>
-                    <div className="relative z-10 flex flex-col items-center text-center">
-                        <div className="w-20 h-20 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-8 shadow-inner">
-                            <Shirt size={28} className="text-white" />
-                        </div>
-                        <h3 className="text-white font-oswald text-2xl uppercase mb-4">Fit Moderno</h3>
-                        <p className="text-blue-100 text-sm leading-relaxed font-light">Taglio boxy e materiali premium. Perfetto per lo stadio, impeccabile per l'aperitivo.</p>
-                    </div>
-                </div>
-            </motion.div>
-
-            {/* Card 3 */}
-            <motion.div variants={itemVariants} className="md:col-span-2 lg:col-span-1">
-                <div className={cardClass}>
-                    <div className={bgIconClass}><Heart size={100} strokeWidth={1} /></div>
-                    <div className="relative z-10 flex flex-col items-center text-center">
-                        <div className="w-20 h-20 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-8 shadow-inner">
-                            <Heart size={28} className="text-white" />
-                        </div>
-                        <h3 className="text-white font-oswald text-2xl uppercase mb-4">Passione Pura</h3>
-                        <p className="text-blue-100 text-sm leading-relaxed font-light">Un tributo indipendente ai colori più belli del mondo. Fatto da tifosi, per tifosi.</p>
-                    </div>
-                </div>
-            </motion.div>
-        </motion.div>
-
-        {/* --- TEAM SECTION --- */}
+        {/* --- 3. FORMAZIONE SECTION --- */}
         <motion.div 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="border-t border-slate-200 pt-24"
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="pt-4" // Padding ridotto al minimo
         >
-             <div className="text-center mb-16">
-                 <span className="inline-block py-1 px-3 border border-[#0066b2] rounded-full bg-blue-50 text-[#0066b2] font-bold tracking-[0.2em] text-[10px] uppercase mb-4">Staff Tecnico</span>
-                 <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase text-slate-900">La <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Formazione</span></h2>
+             <div className="flex flex-col items-center text-center mb-10">
+                 <span className="inline-block py-1 px-4 border border-[#0066b2] rounded-full bg-white text-[#0066b2] font-bold tracking-[0.2em] text-[10px] uppercase mb-4 shadow-sm">
+                    Staff Tecnico
+                 </span>
+                 <h2 className="font-oswald text-4xl md:text-5xl font-bold uppercase text-slate-900">La <span className="text-[#0066b2]">Formazione</span></h2>
              </div>
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                 
-                {/* Team Member 1 */}
-                <div className="group bg-white border border-slate-100 p-4 rounded-[2.5rem] hover:border-[#0066b2] transition-all duration-500 hover:shadow-xl hover:shadow-blue-900/5">
-                    <div className="aspect-[4/5] bg-slate-50 rounded-[2rem] mb-6 relative overflow-hidden flex items-center justify-center border border-slate-200 group-hover:bg-blue-50/50 transition-colors">
-                        <div className="absolute inset-0 bg-jersey-mesh opacity-50"></div>
-                        <User size={80} className="text-slate-300 group-hover:text-[#0066b2] transition-colors duration-500" strokeWidth={1} />
+                {/* Player Card 1 */}
+                <motion.div 
+                    whileHover={{ y: -10 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                    className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50 relative overflow-hidden group"
+                >
+                    <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+                        <PenTool size={100} />
                     </div>
-                    <div className="text-center pb-4">
-                        <h4 className="font-oswald text-2xl uppercase font-bold text-slate-900 group-hover:text-[#0066b2] transition-colors">Alessandro Valli</h4>
-                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-1">Founder & Creative Director</p>
+                    
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="w-16 h-16 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-oswald font-bold text-2xl border-2 border-slate-900 group-hover:bg-white group-hover:text-slate-900 transition-colors">
+                            7
+                        </div>
+                        <div>
+                            <h4 className="font-oswald text-2xl uppercase font-bold text-slate-900 leading-none">Lorenzo Demitri</h4>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-[#0066b2] mt-1">Founder & Creative Director</p>
+                        </div>
                     </div>
-                </div>
+                    <p className="text-slate-500 font-light text-sm leading-relaxed border-t border-slate-100 pt-4">
+                        Visionario e tifoso. Ha trasformato la sua ossessione per i dettagli delle maglie storiche in un nuovo linguaggio visivo.
+                    </p>
+                </motion.div>
 
-                {/* Team Member 2 */}
-                <div className="group bg-white border border-slate-100 p-4 rounded-[2.5rem] hover:border-[#0066b2] transition-all duration-500 hover:shadow-xl hover:shadow-blue-900/5">
-                    <div className="aspect-[4/5] bg-slate-50 rounded-[2rem] mb-6 relative overflow-hidden flex items-center justify-center border border-slate-200 group-hover:bg-blue-50/50 transition-colors">
-                         <div className="absolute inset-0 bg-jersey-mesh opacity-50"></div>
-                         <User size={80} className="text-slate-300 group-hover:text-[#0066b2] transition-colors duration-500" strokeWidth={1} />
+                {/* Player Card 2 */}
+                <motion.div 
+                    whileHover={{ y: -10 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                    className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50 relative overflow-hidden group"
+                >
+                    <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+                        <LayoutTemplate size={100} />
                     </div>
-                    <div className="text-center pb-4">
-                        <h4 className="font-oswald text-2xl uppercase font-bold text-slate-900 group-hover:text-[#0066b2] transition-colors">Davide Mariani</h4>
-                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-1">Head of Operations</p>
+                    
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="w-16 h-16 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-oswald font-bold text-2xl border-2 border-slate-900 group-hover:bg-white group-hover:text-slate-900 transition-colors">
+                          10  
+                        </div>
+                        <div>
+                            <h4 className="font-oswald text-2xl uppercase font-bold text-slate-900 leading-none">Andrea Agnelli</h4>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-[#0066b2] mt-1">Head of Operations</p>
+                        </div>
                     </div>
-                </div>
+                    <p className="text-slate-500 font-light text-sm leading-relaxed border-t border-slate-100 pt-4">
+                        Il motore della logistica. Assicura che ogni pacco parta puntuale e che l'esperienza cliente sia impeccabile.
+                    </p>
+                </motion.div>
 
              </div>
         </motion.div>

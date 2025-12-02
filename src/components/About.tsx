@@ -1,104 +1,119 @@
 
 import React from 'react';
 import { MapPin, Trophy, Layers } from 'lucide-react';
-import { motion, Variants } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const About: React.FC = () => {
-  // Blue Card Style matching ChiSiamo.tsx
-  const cardClass = "bg-[#0066b2] text-white p-8 md:p-12 rounded-[2rem] shadow-xl shadow-blue-900/10 border border-[#0066b2] relative overflow-hidden transition-all duration-500 hover:-translate-y-2 group h-full";
-
-  const variants: Variants = {
-      hidden: { opacity: 0, y: 30 },
-      visible: (i: number) => ({
-          opacity: 1,
-          y: 0,
-          transition: {
-              delay: i * 0.1,
-              duration: 0.8,
-              ease: [0.22, 1, 0.36, 1] as [number, number, number, number]
-          }
-      })
-  };
-
-  // Ridotta dimensione icona sfondo da 180 a 120
-  const bgIconClass = "absolute -right-6 -top-6 text-white opacity-10 transition-transform duration-500 group-hover:scale-110 pointer-events-none";
-
+  
   return (
-    <section id="about" className="pt-12 md:pt-20 pb-24 md:pb-32 bg-white relative overflow-hidden">
+    <section id="about" className="pt-16 pb-24 bg-[#0066b2] relative overflow-hidden">
       
-      {/* Central Axis Continuity */}
-      <div className="absolute inset-0 flex justify-center pointer-events-none z-0">
-          <div className="w-px h-full bg-slate-100 border-l border-dashed border-slate-300"></div>
+      {/* Sfondo Campo da Calcio (Pitch Lines) */}
+      <div className="absolute inset-0 pointer-events-none opacity-20">
+          {/* Rumore di fondo */}
+          <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:32px_32px] opacity-30"></div>
+          
+          {/* Cerchio di Centrocampo */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border-2 border-white/20 rounded-full"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white/20 rounded-full"></div>
+          
+          {/* Linea di Metà Campo */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-white/20"></div>
+          
+          {/* Area Grande (Top) */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[200px] border-b-2 border-l-2 border-r-2 border-white/10 rounded-b-3xl"></div>
+          
+          {/* Area Grande (Bottom) */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60%] h-[200px] border-t-2 border-l-2 border-r-2 border-white/10 rounded-t-3xl"></div>
       </div>
 
-      {/* Tactical Board Markings (Centered on Axis) */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.04]">
-         {/* Center Circle */}
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30vw] h-[30vw] border-2 border-black rounded-full"></div>
-         {/* Midfield Line */}
-         <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-px bg-black"></div>
-         {/* Outer Box */}
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] border-2 border-black rounded-[2rem]"></div>
-      </div>
+      <div className="container mx-auto px-6 max-w-7xl relative z-10">
+        
+        {/* HEADER CENTRALE */}
+        <div className="text-center mb-20">
+            {/* Pillola Analisi Tattica (Invertita) */}
+            <div className="inline-block mb-8">
+                <span className="py-1.5 px-6 border border-white rounded-full bg-white text-[#0066b2] font-bold tracking-[0.2em] text-[10px] uppercase shadow-lg">
+                    Analisi Tattica
+                </span>
+            </div>
 
-      <div className="container mx-auto px-6 relative z-10">
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="max-w-4xl mx-auto text-center mb-20"
-        >
-            <span className="inline-block py-1 px-3 border border-[#0066b2] rounded-full bg-blue-50 text-[#0066b2] font-bold tracking-[0.2em] text-[10px] uppercase mb-8">Analisi Tattica</span>
-            <h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase leading-[1.2] mb-4">Non è solo <span className="text-slate-300">Calcio</span>.</h2>
-            <h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase leading-[1.2] mb-6">È <span className="text-transparent bg-clip-text bg-gradient-to-r from-black to-[#0066b2]">Identità</span>.</h2>
-            <p className="text-slate-500 text-lg md:text-xl font-light leading-relaxed max-w-2xl mx-auto"><strong className="text-black">Tacalabala</strong> riscrive le regole. Uniamo la tradizione di San Siro con l'estetica streetwear di Milano.</p>
-        </motion.div>
+            {/* Titolo Typography Corrected Spacing & Colors - Separation Logic Fixed */}
+            <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase text-white mb-8 leading-tight">
+                <span className="block mb-4">NON È SOLO <span className="text-blue-200 opacity-80">CALCIO</span>.</span>
+                <span className="text-white drop-shadow-md block">È IDENTITÀ.</span>
+            </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            <p className="text-blue-100 text-lg font-light max-w-2xl mx-auto leading-relaxed">
+                Tacalabala riscrive le regole. Uniamo la tradizione di San Siro con l'estetica streetwear di Milano.
+            </p>
+        </div>
+
+        {/* 3 CARD STYLE "FORMAZIONE" MA BLU */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             
             {/* CARD 1 */}
-            <motion.div custom={0} variants={variants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-                <div className={cardClass}>
-                    <div className={bgIconClass}><Trophy size={120} strokeWidth={1} /></div>
-                    <div className="relative z-10 flex flex-col items-center text-center">
-                        <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-10 shadow-inner">
-                            <Trophy size={40} className="text-white" />
-                        </div>
-                        <h3 className="text-white font-oswald text-3xl uppercase mb-6">DNA Vincente</h3>
-                        <p className="text-blue-100 text-lg leading-relaxed font-light">Ispirati dalle notti europee e dagli scudetti. Ogni dettaglio racconta una vittoria, ogni cucitura una leggenda.</p>
-                    </div>
+            <motion.div 
+                whileHover={{ y: -10 }}
+                transition={{ type: 'spring', stiffness: 300 }}
+                className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-xl shadow-black/20 border border-transparent relative overflow-hidden group text-center flex flex-col items-center"
+            >
+                {/* Background Icon (Faded Blue) */}
+                <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity text-[#0066b2]">
+                    <Trophy size={140} strokeWidth={0.5} />
                 </div>
+
+                {/* Icon Box (Blue) */}
+                <div className="w-16 h-16 bg-[#0066b2] text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <Trophy size={32} strokeWidth={1.5} />
+                </div>
+                
+                <h3 className="font-oswald text-2xl uppercase font-bold text-slate-900 mb-4 tracking-wide group-hover:text-[#0066b2] transition-colors">DNA Vincente</h3>
+                <p className="text-slate-500 text-sm leading-relaxed font-light">
+                    Ispirati dalle notti europee e dagli scudetti. Ogni dettaglio racconta una vittoria, ogni cucitura una leggenda.
+                </p>
             </motion.div>
 
             {/* CARD 2 */}
-            <motion.div custom={1} variants={variants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-                <div className={cardClass}>
-                    <div className={bgIconClass}><Layers size={120} strokeWidth={1} /></div>
-                    <div className="relative z-10 flex flex-col items-center text-center">
-                        <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-10 shadow-inner">
-                            <Layers size={40} className="text-white" />
-                        </div>
-                        <h3 className="text-white font-oswald text-3xl uppercase mb-6">Design Custom</h3>
-                        <p className="text-blue-100 text-lg leading-relaxed font-light">Grafiche concettuali che rompono gli schemi. Non facciamo repliche, creiamo pezzi unici da collezione.</p>
-                    </div>
+            <motion.div 
+                whileHover={{ y: -10 }}
+                transition={{ type: 'spring', stiffness: 300 }}
+                className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-xl shadow-black/20 border border-transparent relative overflow-hidden group text-center flex flex-col items-center"
+            >
+                 <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity text-[#0066b2]">
+                    <Layers size={140} strokeWidth={0.5} />
                 </div>
+
+                <div className="w-16 h-16 bg-[#0066b2] text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <Layers size={32} strokeWidth={1.5} />
+                </div>
+                
+                <h3 className="font-oswald text-2xl uppercase font-bold text-slate-900 mb-4 tracking-wide group-hover:text-[#0066b2] transition-colors">Design Custom</h3>
+                <p className="text-slate-500 text-sm leading-relaxed font-light">
+                    Grafiche concettuali che rompono gli schemi. Non facciamo repliche, creiamo pezzi unici da collezione.
+                </p>
             </motion.div>
 
             {/* CARD 3 */}
-            <motion.div custom={2} variants={variants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-                <div className={cardClass}>
-                    <div className={bgIconClass}><MapPin size={120} strokeWidth={1} /></div>
-                    <div className="relative z-10 flex flex-col items-center text-center">
-                        <div className="w-24 h-24 bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl flex items-center justify-center mb-10 shadow-inner">
-                            <MapPin size={40} className="text-white" />
-                        </div>
-                        <h3 className="text-white font-oswald text-3xl uppercase mb-6">Made in Milano</h3>
-                        <p className="text-blue-100 text-lg leading-relaxed font-light">Dalla Madonnina ai quartieri popolari. Portiamo l'eleganza e la grinta di Milano in ogni design.</p>
-                    </div>
+            <motion.div 
+                whileHover={{ y: -10 }}
+                transition={{ type: 'spring', stiffness: 300 }}
+                className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-xl shadow-black/20 border border-transparent relative overflow-hidden group text-center flex flex-col items-center"
+            >
+                 <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity text-[#0066b2]">
+                    <MapPin size={140} strokeWidth={0.5} />
                 </div>
+
+                <div className="w-16 h-16 bg-[#0066b2] text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-300">
+                    <MapPin size={32} strokeWidth={1.5} />
+                </div>
+                
+                <h3 className="font-oswald text-2xl uppercase font-bold text-slate-900 mb-4 tracking-wide group-hover:text-[#0066b2] transition-colors">Made in Milano</h3>
+                <p className="text-slate-500 text-sm leading-relaxed font-light">
+                    Dalla Madonnina ai quartieri popolari. Portiamo l'eleganza e la grinta di Milano in ogni design.
+                </p>
             </motion.div>
-            
+
         </div>
       </div>
     </section>
