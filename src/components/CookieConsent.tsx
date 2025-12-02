@@ -72,18 +72,18 @@ const CookieConsent: React.FC = () => {
             </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto min-w-[300px]">
-             <button 
-                onClick={handleReject}
-                className="w-full sm:flex-1 py-3 px-6 bg-transparent border border-slate-700 text-slate-300 rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-slate-800 hover:text-white transition-all duration-300"
-            >
-                Solo Tecnici
-            </button>
+        <div className="flex flex-col items-center gap-2 w-full md:w-auto">
              <button 
                 onClick={handleAccept}
-                className="w-full sm:flex-1 py-3 px-8 bg-white text-slate-900 rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-[#0066b2] hover:text-white transition-all duration-300 shadow-lg transform active:scale-95 whitespace-nowrap"
+                className="w-full md:w-48 py-4 px-8 bg-white text-slate-900 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-[#0066b2] hover:text-white transition-all duration-300 shadow-lg"
             >
                 Accetta Tutto
+            </button>
+             <button 
+                onClick={handleReject}
+                className="w-full md:w-48 py-2 px-6 bg-transparent border border-slate-600 text-slate-400 rounded-full font-bold uppercase tracking-widest text-[9px] hover:bg-slate-800 hover:text-white hover:border-slate-500 transition-all duration-300"
+            >
+                Solo Tecnici
             </button>
         </div>
 

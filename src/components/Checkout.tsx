@@ -160,12 +160,15 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
              </div>
 
              {/* STEP 2 */}
-             <div className={`relative bg-white p-8 md:p-10 rounded-[2.5rem] shadow-xl border transition-all duration-500 ${step === 2 ? 'border-[#0066b2] shadow-blue-900/10' : 'border-slate-100'}`}>
-                 {step === 1 && <div className="absolute inset-0 bg-slate-50/80 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center rounded-[2.5rem] border border-slate-200"><div className="w-16 h-16 bg-slate-200 text-slate-400 rounded-full flex items-center justify-center mb-4 shadow-inner"><Lock size={32} /></div><p className="font-oswald uppercase font-bold text-slate-400 tracking-wider">Bloccato</p></div>}
+             <div className={`bg-white p-8 md:p-10 rounded-[2.5rem] shadow-xl border transition-all duration-500 ${step === 2 ? 'border-[#0066b2] shadow-blue-900/10' : 'border-slate-100 opacity-60'}`}>
                  <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-100"><h2 className={`font-oswald text-2xl font-bold uppercase flex items-center gap-4 ${step === 2 ? 'text-slate-900' : 'text-slate-300'}`}><span className={`w-10 h-10 flex items-center justify-center rounded-2xl text-sm font-bold shadow-md transition-colors ${step === 2 ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-400'}`}>2</span> Pagamento</h2></div>
                  {step === 2 && clientSecret && stripePromise && (
                      <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8">
-                         <div className="bg-[#fcfcfc] p-6 rounded-2xl border border-slate-100"><p className="text-[10px] font-bold uppercase text-slate-400 mb-4 tracking-widest">PayPal</p><PayPalScriptProvider options={{ clientId: "test", currency: "EUR" }}><PayPalButtons style={{ layout: "vertical", height: 48, shape: 'pill', color: 'gold', label: 'paypal' }} createOrder={(data, actions) => actions.order.create({ intent: "CAPTURE", purchase_units: [{ amount: { currency_code: "EUR", value: grandTotal.toFixed(2) }, description: `Ordine ${orderId}` }] })} onApprove={async (data, actions) => { if (actions.order) { await actions.order.capture(); clearCart(); handleSuccess(); }}} /></PayPalScriptProvider></div>
+                         <div className="bg-[#fcfcfc] p-6 rounded-2xl border border-slate-100"><p className="text-[10px] font-bold uppercase text-slate-400 mb-4 tracking-widest">Metodi di Pagamento</p><PayPalScriptProvider options={{ clientId: "test", currency: "EUR" }}><PayPalButtons style={{ layout: "vertical", height: 48, shape: 'pill', color: 'gold', label: 'paypal' }} createOrder={(data, actions) => actions.order.create({ intent: "CAPTURE", purchase_units: [{ amount: { currency_code: "EUR", value: grandTotal.toFixed(2) }, description: `Ordine ${orderId}` }] })} onApprove={async (data, actions) => { if (actions.order) { await actions.order.capture(); clearCart(); handleSuccess(); }}} /></PayPalScriptProvider></div>
+                         <div className="space-y-3">
+                             <button type="button" className={btnLiquidClass}><span className={btnLiquidHover}></span><span className={btnLiquidContent}>Google Pay</span></button>
+                             <button type="button" className={btnLiquidClass}><span className={btnLiquidHover}></span><span className={btnLiquidContent}>Apple Pay</span></button>
+                         </div>
                          <div className="relative flex py-2 items-center"><div className="flex-grow border-t border-slate-200"></div><span className="flex-shrink-0 mx-4 text-slate-300 text-[10px] uppercase font-bold tracking-widest">Oppure Carta</span><div className="flex-grow border-t border-slate-200"></div></div>
                          <div className="bg-white"><Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe', variables: { colorPrimary: '#0066b2', borderRadius: '12px' } } }}><StripePaymentForm onSuccess={handleSuccess} /></Elements></div>
                      </div>
@@ -189,15 +192,15 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                 {/* COUPON SECTION */}
                 <div className="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <p className="text-[10px] font-bold uppercase text-slate-400 mb-2 flex items-center gap-2"><Tag size={12}/> Hai un codice sconto?</p>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 mb-2">
                         <input type="text" value={couponCode} onChange={e => setCouponCode(e.target.value.toUpperCase())} disabled={!!appliedCoupon} className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold uppercase outline-none focus:border-[#0066b2]" placeholder="CODICE" />
                         {appliedCoupon ? (
-                            <button onClick={() => {removeCoupon(); setCouponCode(''); setCouponMsg('');}} className="bg-red-500 text-white px-4 rounded-lg text-xs font-bold uppercase">Rimuovi</button>
+                            <button onClick={() => {removeCoupon(); setCouponCode(''); setCouponMsg('');}} className="bg-red-500 text-white px-4 rounded-lg text-xs font-bold uppercase hover:bg-red-600 transition-colors">Rimuovi</button>
                         ) : (
-                            <button onClick={handleApplyCoupon} className="bg-slate-900 text-white px-4 rounded-lg text-xs font-bold uppercase hover:bg-[#0066b2] transition-colors">Applica</button>
+                            <button onClick={handleApplyCoupon} className={btnLiquidClass.replace('w-full', 'px-6')}><span className={btnLiquidHover}></span><span className={btnLiquidContent}>Applica</span></button>
                         )}
                     </div>
-                    {couponMsg && <p className={`text-[10px] font-bold mt-2 ${appliedCoupon ? 'text-green-600' : 'text-red-500'}`}>{couponMsg}</p>}
+                    {couponMsg && <p className={`text-[10px] font-bold ${appliedCoupon ? 'text-green-600' : 'text-red-500'}`}>{couponMsg}</p>}
                 </div>
 
                 <div className="space-y-3 pt-6 border-t border-slate-100">
