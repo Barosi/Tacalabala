@@ -73,9 +73,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // PATCH for Stock/Price Updates
   if (req.method === 'PATCH') {
-      const { productId, size, stock, price, type } = req.body;
+      const { productId, size, stock, price, type, details } = req.body;
       try {
-          // Type 'price' update
+          // Type 'details' update (Title, SKU, Price)
+          if (type === 'details' && details) {
+              const numericPrice = parseFloat(details.price.replace('€', '').replace(',', '.').trim());
+              await pool.query(
+                  'UPDATE products SET title = $1, article_code = $2, price = $3 WHERE id = $4',
+                  [details.title, details.articleCode, numericPrice, productId]
+              );
+              return res.status(200).json({ success: true });
+          }
+
+          // Type 'price' update (Legacy)
           if (type === 'price' && price) {
               const numericPrice = parseFloat(price.replace('€', '').replace(',', '.').trim());
               await pool.query('UPDATE products SET price = $1 WHERE id = $2', [numericPrice, productId]);

@@ -1,10 +1,56 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Product, ProductVariant, Size, FAQ, Discount, OrderStatus, ShippingConfig } from '../types';
-import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, Tag, Calendar, ShoppingBag, Truck, Check, Search, Shirt, Layers, Image as ImageIcon, Upload, Settings, Mail, Shield, AlertTriangle, ChevronDown, X, Phone, Globe, ToggleLeft, ToggleRight, HelpCircle, AlertOctagon, List, Edit3 } from 'lucide-react';
+import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, Tag, Calendar, ShoppingBag, Truck, Check, Search, Shirt, Layers, Image as ImageIcon, Upload, Settings, Mail, Shield, AlertTriangle, ChevronDown, X, Phone, Globe, ToggleLeft, ToggleRight, HelpCircle, AlertOctagon, List, Edit3, PackageOpen, XCircle } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { sendShippingConfirmationEmail } from '../utils/emailSender';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// --- TOAST SYSTEM ---
+interface Toast {
+    id: number;
+    message: string;
+    type: 'success' | 'error';
+}
+
+const ToastNotification = ({ toast, remove }: { toast: Toast; remove: (id: number) => void }) => {
+    useEffect(() => {
+        const timer = setTimeout(() => remove(toast.id), 4000);
+        return () => clearTimeout(timer);
+    }, [toast.id, remove]);
+
+    return (
+        <motion.div
+            layout
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+            className={`
+                flex items-center gap-4 p-4 rounded-2xl shadow-2xl border backdrop-blur-md min-w-[300px] pointer-events-auto
+                ${toast.type === 'success' 
+                    ? 'bg-white/90 border-green-500/20 text-slate-800' 
+                    : 'bg-white/90 border-red-500/20 text-slate-800'
+                }
+            `}
+        >
+            <div className={`
+                w-10 h-10 rounded-full flex items-center justify-center shadow-sm flex-shrink-0
+                ${toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}
+            `}>
+                {toast.type === 'success' ? <Check size={20} strokeWidth={3} /> : <XCircle size={20} strokeWidth={3} />}
+            </div>
+            <div className="flex-1">
+                <h4 className={`font-oswald uppercase font-bold text-sm ${toast.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                    {toast.type === 'success' ? 'Operazione Riuscita' : 'Errore'}
+                </h4>
+                <p className="text-xs font-medium text-slate-500">{toast.message}</p>
+            </div>
+            <button onClick={() => remove(toast.id)} className="text-slate-300 hover:text-slate-500 transition-colors">
+                <X size={16} />
+            </button>
+        </motion.div>
+    );
+};
 
 // --- UI COMPONENTS ---
 
@@ -106,7 +152,7 @@ const StyledSelect = (props: React.SelectHTMLAttributes<HTMLSelectElement>) => (
     </div>
 );
 
-const Card = ({ title, subtitle, icon: Icon, children, className = '' }: { title: string, subtitle?: string, icon?: any, children: React.ReactNode, className?: string }) => (
+const Card = ({ title, subtitle, icon: Icon, children, className = '' }: { title?: string, subtitle?: string, icon?: any, children: React.ReactNode, className?: string }) => (
     <div className={`bg-white p-8 md:p-10 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-slate-100 relative overflow-hidden h-full flex flex-col ${className}`}>
         {(title || Icon) && (
             <div className="flex items-center gap-5 mb-8 pb-6 border-b border-slate-50 flex-shrink-0">
@@ -135,8 +181,10 @@ const sortSizes = (variants: {size: string, stock: number}[]) => {
 const ModalOverlay = ({ children, isOpen }: { children: React.ReactNode, isOpen: boolean }) => {
     if (!isOpen) return null;
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
-            {children}
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+            <div className="animate-in zoom-in-95 duration-300 w-full max-w-sm">
+                {children}
+            </div>
         </div>
     );
 };
@@ -149,7 +197,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
     const { 
         products, orders, discounts,
         stripeConfig, supportConfig, mailConfig, shippingConfig,
-        addProduct, deleteProduct, updateProductStock, updateProductPrice, addDiscount, deleteDiscount,
+        addProduct, deleteProduct, updateProductStock, updateProductDetails, addDiscount, deleteDiscount,
         addFaq, deleteFaq, setStripeConfig, setSupportConfig, setMailConfig, setShippingConfig,
         updateOrderStatus, deleteOrder,
     } = useStore();
@@ -162,8 +210,18 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
     const [modalConfig, setModalConfig] = useState<{isOpen: boolean; title: string; message: string; onConfirm: () => void;}>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
     const [trackingModal, setTrackingModal] = useState<{isOpen: boolean; orderId: string | null; email: string; name: string;}>({ isOpen: false, orderId: null, email: '', name: '' });
     
+    // Toasts State
+    const [toasts, setToasts] = useState<Toast[]>([]);
+    const addToast = (message: string, type: 'success' | 'error' = 'success') => {
+        const id = Date.now();
+        setToasts(prev => [...prev, { id, message, type }]);
+    };
+    const removeToast = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
+
+    // Inventory Local Edit State
+    const [editForm, setEditForm] = useState<{id: string, title: string, price: string, articleCode: string}>({ id: '', title: '', price: '', articleCode: '' });
+
     // Forms
-    // Removing 'season' from user input, combining Kit and Year
     const [newProduct, setNewProduct] = useState<Partial<Product>>({ title: '', articleCode: '', brand: 'Tacalabala', kitType: '', year: '', price: '', imageUrl: '', images: [], condition: 'Nuovo con etichetta', description: '', isSoldOut: false, tags: [], instagramUrl: '', dropDate: '' });
     const [variantsState, setVariantsState] = useState<{size: Size, enabled: boolean, stock: string}[]>([ { size: 'S', enabled: true, stock: '10' }, { size: 'M', enabled: true, stock: '10' }, { size: 'L', enabled: true, stock: '10' }, { size: 'XL', enabled: true, stock: '10' } ]);
     const [uploadImages, setUploadImages] = useState<string[]>([]);
@@ -186,7 +244,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
         if (files) {
             const newImages: string[] = [];
             Array.from(files).forEach(file => {
-                if (file.size > 1024 * 1024) { alert(`File ${file.name} troppo grande. Max 1MB.`); return; }
+                if (file.size > 1024 * 1024) { addToast(`File ${file.name} troppo grande. Max 1MB.`, 'error'); return; }
                 const reader = new FileReader();
                 reader.onloadend = () => { if (typeof reader.result === 'string') newImages.push(reader.result); if (newImages.length === files.length) setUploadImages(prev => [...prev, ...newImages]); };
                 reader.readAsDataURL(file);
@@ -196,11 +254,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
 
     const handleProductSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newProduct.articleCode) { alert("SKU Obbligatorio"); return; }
+        if (!newProduct.articleCode) { addToast("SKU Obbligatorio", 'error'); return; }
         const finalImages = uploadImages.length > 0 ? uploadImages : [newProduct.imageUrl || 'https://via.placeholder.com/400'];
         const finalVariants: ProductVariant[] = variantsState.filter(v => v.enabled).map(v => ({ size: v.size, stock: parseInt(v.stock) || 0 }));
-        
-        // Format Price to "€X"
         const formattedPrice = `€${newProduct.price}`;
 
         const productToAdd: Product = {
@@ -210,7 +266,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             brand: 'Tacalabala',
             kitType: newProduct.kitType,
             year: newProduct.year,
-            season: 'Classic', // Default value since input is removed
+            season: 'Classic', 
             price: formattedPrice,
             imageUrl: finalImages[0],
             images: finalImages,
@@ -226,13 +282,14 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
         addProduct(productToAdd);
         setNewProduct({ title: '', articleCode: '', brand: 'Tacalabala', kitType: '', year: '', price: '', imageUrl: '', images: [], condition: 'Nuovo con etichetta', description: '', isSoldOut: false, tags: [], instagramUrl: '', dropDate: '' });
         setUploadImages([]);
-        alert('Prodotto aggiunto!');
+        addToast('Prodotto aggiunto con successo!', 'success');
     };
 
     const handleTrackingConfirm = (code: string, courier: string) => {
         if (trackingModal.orderId) {
             updateOrderStatus(trackingModal.orderId, 'shipped', code, courier);
             sendShippingConfirmationEmail(mailConfig, trackingModal.orderId, trackingModal.email, trackingModal.name, code, courier);
+            addToast('Ordine spedito e mail inviata!', 'success');
         }
         setTrackingModal({ isOpen: false, orderId: null, email: '', name: '' });
     };
@@ -254,29 +311,63 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             isActive: true
         };
         addDiscount(discount);
-        alert('Promozione creata!');
+        addToast('Promozione creata!', 'success');
     };
 
     const handleStripeModeChange = (val: string) => {
         if (val === 'true') {
-            if (confirm("ATTENZIONE: Stai per attivare la modalità LIVE. I pagamenti saranno reali e verranno addebitati. Sei sicuro?")) {
-                setPayForm({...payForm, isEnabled: true});
-            } else {
-                // User cancelled, do nothing (value stays false)
-            }
+            setModalConfig({
+                isOpen: true,
+                title: 'Attiva Live Mode?',
+                message: 'Stai per attivare i pagamenti reali. Le transazioni verranno addebitate.',
+                onConfirm: () => { setPayForm({...payForm, isEnabled: true}); setModalConfig(prev => ({...prev, isOpen: false})); }
+            });
         } else {
             setPayForm({...payForm, isEnabled: false});
         }
     };
 
+    const startEditingProduct = (product: Product) => {
+        setExpandedProductId(product.id === expandedProductId ? null : product.id);
+        if (product.id !== expandedProductId) {
+             setEditForm({
+                 id: product.id,
+                 title: product.title,
+                 price: product.price.replace('€', '').trim(),
+                 articleCode: product.articleCode
+             });
+        }
+    };
+
+    const handleUpdateProductDetails = () => {
+        if (!editForm.id) return;
+        updateProductDetails(editForm.id, {
+            title: editForm.title,
+            price: `€${editForm.price}`,
+            articleCode: editForm.articleCode
+        });
+        addToast('Dettagli prodotto aggiornati', 'success');
+    };
+
     return (
-        <section className="pt-32 md:pt-48 pb-16 md:pb-24 bg-slate-50 min-h-screen">
+        <section className="pt-32 md:pt-48 pb-16 md:pb-24 bg-slate-50 min-h-screen relative overflow-hidden">
             
+            {/* Toast Container - Fixed Bottom Right */}
+            <div className="fixed bottom-6 right-6 z-[120] flex flex-col gap-3 pointer-events-none">
+                <AnimatePresence>
+                    {toasts.map(toast => (
+                        <ToastNotification key={toast.id} toast={toast} remove={removeToast} />
+                    ))}
+                </AnimatePresence>
+            </div>
+
             <ModalOverlay isOpen={modalConfig.isOpen}>
-                <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm p-8 text-center border border-slate-100">
-                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500"><AlertTriangle size={32} /></div>
+                <div className="bg-white rounded-[2rem] shadow-2xl p-8 text-center border border-slate-100 relative overflow-hidden">
+                     {/* Decorative Elements */}
+                    <div className="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
+                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500 shadow-sm"><AlertTriangle size={32} /></div>
                     <h3 className="font-oswald text-2xl font-bold uppercase text-slate-900 mb-2">{modalConfig.title}</h3>
-                    <p className="text-sm text-slate-500 mb-8 font-medium">{modalConfig.message}</p>
+                    <p className="text-sm text-slate-500 mb-8 font-medium leading-relaxed">{modalConfig.message}</p>
                     <div className="flex gap-3">
                         <LiquidButton onClick={() => setModalConfig({ ...modalConfig, isOpen: false })} label="Annulla" variant="outline" className="flex-1" />
                         <LiquidButton onClick={modalConfig.onConfirm} label="Conferma" variant="danger" className="flex-1" />
@@ -285,8 +376,9 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             </ModalOverlay>
 
             <ModalOverlay isOpen={trackingModal.isOpen}>
-                <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm p-8 text-center border border-slate-100">
-                    <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 text-[#0066b2]"><Truck size={32} /></div>
+                <div className="bg-white rounded-[2rem] shadow-2xl p-8 text-center border border-slate-100 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-[#0066b2]"></div>
+                    <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 text-[#0066b2] shadow-sm"><Truck size={32} /></div>
                     <h3 className="font-oswald text-2xl font-bold uppercase text-slate-900 mb-2">Conferma Spedizione</h3>
                     <form onSubmit={(e) => {
                         e.preventDefault();
@@ -309,7 +401,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                 </div>
             </ModalOverlay>
 
-            <div className="container mx-auto px-6 max-w-7xl">
+            <div className="container mx-auto px-6 max-w-7xl relative z-10">
                 
                 <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
                     <div>
@@ -450,70 +542,116 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                 {products.filter(p => p.title.toLowerCase().includes(searchTerm.toLowerCase()) || p.articleCode.toLowerCase().includes(searchTerm.toLowerCase())).map(product => {
                                     const isExpanded = expandedProductId === product.id;
                                     const sortedVariants = sortSizes(product.variants || []);
-                                    // Price parsing for edit input
-                                    const rawPrice = product.price.replace('€', '').trim();
-
+                                    
                                     return (
-                                        <div key={product.id} className={`border rounded-[1.5rem] transition-all duration-300 overflow-hidden ${isExpanded ? 'border-[#0066b2] bg-blue-50/10 shadow-lg' : 'border-slate-100 bg-white hover:border-slate-300'}`}>
-                                            <div className="p-4 flex items-center justify-between cursor-pointer" onClick={() => setExpandedProductId(isExpanded ? null : product.id)}>
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-16 h-16 bg-slate-50 rounded-xl overflow-hidden border border-slate-200 flex-shrink-0">
+                                        <div key={product.id} className={`border rounded-[1.5rem] transition-all duration-300 overflow-hidden ${isExpanded ? 'border-[#0066b2] bg-white shadow-lg ring-4 ring-blue-50' : 'border-slate-100 bg-white hover:border-slate-300'}`}>
+                                            <div className="p-5 flex items-center justify-between cursor-pointer group" onClick={() => startEditingProduct(product)}>
+                                                <div className="flex items-center gap-5">
+                                                    <div className="w-16 h-16 bg-slate-50 rounded-xl overflow-hidden border border-slate-200 flex-shrink-0 relative">
                                                         <img src={product.imageUrl} alt="" className="w-full h-full object-cover" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-bold text-slate-900 text-sm uppercase">{product.title}</h4>
-                                                        <p className="text-[10px] font-mono text-slate-500">{product.articleCode}</p>
+                                                        <h4 className="font-bold text-slate-900 text-sm uppercase group-hover:text-[#0066b2] transition-colors">{product.title}</h4>
+                                                        <p className="text-[10px] font-mono text-slate-500 font-bold">{product.articleCode}</p>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-4">
-                                                    <span className="font-oswald font-bold text-lg text-[#0066b2]">{product.price}</span>
-                                                    <button onClick={(e) => { e.stopPropagation(); if(confirm('Eliminare prodotto?')) deleteProduct(product.id); }} className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 border border-transparent hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors" title="Elimina Articolo">
+                                                <div className="flex items-center gap-6">
+                                                    <span className="font-oswald font-bold text-lg text-slate-900">{product.price}</span>
+                                                    <button 
+                                                        onClick={(e) => { 
+                                                            e.stopPropagation(); 
+                                                            setModalConfig({
+                                                                isOpen: true,
+                                                                title: 'Elimina Prodotto',
+                                                                message: 'Sei sicuro di voler rimuovere questo articolo? L\'azione è irreversibile.',
+                                                                onConfirm: () => { deleteProduct(product.id); setModalConfig(prev => ({...prev, isOpen: false})); addToast('Prodotto eliminato', 'success'); }
+                                                            });
+                                                        }} 
+                                                        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 border border-slate-100 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all" 
+                                                        title="Elimina Articolo"
+                                                    >
                                                         <Trash2 size={16} /> 
                                                     </button>
-                                                    <ChevronDown size={20} className={`text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                                                    <ChevronDown size={20} className={`text-slate-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
                                                 </div>
                                             </div>
+
+                                            <AnimatePresence>
                                             {isExpanded && (
-                                                <div className="px-4 pb-4 pt-0 animate-in slide-in-from-top-2">
-                                                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-4">
+                                                <motion.div 
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: 'auto', opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    className="border-t border-slate-100 bg-slate-50/50"
+                                                >
+                                                    <div className="p-6 space-y-6">
                                                         
-                                                        {/* EDIT PRICE ROW */}
-                                                        <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                                                            <span className="text-[10px] font-bold uppercase text-slate-400">Modifica Prezzo</span>
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="font-bold text-slate-900">€</span>
+                                                        {/* General Edit Section */}
+                                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                                                <label className="text-[9px] font-bold uppercase text-slate-400 mb-1 block">Titolo</label>
                                                                 <input 
-                                                                    type="number" 
-                                                                    className="w-20 bg-slate-100 border border-slate-200 rounded-lg p-1.5 text-center font-bold text-slate-900 focus:border-[#0066b2] outline-none"
-                                                                    defaultValue={rawPrice}
-                                                                    onBlur={(e) => {
-                                                                        const val = e.target.value;
-                                                                        if (val !== rawPrice) updateProductPrice(product.id, `€${val}`);
-                                                                    }}
+                                                                    className="w-full text-sm font-bold text-slate-900 bg-transparent outline-none border-b border-transparent focus:border-[#0066b2] transition-colors pb-1"
+                                                                    value={editForm.title}
+                                                                    onChange={e => setEditForm({...editForm, title: e.target.value})}
                                                                 />
+                                                            </div>
+                                                            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                                                <label className="text-[9px] font-bold uppercase text-slate-400 mb-1 block">SKU</label>
+                                                                <input 
+                                                                    className="w-full text-sm font-bold text-slate-900 bg-transparent outline-none border-b border-transparent focus:border-[#0066b2] transition-colors pb-1"
+                                                                    value={editForm.articleCode}
+                                                                    onChange={e => setEditForm({...editForm, articleCode: e.target.value})}
+                                                                />
+                                                            </div>
+                                                            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-2">
+                                                                <div>
+                                                                    <label className="text-[9px] font-bold uppercase text-slate-400 mb-1 block">Prezzo</label>
+                                                                    <div className="flex items-center">
+                                                                        <span className="text-sm font-bold text-slate-900 mr-1">€</span>
+                                                                        <input 
+                                                                            type="number"
+                                                                            className="w-full text-sm font-bold text-slate-900 bg-transparent outline-none border-b border-transparent focus:border-[#0066b2] transition-colors pb-1"
+                                                                            value={editForm.price}
+                                                                            onChange={e => setEditForm({...editForm, price: e.target.value})}
+                                                                        />
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
 
-                                                        {/* STOCK VARIANTS */}
-                                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                                            {sortedVariants.map(v => (
-                                                                <div key={v.size} className="flex flex-col items-center justify-center text-center bg-white rounded-2xl border border-slate-100 p-3 shadow-sm">
-                                                                    <div className="w-10 h-10 rounded-full bg-[#0066b2] text-white flex items-center justify-center font-bold text-sm shadow-md mb-2">
-                                                                        {v.size}
+                                                        {/* STOCK VARIANTS - CENTERED NUMBERS */}
+                                                        <div>
+                                                            <label className="text-[10px] font-bold uppercase text-slate-400 mb-3 block">Gestione Stock</label>
+                                                            <div className="grid grid-cols-4 gap-4">
+                                                                {sortedVariants.map(v => (
+                                                                    <div key={v.size} className="flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200 p-4 shadow-sm relative group overflow-hidden">
+                                                                        <div className="absolute top-0 left-0 w-full h-1 bg-[#0066b2] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                                                        <span className="text-xs font-bold text-slate-400 mb-2">{v.size}</span>
+                                                                        
+                                                                        {/* Centered Input Container */}
+                                                                        <div className="w-full flex items-center justify-center">
+                                                                            <input 
+                                                                                type="number" 
+                                                                                className="w-full text-center font-oswald font-bold text-2xl text-slate-900 outline-none bg-transparent p-0 m-0 focus:text-[#0066b2] transition-colors" 
+                                                                                value={v.stock} 
+                                                                                onChange={(e) => updateProductStock(product.id, v.size as Size, parseInt(e.target.value)||0)} 
+                                                                            />
+                                                                        </div>
+                                                                        <span className="text-[9px] uppercase font-bold text-slate-300 mt-1">Pezzi</span>
                                                                     </div>
-                                                                    <input 
-                                                                        type="number" 
-                                                                        className="w-full text-center font-bold text-xl text-slate-900 outline-none bg-transparent border-b-2 border-slate-100 focus:border-[#0066b2] transition-colors py-1" 
-                                                                        value={v.stock} 
-                                                                        onChange={(e) => updateProductStock(product.id, v.size as Size, parseInt(e.target.value)||0)} 
-                                                                    />
-                                                                    <span className="text-[9px] uppercase font-bold text-slate-400 mt-1">Pezzi</span>
-                                                                </div>
-                                                            ))}
+                                                                ))}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Actions */}
+                                                        <div className="flex justify-end pt-2">
+                                                            <LiquidButton onClick={handleUpdateProductDetails} label="Salva Modifiche" icon={Save} variant="primary" className="w-auto" />
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </motion.div>
                                             )}
+                                            </AnimatePresence>
                                         </div>
                                     );
                                 })}
@@ -526,89 +664,137 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                 {activeTab === 'orders' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4">
                          <Card title="Gestione Ordini" subtitle="Spedizioni e Tracking" icon={Truck}>
-                            <div className="space-y-4">
-                                {orders.map(order => (
-                                    <div key={order.id} className="border border-slate-200 rounded-[2rem] p-6 bg-white hover:shadow-xl hover:border-[#0066b2] transition-all duration-300 group">
-                                        <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-6 mb-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-bold shadow-sm ${order.status === 'paid' ? 'bg-green-100 text-green-600' : order.status === 'shipped' ? 'bg-blue-100 text-[#0066b2]' : 'bg-yellow-50 text-yellow-600'}`}>
-                                                    {order.status === 'paid' ? '$' : order.status === 'shipped' ? <Truck size={20}/> : '?'}
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-oswald font-bold text-xl text-slate-900">{order.id}</h4>
-                                                    <p className="text-xs text-slate-400 font-bold">{new Date(order.date).toLocaleString('it-IT')}</p>
-                                                </div>
-                                            </div>
-                                            
-                                            <div className="flex items-center gap-3">
-                                                <div className="relative">
-                                                    <select 
-                                                        value={order.status}
-                                                        onChange={(e) => {
-                                                            if (e.target.value === 'shipped' && order.status !== 'shipped') {
-                                                                setTrackingModal({isOpen: true, orderId: order.id, email: order.customerEmail, name: order.customerName || ''});
-                                                            } else {
-                                                                updateOrderStatus(order.id, e.target.value as OrderStatus);
-                                                            }
-                                                        }}
-                                                        className="appearance-none bg-slate-50 border border-slate-200 rounded-full py-2 pl-4 pr-10 text-xs font-bold uppercase tracking-wider outline-none cursor-pointer hover:border-[#0066b2] transition-colors focus:bg-white"
-                                                    >
-                                                        <option value="pending">In Attesa</option>
-                                                        <option value="paid">Pagato</option>
-                                                        <option value="shipped">Spedito</option>
-                                                        <option value="delivered">Consegnato</option>
-                                                        <option value="cancelled">Annullato</option>
-                                                    </select>
-                                                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                                                </div>
-                                                <button onClick={() => { if(confirm('Eliminare ordine?')) deleteOrder(order.id); }} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 text-slate-300 rounded-full hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"><Trash2 size={14}/></button>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 rounded-2xl p-6 border border-slate-100">
-                                            <div>
-                                                <span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest block mb-2">Cliente</span>
-                                                <p className="font-bold text-slate-900 text-sm mb-1">{order.customerName}</p>
-                                                <p className="text-xs text-slate-500 mb-1">{order.customerEmail}</p>
-                                                {/* Se presenti dati fatturazione */}
-                                                {order.invoiceDetails && (
-                                                    <div className="mt-2 text-[10px] bg-white p-2 rounded border border-slate-200 text-slate-600">
-                                                        <p>CF: {order.invoiceDetails.taxId}</p>
-                                                        {order.invoiceDetails.vatNumber && <p>P.IVA: {order.invoiceDetails.vatNumber}</p>}
-                                                        {order.invoiceDetails.sdiCode && <p>SDI/PEC: {order.invoiceDetails.sdiCode}</p>}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest block mb-2">Spedizione</span>
-                                                <p className="text-xs text-slate-600 font-medium leading-relaxed bg-white p-3 rounded-xl border border-slate-200 mb-3">{order.shippingAddress}</p>
-                                                
-                                                {/* Tracking Info Block */}
-                                                {order.trackingCode && (
-                                                    <div className="inline-flex flex-col gap-1 w-full bg-blue-50 border border-blue-100 p-2 rounded-xl">
-                                                        <span className="text-[9px] font-bold uppercase text-[#0066b2] flex items-center gap-1"><Truck size={10}/> Spedito con {order.courier}</span>
-                                                        <span className="text-xs font-mono font-bold text-slate-900 break-all">{order.trackingCode}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <span className="text-[9px] font-bold uppercase text-slate-400 tracking-widest block mb-2">Riepilogo</span>
-                                                <ul className="space-y-1 mb-2">
-                                                    {order.items.map((item, i) => (
-                                                        <li key={i} className="flex justify-between text-xs font-medium text-slate-700 border-b border-slate-200 border-dashed pb-1 last:border-0">
-                                                            <span>{item.quantity}x {item.title} ({item.selectedSize})</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                                <div className="flex justify-between items-end border-t border-slate-200 pt-2 mt-2">
-                                                    <span className="text-xs text-slate-500">Shipping: €{order.shippingCost?.toFixed(2)}</span>
-                                                    <p className="text-right font-oswald font-bold text-lg text-[#0066b2]">Totale: €{order.total.toFixed(2)}</p>
-                                                </div>
-                                            </div>
-                                        </div>
+                            {orders.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-20 text-center">
+                                    <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 text-slate-300 border border-slate-100">
+                                        <PackageOpen size={48} strokeWidth={1} />
                                     </div>
-                                ))}
-                            </div>
+                                    <h3 className="font-oswald text-2xl font-bold uppercase text-slate-900 mb-2">Nessun Ordine</h3>
+                                    <p className="text-slate-400 text-sm max-w-xs mx-auto">Non ci sono ancora ordini da gestire. Appena qualcuno acquisterà, lo vedrai qui.</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 gap-6">
+                                    {orders.map(order => (
+                                        <div key={order.id} className="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm hover:shadow-xl hover:border-[#0066b2] transition-all duration-300 group relative overflow-hidden">
+                                            
+                                            {/* Top Bar Status Line */}
+                                            <div className={`absolute top-0 left-0 w-full h-1.5 ${order.status === 'paid' ? 'bg-green-500' : order.status === 'shipped' ? 'bg-[#0066b2]' : order.status === 'cancelled' ? 'bg-red-500' : 'bg-yellow-400'}`}></div>
+
+                                            {/* Grid Layout for Order Content */}
+                                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-2">
+                                                
+                                                {/* Left: ID & Status */}
+                                                <div className="lg:col-span-3 space-y-4 border-b lg:border-b-0 lg:border-r border-slate-100 pb-6 lg:pb-0 lg:pr-6">
+                                                    <div>
+                                                        <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest block mb-1">ID Ordine</span>
+                                                        <h4 className="font-oswald font-bold text-xl text-slate-900">{order.id}</h4>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest block mb-1">Data</span>
+                                                        <p className="text-xs font-bold text-slate-600">{new Date(order.date).toLocaleString('it-IT')}</p>
+                                                    </div>
+                                                    <div className="pt-2">
+                                                        <div className="relative">
+                                                            <select 
+                                                                value={order.status}
+                                                                onChange={(e) => {
+                                                                    if (e.target.value === 'shipped' && order.status !== 'shipped') {
+                                                                        setTrackingModal({isOpen: true, orderId: order.id, email: order.customerEmail, name: order.customerName || ''});
+                                                                    } else {
+                                                                        updateOrderStatus(order.id, e.target.value as OrderStatus);
+                                                                    }
+                                                                }}
+                                                                className={`w-full appearance-none rounded-xl py-2 pl-3 pr-8 text-xs font-bold uppercase tracking-wider outline-none cursor-pointer border transition-colors ${
+                                                                    order.status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : 
+                                                                    order.status === 'shipped' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
+                                                                    order.status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-200' : 
+                                                                    'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                                                }`}
+                                                            >
+                                                                <option value="pending">In Attesa</option>
+                                                                <option value="paid">Pagato</option>
+                                                                <option value="shipped">Spedito</option>
+                                                                <option value="delivered">Consegnato</option>
+                                                                <option value="cancelled">Annullato</option>
+                                                            </select>
+                                                            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 opacity-50 pointer-events-none" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Middle: Customer Info */}
+                                                <div className="lg:col-span-4 space-y-4 border-b lg:border-b-0 lg:border-r border-slate-100 pb-6 lg:pb-0 lg:pr-6">
+                                                    <div>
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <span className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><Settings size={12}/></span>
+                                                            <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Dati Cliente</span>
+                                                        </div>
+                                                        <p className="font-bold text-slate-900 text-sm">{order.customerName}</p>
+                                                        <p className="text-xs text-slate-500 font-medium">{order.customerEmail}</p>
+                                                        {order.invoiceDetails && (
+                                                            <div className="mt-2 text-[10px] bg-slate-50 p-2 rounded border border-slate-100 text-slate-600 font-medium">
+                                                                <p>CF: {order.invoiceDetails.taxId}</p>
+                                                                {order.invoiceDetails.vatNumber && <p>P.IVA: {order.invoiceDetails.vatNumber}</p>}
+                                                                {order.invoiceDetails.sdiCode && <p>SDI: {order.invoiceDetails.sdiCode}</p>}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <span className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><Truck size={12}/></span>
+                                                            <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Spedizione</span>
+                                                        </div>
+                                                        <p className="text-xs text-slate-700 font-medium leading-relaxed">{order.shippingAddress}</p>
+                                                        {order.trackingCode && (
+                                                            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-[#0066b2] rounded-full border border-blue-100">
+                                                                <span className="text-[9px] font-bold uppercase">{order.courier}</span>
+                                                                <span className="text-[10px] font-mono font-bold">{order.trackingCode}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Right: Summary & Total */}
+                                                <div className="lg:col-span-5 flex flex-col justify-between h-full">
+                                                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 mb-4 flex-grow">
+                                                        <ul className="space-y-2">
+                                                            {order.items.map((item, i) => (
+                                                                <li key={i} className="flex justify-between items-start text-xs border-b border-dashed border-slate-200 last:border-0 pb-2 last:pb-0">
+                                                                    <div>
+                                                                        <span className="font-bold text-slate-700">{item.quantity}x {item.title}</span>
+                                                                        <span className="block text-[10px] text-slate-400 font-bold uppercase bg-white px-1.5 rounded w-fit mt-0.5 border border-slate-100">{item.selectedSize}</span>
+                                                                    </div>
+                                                                    <span className="font-bold text-slate-900">{item.price}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                    
+                                                    <div className="flex justify-between items-end border-t border-slate-100 pt-4">
+                                                        <button 
+                                                            onClick={() => { 
+                                                                setModalConfig({
+                                                                    isOpen: true, 
+                                                                    title: 'Elimina Ordine', 
+                                                                    message: 'Sei sicuro di voler eliminare questo ordine definitivamente?',
+                                                                    onConfirm: () => { deleteOrder(order.id); setModalConfig(prev => ({...prev, isOpen: false})); addToast('Ordine eliminato', 'success'); }
+                                                                });
+                                                            }} 
+                                                            className="text-slate-300 hover:text-red-500 transition-colors flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest"
+                                                        >
+                                                            <Trash2 size={14} /> Elimina
+                                                        </button>
+                                                        <div className="text-right">
+                                                            <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Totale Ordine</span>
+                                                            <p className="font-oswald font-bold text-2xl text-[#0066b2] leading-none">€{order.total.toFixed(2)}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </Card>
                     </div>
                 )}
@@ -695,7 +881,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             <h4 className="font-oswald font-bold text-xl text-slate-900 uppercase">{d.name}</h4>
                                             <p className="text-xs font-bold text-slate-400 mt-1">Sconto {d.percentage}% • Scade: {new Date(d.endDate).toLocaleDateString()}</p>
                                         </div>
-                                        <button onClick={() => deleteDiscount(d.id)} className="w-10 h-10 bg-white border border-slate-200 text-slate-300 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"><Trash2 size={16}/></button>
+                                        <button onClick={() => { deleteDiscount(d.id); addToast('Promo eliminata', 'success'); }} className="w-10 h-10 bg-white border border-slate-200 text-slate-300 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"><Trash2 size={16}/></button>
                                     </div>
                                 ))}
                             </div>
@@ -728,7 +914,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                 </div>
                             </div>
                             <div className="mt-8 pt-6 border-t border-slate-50 flex justify-center">
-                                <LiquidButton onClick={() => { setShippingConfig(shipForm); alert('Spedizioni salvate'); }} label="Salva Configurazioni" icon={Save} variant="primary" className="w-full md:w-auto" />
+                                <LiquidButton onClick={() => { setShippingConfig(shipForm); addToast('Spedizioni salvate', 'success'); }} label="Salva Configurazioni" icon={Save} variant="primary" className="w-full md:w-auto" />
                             </div>
                         </Card>
                     </div>
@@ -776,7 +962,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     <StyledInput type="password" value={payForm.webhookSecret} onChange={e => setPayForm({...payForm, webhookSecret: e.target.value})} placeholder="whsec_..." />
                                 </InputGroup>
                                 <div className="pt-6 flex justify-center">
-                                   <LiquidButton onClick={() => { setStripeConfig(payForm); alert('Stripe configurato'); }} label="Salva Chiavi API" icon={Shield} variant="primary" className="w-full md:w-auto" />
+                                   <LiquidButton onClick={() => { setStripeConfig(payForm); addToast('Stripe configurato', 'success'); }} label="Salva Chiavi API" icon={Shield} variant="primary" className="w-full md:w-auto" />
                                 </div>
                             </div>
                         </Card>
@@ -795,7 +981,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     <InputGroup label="Public Key" helpText="Dalla dashboard EmailJS -> Account -> Public Key"><StyledInput value={mailFormState.publicKey} onChange={e => setMailFormState({...mailFormState, publicKey: e.target.value})} placeholder="XyZ_123abc456..." /></InputGroup>
                                     <InputGroup label="Email Admin"><StyledInput value={mailFormState.emailTo} onChange={e => setMailFormState({...mailFormState, emailTo: e.target.value})} placeholder="admin@tacalabala.it" /></InputGroup>
                                     <div className="pt-4 flex justify-center">
-                                        <LiquidButton onClick={() => { setMailConfig(mailFormState); alert('EmailJS salvato'); }} label="Salva Mail" icon={Save} variant="primary" />
+                                        <LiquidButton onClick={() => { setMailConfig(mailFormState); addToast('EmailJS salvato', 'success'); }} label="Salva Mail" icon={Save} variant="primary" />
                                     </div>
                                 </div>
                                 
@@ -817,7 +1003,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     </div>
                                     
                                     <div className="pt-4 flex justify-center">
-                                        <LiquidButton onClick={() => { setSupportConfig({ whatsappNumber: `${whatsappForm.prefix}${whatsappForm.number}` }); alert('WhatsApp aggiornato'); }} label="Salva Numero" icon={Save} variant="primary" />
+                                        <LiquidButton onClick={() => { setSupportConfig({ whatsappNumber: `${whatsappForm.prefix}${whatsappForm.number}` }); addToast('WhatsApp aggiornato', 'success'); }} label="Salva Numero" icon={Save} variant="primary" />
                                     </div>
                                 </div>
                             </div>
@@ -835,7 +1021,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-32 resize-none" value={newFaq.answer} onChange={e => setNewFaq({...newFaq, answer: e.target.value})} />
                                 </InputGroup>
                                 <div className="flex justify-center pt-4">
-                                    <LiquidButton onClick={() => { addFaq({ ...newFaq, id: '' }); setNewFaq({question:'', answer:''}); alert('FAQ Aggiunta'); }} label="Salva FAQ" icon={Plus} variant="primary" />
+                                    <LiquidButton onClick={() => { addFaq({ ...newFaq, id: '' }); setNewFaq({question:'', answer:''}); addToast('FAQ Aggiunta', 'success'); }} label="Salva FAQ" icon={Plus} variant="primary" />
                                 </div>
                             </div>
                         </Card>

@@ -19,6 +19,7 @@ interface StoreState {
   deleteProduct: (id: string) => void;
   updateProductStock: (productId: string, size: Size, newStock: number) => void;
   updateProductPrice: (productId: string, newPrice: string) => void;
+  updateProductDetails: (productId: string, details: Partial<Product>) => void; // New Method
 
   // Discounts
   discounts: Discount[];
@@ -179,6 +180,19 @@ export const useStore = create<StoreState>()(
                 body: JSON.stringify({ productId, price: newPrice, type: 'price' })
             });
           } catch(e) { console.warn("API update failed", e); }
+      },
+
+      updateProductDetails: async (productId, details) => {
+          set((state) => ({
+              products: state.products.map(p => p.id === productId ? { ...p, ...details } : p)
+          }));
+          try {
+              await fetch('/api/products', {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ productId, details, type: 'details' })
+              });
+          } catch (e) { console.warn("API update failed", e); }
       },
 
       addDiscount: async (discount) => {
