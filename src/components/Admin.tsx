@@ -975,7 +975,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         <Card title="Canali di Contatto" subtitle="Configurazione EmailJS & WhatsApp" icon={Mail}>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                                 <div className="space-y-6">
-                                    <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 flex items-center gap-2"><Mail size={18}/> EmailJS</h4>
+                                    <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 flex items-center gap-2"><Mail size={18}/> Email</h4>
                                     <InputGroup label="Service ID" helpText="Dalla dashboard EmailJS -> Email Services"><StyledInput value={mailFormState.serviceId} onChange={e => setMailFormState({...mailFormState, serviceId: e.target.value})} placeholder="service_z38abc..." /></InputGroup>
                                     <InputGroup label="Template ID" helpText="Dalla dashboard EmailJS -> Email Templates"><StyledInput value={mailFormState.templateId} onChange={e => setMailFormState({...mailFormState, templateId: e.target.value})} placeholder="template_7a2xyz..." /></InputGroup>
                                     <InputGroup label="Public Key" helpText="Dalla dashboard EmailJS -> Account -> Public Key"><StyledInput value={mailFormState.publicKey} onChange={e => setMailFormState({...mailFormState, publicKey: e.target.value})} placeholder="XyZ_123abc456..." /></InputGroup>
@@ -986,9 +986,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                 </div>
                                 
                                 <div className="space-y-6 border-l border-slate-100 pl-8">
-                                    <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 flex items-center gap-2"><Phone size={18}/> WhatsApp</h4>
-                                    <p className="text-xs text-slate-500 font-medium">Numero per l'assistenza clienti diretta.</p>
-                                    
+                                    <h4 className="font-oswald text-lg uppercase font-bold text-slate-900 flex items-center gap-2"><Phone size={18}/> WhatsApp</h4>                                    
                                     <div className="flex gap-4">
                                         <div className="w-24">
                                             <InputGroup label="Prefisso">
