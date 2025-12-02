@@ -197,7 +197,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
                         {appliedCoupon ? (
                             <button onClick={() => {removeCoupon(); setCouponCode(''); setCouponMsg('');}} className="bg-red-500 text-white px-4 rounded-lg text-xs font-bold uppercase hover:bg-red-600 transition-colors">Rimuovi</button>
                         ) : (
-                            <button onClick={handleApplyCoupon} className={btnLiquidClass.replace('w-full', 'px-6')}><span className={btnLiquidHover}></span><span className={btnLiquidContent}>Applica</span></button>
+                            <button onClick={handleApplyCoupon} className="relative overflow-hidden group/btn bg-white text-slate-900 py-2 px-4 rounded-full font-bold uppercase tracking-widest text-[9px] transition-all duration-300 shadow-sm hover:shadow-blue-900/20 border border-slate-200 flex items-center justify-center gap-2 transform-gpu active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"><span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span><span className="relative z-10">Applica</span></button>
                         )}
                     </div>
                     {couponMsg && <p className={`text-[10px] font-bold ${appliedCoupon ? 'text-green-600' : 'text-red-500'}`}>{couponMsg}</p>}

@@ -75,9 +75,9 @@ const Login: React.FC<{onLogin: (s: boolean) => void, onCancel: () => void}> = (
                     {error && <div className="bg-red-50 text-red-500 p-3 rounded-lg text-center text-xs font-bold uppercase tracking-wide border border-red-100">Credenziali Errate</div>}
                     
                     <div className="flex justify-center mt-6">
-                        <button type="submit" disabled={isLoading} className="w-auto min-w-[200px] relative overflow-hidden group/btn bg-white border border-slate-200 text-slate-500 hover:text-white py-3 px-10 rounded-full font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 shadow-sm hover:shadow-lg active:scale-95 transform-gpu disabled:opacity-50">
-                             <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
-                             <span className="relative z-10 flex items-center gap-2">
+                        <button type="submit" disabled={isLoading} className="w-auto min-w-[200px] relative overflow-hidden group/btn bg-white border border-slate-200 text-slate-900 py-3 px-10 rounded-full font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 shadow-sm hover:shadow-blue-900/20 active:scale-95 transform-gpu disabled:opacity-50">
+                             <span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
+                             <span className="relative z-10 flex items-center gap-2 group-hover/btn:text-white transition-colors duration-500">
                                  {isLoading ? <Loader2 className="animate-spin" size={16} /> : <><LogIn size={16} /> Accedi</>}
                              </span>
                         </button>
