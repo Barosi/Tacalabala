@@ -547,12 +547,16 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                         </div>
                                     </div>
 
-                                    {/* Right: Gallery (1/3) - Fits Height */}
-                                    <div className="lg:col-span-1 h-full">
-                                        <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 h-full flex flex-col">
+                                    {/* Right: Gallery (1/3) */}
+                                    <div className="lg:col-span-1 flex flex-col">
+                                        <div className="flex justify-between items-center mb-2 h-4"> {/* Aligned with InputGroup label */}
+                                            <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest pl-1">Galleria</span>
+                                            <span className="text-[9px] font-bold bg-white px-2 py-1 rounded text-slate-400 border border-slate-200">{uploadImages.length} Foto</span>
+                                        </div>
+                                        
+                                        <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 flex-grow flex flex-col relative">
                                             <div className="flex justify-between items-center mb-4">
-                                                <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest pl-1">Galleria</span>
-                                                <span className="text-[9px] font-bold bg-white px-2 py-1 rounded text-slate-400 border border-slate-100">{uploadImages.length} Foto</span>
+                                                <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Anteprima</span>
                                             </div>
                                             
                                             <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
