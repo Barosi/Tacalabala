@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Product, ProductVariant, Size, FAQ, Discount, OrderStatus, ShippingConfig } from '../types';
 import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, Tag, Calendar, ShoppingBag, Truck, Check, Search, Shirt, Layers, Image as ImageIcon, Upload, Settings, Mail, Shield, AlertTriangle, ChevronDown, X, Phone, Globe, ToggleLeft, ToggleRight, HelpCircle, AlertOctagon, List, Edit3, PackageOpen, XCircle, Clock, Star, Lock } from 'lucide-react';
@@ -510,18 +511,20 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                 {activeTab === 'products' && (
                     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
                         <Card title="Nuovo Articolo" subtitle="Inserisci i dettagli streetwear" icon={Plus}>
-                            <form onSubmit={handleProductSubmit} className="h-full flex flex-col">
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 flex-grow items-start">
+                            <form onSubmit={handleProductSubmit} className="h-full flex flex-col space-y-8">
+                                
+                                {/* 1. Top Section: Info (Left) + Compact Images (Right) */}
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                                     
-                                    {/* Column Left: Info */}
-                                    <div className="space-y-6 h-full">
-                                        <InputGroup label="Titolo Prodotto">
+                                    {/* Left Column: Info Fields */}
+                                    <div className="lg:col-span-2 space-y-6">
+                                         <InputGroup label="Titolo Prodotto">
                                             <StyledInput value={newProduct.title} onChange={e => setNewProduct({...newProduct, title: e.target.value})} placeholder="Es. Milano Concrete Tee" required />
                                         </InputGroup>
                                         
-                                        {/* SKU + Prezzo (Fixed format) */}
+                                        {/* SKU + Price Row */}
                                         <div className="grid grid-cols-2 gap-6">
-                                            <InputGroup label="SKU (Codice)">
+                                             <InputGroup label="SKU (Codice)">
                                                 <StyledInput value={newProduct.articleCode} onChange={e => setNewProduct({...newProduct, articleCode: e.target.value})} placeholder="TC-001" required />
                                             </InputGroup>
                                             <InputGroup label="Prezzo">
@@ -539,94 +542,113 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             </InputGroup>
                                         </div>
 
-                                        {/* Kit Type + Anno Row */}
+                                        {/* Kit Type + Year Row */}
                                         <div className="grid grid-cols-2 gap-6">
                                             <InputGroup label="Kit Type"><StyledInput value={newProduct.kitType} onChange={e => setNewProduct({...newProduct, kitType: e.target.value})} placeholder="Home" /></InputGroup>
                                             <InputGroup label="Anno"><StyledInput value={newProduct.year} onChange={e => setNewProduct({...newProduct, year: e.target.value})} placeholder="2024" /></InputGroup>
                                         </div>
+                                    </div>
 
-                                        {/* Drop Date + New Arrival Toggle */}
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                                            <InputGroup label="Data Drop (Opzionale)" helpText="Se futura, il prodotto sarà 'Locked'.">
-                                                <div className="relative">
-                                                    <StyledInput 
-                                                        type="datetime-local" 
-                                                        value={newProduct.dropDate} 
-                                                        onChange={e => setNewProduct({...newProduct, dropDate: e.target.value})} 
-                                                        className="pl-10"
-                                                    />
-                                                    <Clock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                                                </div>
-                                            </InputGroup>
-
-                                            <div className="flex flex-col justify-between">
-                                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 pl-1 mb-2">Stato</label>
-                                                <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-100 h-[58px]">
-                                                    <input 
-                                                        type="checkbox" 
-                                                        checked={newProduct.isNewArrival} 
-                                                        onChange={e => setNewProduct({...newProduct, isNewArrival: e.target.checked})}
-                                                        className="w-5 h-5 accent-[#0066b2] cursor-pointer"
-                                                        id="chk-new"
-                                                    />
-                                                    <label htmlFor="chk-new" className="text-xs font-bold uppercase text-slate-700 cursor-pointer flex items-center gap-2">
-                                                        <Star size={14} className={newProduct.isNewArrival ? "fill-[#0066b2] text-[#0066b2]" : "text-slate-300"} />
-                                                        Segna come Novità
-                                                    </label>
+                                    {/* Right Column: Compact Images */}
+                                    <div className="lg:col-span-1 bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200">
+                                         <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-4 block pl-1">Media (Max 1MB)</span>
+                                         <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
+                                         
+                                         <div className="grid grid-cols-3 gap-2">
+                                            {/* Add Button */}
+                                            <div onClick={() => fileInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 hover:text-[#0066b2] hover:border-[#0066b2] hover:bg-white cursor-pointer transition-all gap-1 group">
+                                                <div className="p-2 bg-white rounded-full shadow-sm group-hover:shadow-md transition-shadow">
+                                                    <Upload size={16} />
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <InputGroup label="Descrizione">
-                                            <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-40 resize-none" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} placeholder="Descrivi il fit e i dettagli..." />
+                                            {/* Previews */}
+                                            {uploadImages.map((img, i) => (
+                                                <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group bg-white shadow-sm">
+                                                    <img src={img} className="w-full h-full object-cover" alt="" />
+                                                    <button type="button" onClick={() => setUploadImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={16}/></button>
+                                                </div>
+                                            ))}
+                                         </div>
+                                    </div>
+                                </div>
+
+                                {/* 2. Middle Section: Drop/New + Stock (Side by Side) */}
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+                                    
+                                    {/* Left: Drop Date & New Arrival */}
+                                    <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 flex flex-col justify-between h-full space-y-4">
+                                         <InputGroup label="Data Drop (Opzionale)" helpText="Se futura, il prodotto sarà 'Locked'.">
+                                            <div className="relative">
+                                                <StyledInput 
+                                                    type="datetime-local" 
+                                                    value={newProduct.dropDate} 
+                                                    onChange={e => setNewProduct({...newProduct, dropDate: e.target.value})} 
+                                                    className="pl-10"
+                                                />
+                                                <Clock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                            </div>
                                         </InputGroup>
+                                        
+                                        {/* Styled New Arrival Toggle */}
+                                        <div 
+                                            className={`
+                                                relative p-4 rounded-2xl border transition-all duration-300 cursor-pointer group flex items-center justify-between
+                                                ${newProduct.isNewArrival 
+                                                    ? 'bg-white border-[#0066b2] shadow-md shadow-blue-100' 
+                                                    : 'bg-white border-slate-200 hover:border-slate-300'}
+                                            `}
+                                            onClick={() => setNewProduct({...newProduct, isNewArrival: !newProduct.isNewArrival})}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                 <div className={`p-2 rounded-full ${newProduct.isNewArrival ? 'bg-blue-50 text-[#0066b2]' : 'bg-slate-100 text-slate-300'}`}>
+                                                     <Star size={18} className={newProduct.isNewArrival ? 'fill-[#0066b2]' : ''} />
+                                                 </div>
+                                                 <div>
+                                                     <p className={`text-xs font-bold uppercase ${newProduct.isNewArrival ? 'text-slate-900' : 'text-slate-500'}`}>Segna come Novità</p>
+                                                     <p className="text-[10px] text-slate-400">Appare in alto nello store</p>
+                                                 </div>
+                                            </div>
+                                            <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-300 ${newProduct.isNewArrival ? 'bg-[#0066b2]' : 'bg-slate-200'}`}>
+                                                <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${newProduct.isNewArrival ? 'translate-x-4' : 'translate-x-0'}`} />
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    {/* Column Right: Media & Variants */}
-                                    <div className="flex flex-col gap-6 h-full">
-                                        
-                                        {/* Image Upload Redesigned */}
-                                        <div className="flex flex-col flex-1">
-                                            <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-2 pl-1">Galleria Immagini (Max 1MB)</span>
-                                            <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 flex-grow">
-                                                <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
-                                                
-                                                <div className="grid grid-cols-3 gap-4">
-                                                    {uploadImages.map((img, i) => (
-                                                        <div key={i} className="relative aspect-square rounded-2xl overflow-hidden border border-slate-200 group bg-white shadow-sm">
-                                                            <img src={img} className="w-full h-full object-cover" alt="" />
-                                                            <button type="button" onClick={() => setUploadImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={24}/></button>
-                                                        </div>
-                                                    ))}
-                                                    
-                                                    {/* Clean Add Button inside grid */}
-                                                    <div onClick={() => fileInputRef.current?.click()} className="aspect-square rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 hover:text-[#0066b2] hover:border-[#0066b2] hover:bg-white cursor-pointer transition-all gap-2 group">
-                                                        <div className="p-3 bg-white rounded-full shadow-sm group-hover:shadow-md transition-shadow">
-                                                            <ImageIcon size={24} />
-                                                        </div>
-                                                        <span className="text-[10px] font-bold uppercase tracking-widest">Aggiungi</span>
+                                    {/* Right: Stock Management */}
+                                    <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 h-full">
+                                        <span className="block text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-4 pl-1">Gestione Stock per Taglia</span>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {variantsState.map((v, idx) => (
+                                                <div key={v.size} className={`flex items-center gap-3 bg-white p-3 rounded-2xl border shadow-sm transition-all ${v.enabled ? 'border-slate-200 opacity-100' : 'border-slate-100 opacity-60 grayscale'}`}>
+                                                    <input type="checkbox" checked={v.enabled} onChange={(e) => {const up = [...variantsState]; up[idx].enabled = e.target.checked; setVariantsState(up);}} className="w-5 h-5 accent-[#0066b2] rounded cursor-pointer"/>
+                                                    <span className="font-bold text-sm w-6 text-center">{v.size}</span>
+                                                    <div className="flex-1 border-l border-slate-100 pl-3">
+                                                         <input 
+                                                            type="number" 
+                                                            disabled={!v.enabled} 
+                                                            value={v.stock} 
+                                                            onChange={(e) => {const up = [...variantsState]; up[idx].stock = e.target.value; setVariantsState(up);}} 
+                                                            className="w-full text-right bg-transparent outline-none font-mono text-slate-900 text-sm font-bold" 
+                                                            placeholder="0" 
+                                                        />
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200">
-                                            <span className="block text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-4">Gestione Stock per Taglia</span>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                {variantsState.map((v, idx) => (
-                                                    <div key={v.size} className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm opacity-90 hover:opacity-100 transition-opacity">
-                                                        <input type="checkbox" checked={v.enabled} onChange={(e) => {const up = [...variantsState]; up[idx].enabled = e.target.checked; setVariantsState(up);}} className="w-5 h-5 accent-[#0066b2] rounded cursor-pointer"/>
-                                                        <span className="font-bold text-sm w-8">{v.size}</span>
-                                                        <input type="number" disabled={!v.enabled} value={v.stock} onChange={(e) => {const up = [...variantsState]; up[idx].stock = e.target.value; setVariantsState(up);}} className="w-full text-right bg-transparent outline-none font-mono text-slate-900 border-b border-transparent focus:border-[#0066b2]" placeholder="0" />
-                                                    </div>
-                                                ))}
-                                            </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
-                                <div className="mt-12 flex justify-center">
-                                     <LiquidButton type="submit" label="Salva" icon={Save} variant="primary" className="w-full md:w-auto min-w-[200px]" />
+
+                                {/* 3. Bottom Section: Description */}
+                                <InputGroup label="Descrizione">
+                                    <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-32 resize-none" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} placeholder="Descrivi il fit e i dettagli..." />
+                                </InputGroup>
+
+                                {/* Submit Action */}
+                                <div className="pt-4 flex justify-center">
+                                     <LiquidButton type="submit" label="Salva Articolo" icon={Save} variant="primary" className="w-full md:w-auto min-w-[200px]" />
                                 </div>
+
                             </form>
                         </Card>
 
@@ -881,7 +903,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         </Card>
                     </div>
                 )}
-                {/* ... (Other Tabs are fine) ... */}
                 {activeTab === 'promotions' && (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-in fade-in slide-in-from-bottom-4">
                         <Card title="Nuova Promo" subtitle="Crea coupon o sconti automatici" icon={Tag}>

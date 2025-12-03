@@ -67,23 +67,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         `);
     } catch (e) { console.warn("Products table schema update failed", e); }
 
-    // 0.4 Ensure Discounts table exists and has correct schema (Migration)
+    // 0.4 Ensure Discounts table exists and has correct schema (Robust Migration)
     try {
+        // Step 1: Create base table if not exists
         await pool.query(`
             CREATE TABLE IF NOT EXISTS discounts (
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL
             )
         `);
-        // Add missing columns if they don't exist (Migration pattern)
-        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS code TEXT`);
-        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS discount_type TEXT DEFAULT 'automatic'`);
-        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS percentage NUMERIC`);
-        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS start_date TIMESTAMP`);
-        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS end_date TIMESTAMP`);
-        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS target_type TEXT`);
-        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS target_product_ids TEXT`);
-        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE`);
+        
+        // Step 2: Add columns sequentially. We use separate queries to ensure even if one fails (e.g. exists but different type - rare in this context), others try to run.
+        // Although 'IF NOT EXISTS' handles existence, putting them in block helps readability.
+        const columns = [
+            "ADD COLUMN IF NOT EXISTS code TEXT",
+            "ADD COLUMN IF NOT EXISTS discount_type TEXT DEFAULT 'automatic'",
+            "ADD COLUMN IF NOT EXISTS percentage NUMERIC",
+            "ADD COLUMN IF NOT EXISTS start_date TIMESTAMP",
+            "ADD COLUMN IF NOT EXISTS end_date TIMESTAMP",
+            "ADD COLUMN IF NOT EXISTS target_type TEXT",
+            "ADD COLUMN IF NOT EXISTS target_product_ids TEXT",
+            "ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE"
+        ];
+
+        for (const colSql of columns) {
+            try {
+                await pool.query(`ALTER TABLE discounts ${colSql}`);
+            } catch (colErr) {
+                console.warn(`Failed to add discount column: ${colSql}`, colErr);
+            }
+        }
+
     } catch (e) { console.warn("Discounts table creation/migration failed", e); }
 
 
