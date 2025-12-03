@@ -24,6 +24,7 @@ export interface Product {
   tags: string[];
   instagramUrl?: string;
   dropDate?: string; 
+  isNewArrival?: boolean; // NEW: Flag Novità
   variants?: ProductVariant[];
 }
 

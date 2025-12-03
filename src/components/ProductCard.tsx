@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Product, Size } from '../types';
-import { ShoppingBag, Loader2, Tag, Lock, Clock, Eye, AlertCircle, Check } from 'lucide-react';
+import { ShoppingBag, Loader2, Tag, Lock, Clock, Eye, AlertCircle, Check, Star } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { motion } from 'framer-motion';
 
@@ -17,8 +17,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   
   const { addToCart, calculatePrice } = useStore();
   
-  const isComingSoon = product.dropDate && new Date(product.dropDate) > new Date();
+  // Logic for Future Drops
+  const now = new Date();
   const dropDateObj = product.dropDate ? new Date(product.dropDate) : null;
+  const isLocked = dropDateObj ? dropDateObj > now : false;
+
   const priceInfo = calculatePrice(product);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
@@ -35,45 +38,69 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
   const currentVariant = product.variants?.find(v => v.size === selectedSize);
   const stockCount = currentVariant ? currentVariant.stock : 0;
   const isSizeSoldOut = stockCount === 0;
-  const isPermanentlyDisabled = product.isSoldOut || isSizeSoldOut || isComingSoon;
+  const isPermanentlyDisabled = product.isSoldOut || isSizeSoldOut || isLocked;
   const isDisabled = isPermanentlyDisabled || buttonState !== 'idle';
 
   return (
     <div 
-        onClick={onClick}
-        className="group relative bg-white border border-slate-100 overflow-hidden hover:border-[#0066b2] transition-all duration-500 shadow-sm hover:shadow-2xl hover:shadow-blue-900/10 rounded-2xl h-full flex flex-col cursor-pointer"
+        onClick={isLocked ? undefined : onClick}
+        className={`
+            group relative bg-white border overflow-hidden transition-all duration-500 shadow-sm rounded-2xl h-full flex flex-col 
+            ${isLocked ? 'border-slate-100 cursor-not-allowed' : 'border-slate-100 hover:border-[#0066b2] hover:shadow-2xl hover:shadow-blue-900/10 cursor-pointer'}
+            ${product.isNewArrival && !isLocked ? 'ring-2 ring-purple-100' : ''}
+        `}
     >
       
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-black to-[#0066b2] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left z-30"></div>
+      {/* Top Bar Decoration */}
+      <div className={`absolute top-0 left-0 w-full h-1 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left z-30 ${isLocked ? 'bg-slate-200' : 'bg-gradient-to-r from-black to-[#0066b2]'}`}></div>
 
-      {product.isSoldOut && !isComingSoon && (
+      {/* SOLD OUT BADGE */}
+      {product.isSoldOut && !isLocked && (
         <div className="absolute top-4 left-4 z-20 bg-slate-900 text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest rounded-full">Sold Out</div>
       )}
 
-      {!product.isSoldOut && !isComingSoon && priceInfo.hasDiscount && (
+      {/* NEW ARRIVAL BADGE */}
+      {product.isNewArrival && !isLocked && !product.isSoldOut && (
+         <div className="absolute top-4 left-4 z-20 bg-white text-purple-600 border border-purple-200 text-[10px] font-bold px-3 py-1 uppercase tracking-widest rounded-full flex items-center gap-1 shadow-sm">
+             <Star size={10} className="fill-purple-600 animate-pulse"/> New
+         </div>
+      )}
+
+      {/* DISCOUNT BADGE */}
+      {!product.isSoldOut && !isLocked && priceInfo.hasDiscount && (
           <div className="absolute top-4 right-4 z-20 bg-red-600 text-white text-xs font-bold px-4 py-2 uppercase tracking-widest rounded-full shadow-xl flex items-center gap-2">
               <Tag size={14} className="fill-white/20" /> -{priceInfo.discountPercent}%
           </div>
+      )}
+
+      {/* LOCKED BADGE (Top Right) */}
+      {isLocked && (
+           <div className="absolute top-4 right-4 z-20 bg-slate-900 text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest rounded-full flex items-center gap-2">
+               <Lock size={10} /> Locked
+           </div>
       )}
 
       {/* IMAGE SECTION */}
       <div className="relative aspect-[4/5] overflow-hidden bg-slate-50 p-6">
         <div className="absolute inset-0 shadow-[inset_0_0_40px_rgba(0,0,0,0.05)] pointer-events-none z-10 rounded-sm"></div>
         
-        {/* Quick View Overlay hint */}
-        <div className="absolute inset-0 z-20 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-             <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-slate-900 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex items-center gap-2">
-                 <Eye size={14} /> Dettagli
-             </div>
-        </div>
+        {/* Quick View Overlay hint (Only if unlocked) */}
+        {!isLocked && (
+            <div className="absolute inset-0 z-20 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-slate-900 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 flex items-center gap-2">
+                    <Eye size={14} /> Dettagli
+                </div>
+            </div>
+        )}
 
-        {isComingSoon && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/60 backdrop-blur-md p-6 text-center">
-                <div className="bg-black text-white p-4 rounded-full mb-4 shadow-xl"><Lock size={32} /></div>
+        {/* LOCKED OVERLAY */}
+        {isLocked && (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/40 backdrop-blur-xl p-6 text-center">
+                <div className="bg-slate-900 text-white p-4 rounded-full mb-4 shadow-2xl"><Lock size={32} /></div>
                 <h4 className="font-oswald text-2xl uppercase font-bold text-slate-900 mb-2">Coming Soon</h4>
-                <p className="text-sm font-bold uppercase tracking-widest text-[#0066b2] bg-blue-50 px-3 py-1 rounded-full flex items-center gap-2">
-                    <Clock size={14} /> Drop: {dropDateObj?.toLocaleDateString()}
-                </p>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-[#0066b2] bg-blue-50 px-3 py-1 rounded-full flex items-center gap-2 border border-blue-100">
+                    <Clock size={12} /> Drop: {dropDateObj?.toLocaleDateString()}
+                </div>
                 <p className="text-xs font-mono text-slate-500 mt-2">{dropDateObj?.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
             </div>
         )}
@@ -82,7 +109,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
           src={imgSrc}
           alt={product.title}
           onError={() => setImgSrc("https://via.placeholder.com/400x500")}
-          className={`w-full h-full object-contain drop-shadow-xl transition-transform duration-700 group-hover:scale-110 group-hover:-rotate-2 ${product.isSoldOut ? 'opacity-50 grayscale' : 'opacity-100'} ${isComingSoon ? 'blur-sm scale-90' : ''}`}
+          className={`
+            w-full h-full object-contain drop-shadow-xl transition-transform duration-700 
+            ${isLocked ? 'opacity-40 blur-sm scale-90 grayscale' : 'opacity-100 group-hover:scale-110 group-hover:-rotate-2'} 
+            ${product.isSoldOut ? 'opacity-50 grayscale' : ''}
+          `}
         />
       </div>
 
@@ -96,7 +127,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
             </span>
             
             {/* Size Selector - Centered Pills */}
-            {!isComingSoon && (
+            {!isLocked && (
                 <div className="flex gap-1 bg-slate-100 rounded-full p-1" onClick={(e) => e.stopPropagation()}>
                     {(['S', 'M', 'L', 'XL'] as Size[]).map((s) => {
                         const variant = product.variants?.find(v => v.size === s);
@@ -128,12 +159,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
             )}
         </div>
         
-        <h3 className="text-black font-oswald text-2xl uppercase tracking-wide leading-tight mb-2 text-center group-hover:text-[#0066b2] transition-colors">
-          {isComingSoon ? '???' : product.title}
+        <h3 className="text-black font-oswald text-2xl uppercase tracking-wide leading-tight mb-2 text-center group-hover:text-[#0066b2] transition-colors line-clamp-2">
+          {isLocked ? '???' : product.title}
         </h3>
         
         <div className="min-h-[20px] mb-4 text-center">
-             {!isComingSoon && (isSizeSoldOut ? (
+             {!isLocked && (isSizeSoldOut ? (
                  <p className="text-[10px] text-red-500 font-bold uppercase inline-flex items-center gap-1"><AlertCircle size={12} /> Taglia Esaurita</p>
              ) : (
                  <p className="text-[10px] text-green-600 font-bold uppercase inline-flex items-center gap-1 opacity-80"><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>Disponibilità: {stockCount} pezzi</p>
@@ -143,7 +174,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
         <div className="mt-auto pt-6 border-t border-slate-100 flex items-center justify-between">
             <div className="flex flex-col">
                  <span className="text-[10px] text-slate-400 uppercase tracking-wide mb-1">Prezzo</span>
-                 {isComingSoon ? (
+                 {isLocked ? (
                      <span className="font-oswald font-bold text-xl text-slate-300">Locked</span>
                  ) : priceInfo.hasDiscount ? (
                      <div className="flex items-center gap-3">
@@ -183,7 +214,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
                 )}
 
                 <span className="relative z-10 flex items-center gap-2">
-                    {isComingSoon ? (
+                    {isLocked ? (
                         <><Lock size={14} /> Locked</>
                     ) : product.isSoldOut || isSizeSoldOut ? (
                         'Esaurita'

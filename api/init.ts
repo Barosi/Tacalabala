@@ -57,31 +57,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         `);
     } catch (e) { console.warn("Orders table schema update failed", e); }
 
-    // 0.3 Update Products table schema for Multi-Images
+    // 0.3 Update Products table schema for Multi-Images and New Arrival
     try {
         await pool.query(`
             ALTER TABLE products 
-            ADD COLUMN IF NOT EXISTS images TEXT
+            ADD COLUMN IF NOT EXISTS images TEXT,
+            ADD COLUMN IF NOT EXISTS is_new_arrival BOOLEAN DEFAULT FALSE,
+            ADD COLUMN IF NOT EXISTS drop_date TIMESTAMP
         `);
     } catch (e) { console.warn("Products table schema update failed", e); }
 
-    // 0.4 Ensure Discounts table exists
+    // 0.4 Ensure Discounts table exists and has correct schema (Migration)
     try {
         await pool.query(`
             CREATE TABLE IF NOT EXISTS discounts (
                 id TEXT PRIMARY KEY,
-                name TEXT NOT NULL,
-                code TEXT,
-                discount_type TEXT DEFAULT 'automatic',
-                percentage NUMERIC,
-                start_date TIMESTAMP,
-                end_date TIMESTAMP,
-                target_type TEXT,
-                target_product_ids TEXT,
-                is_active BOOLEAN DEFAULT TRUE
+                name TEXT NOT NULL
             )
         `);
-    } catch (e) { console.warn("Discounts table creation failed", e); }
+        // Add missing columns if they don't exist (Migration pattern)
+        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS code TEXT`);
+        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS discount_type TEXT DEFAULT 'automatic'`);
+        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS percentage NUMERIC`);
+        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS start_date TIMESTAMP`);
+        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS end_date TIMESTAMP`);
+        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS target_type TEXT`);
+        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS target_product_ids TEXT`);
+        await pool.query(`ALTER TABLE discounts ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE`);
+    } catch (e) { console.warn("Discounts table creation/migration failed", e); }
 
 
     // 1. Fetch Products
@@ -122,6 +125,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             tags: p.tags,
             instagramUrl: p.instagram_url,
             dropDate: p.drop_date,
+            isNewArrival: p.is_new_arrival,
             variants: pVariants.map((v: any) => ({ size: v.size, stock: v.stock }))
         };
     });
@@ -150,7 +154,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             code: d.code,
             discountType: d.discount_type || 'automatic',
             percentage: d.percentage,
-            targetProductIds: typeof d.target_product_ids === 'string' ? JSON.parse(d.target_product_ids) : d.target_product_ids,
+            targetProductIds: d.target_product_ids ? (typeof d.target_product_ids === 'string' ? JSON.parse(d.target_product_ids) : d.target_product_ids) : [],
             startDate: d.start_date, 
             endDate: d.end_date,
             targetType: d.target_type,

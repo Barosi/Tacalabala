@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Product, ProductVariant, Size, FAQ, Discount, OrderStatus, ShippingConfig } from '../types';
-import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, Tag, Calendar, ShoppingBag, Truck, Check, Search, Shirt, Layers, Image as ImageIcon, Upload, Settings, Mail, Shield, AlertTriangle, ChevronDown, X, Phone, Globe, ToggleLeft, ToggleRight, HelpCircle, AlertOctagon, List, Edit3, PackageOpen, XCircle } from 'lucide-react';
+import { Plus, Trash2, LogOut, Package, CreditCard, Save, MessageCircle, Tag, Calendar, ShoppingBag, Truck, Check, Search, Shirt, Layers, Image as ImageIcon, Upload, Settings, Mail, Shield, AlertTriangle, ChevronDown, X, Phone, Globe, ToggleLeft, ToggleRight, HelpCircle, AlertOctagon, List, Edit3, PackageOpen, XCircle, Clock, Star, Lock } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { sendShippingConfirmationEmail } from '../utils/emailSender';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -237,7 +236,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
     const [editForm, setEditForm] = useState<{id: string, title: string, price: string, articleCode: string}>({ id: '', title: '', price: '', articleCode: '' });
 
     // Forms
-    const [newProduct, setNewProduct] = useState<Partial<Product>>({ title: '', articleCode: '', brand: 'Tacalabala', kitType: '', year: '', price: '', imageUrl: '', images: [], condition: 'Nuovo con etichetta', description: '', isSoldOut: false, tags: [], instagramUrl: '', dropDate: '' });
+    const [newProduct, setNewProduct] = useState<Partial<Product>>({ title: '', articleCode: '', brand: 'Tacalabala', kitType: '', year: '', price: '', imageUrl: '', images: [], condition: 'Nuovo con etichetta', description: '', isSoldOut: false, tags: [], instagramUrl: '', dropDate: '', isNewArrival: false });
     const [variantsState, setVariantsState] = useState<{size: Size, enabled: boolean, stock: string}[]>([ { size: 'S', enabled: true, stock: '10' }, { size: 'M', enabled: true, stock: '10' }, { size: 'L', enabled: true, stock: '10' }, { size: 'XL', enabled: true, stock: '10' } ]);
     const [uploadImages, setUploadImages] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -293,10 +292,11 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
             tags: newProduct.tags || [],
             instagramUrl: newProduct.instagramUrl,
             dropDate: newProduct.dropDate,
+            isNewArrival: newProduct.isNewArrival,
             variants: finalVariants
         };
         addProduct(productToAdd);
-        setNewProduct({ title: '', articleCode: '', brand: 'Tacalabala', kitType: '', year: '', price: '', imageUrl: '', images: [], condition: 'Nuovo con etichetta', description: '', isSoldOut: false, tags: [], instagramUrl: '', dropDate: '' });
+        setNewProduct({ title: '', articleCode: '', brand: 'Tacalabala', kitType: '', year: '', price: '', imageUrl: '', images: [], condition: 'Nuovo con etichetta', description: '', isSoldOut: false, tags: [], instagramUrl: '', dropDate: '', isNewArrival: false });
         setUploadImages([]);
         addToast('Prodotto aggiunto con successo!', 'success');
     };
@@ -545,6 +545,38 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             <InputGroup label="Anno"><StyledInput value={newProduct.year} onChange={e => setNewProduct({...newProduct, year: e.target.value})} placeholder="2024" /></InputGroup>
                                         </div>
 
+                                        {/* Drop Date + New Arrival Toggle */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                                            <InputGroup label="Data Drop (Opzionale)" helpText="Se futura, il prodotto sarà 'Locked'.">
+                                                <div className="relative">
+                                                    <StyledInput 
+                                                        type="datetime-local" 
+                                                        value={newProduct.dropDate} 
+                                                        onChange={e => setNewProduct({...newProduct, dropDate: e.target.value})} 
+                                                        className="pl-10"
+                                                    />
+                                                    <Clock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                                </div>
+                                            </InputGroup>
+
+                                            <div className="flex flex-col justify-between">
+                                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 pl-1 mb-2">Stato</label>
+                                                <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-100 h-[58px]">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={newProduct.isNewArrival} 
+                                                        onChange={e => setNewProduct({...newProduct, isNewArrival: e.target.checked})}
+                                                        className="w-5 h-5 accent-[#0066b2] cursor-pointer"
+                                                        id="chk-new"
+                                                    />
+                                                    <label htmlFor="chk-new" className="text-xs font-bold uppercase text-slate-700 cursor-pointer flex items-center gap-2">
+                                                        <Star size={14} className={newProduct.isNewArrival ? "fill-[#0066b2] text-[#0066b2]" : "text-slate-300"} />
+                                                        Segna come Novità
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <InputGroup label="Descrizione">
                                             <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-40 resize-none" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} placeholder="Descrivi il fit e i dettagli..." />
                                         </InputGroup>
@@ -616,7 +648,11 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                                         <img src={product.imageUrl} alt="" className="w-full h-full object-cover" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-bold text-slate-900 text-sm uppercase group-hover:text-[#0066b2] transition-colors">{product.title}</h4>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <h4 className="font-bold text-slate-900 text-sm uppercase group-hover:text-[#0066b2] transition-colors">{product.title}</h4>
+                                                            {product.isNewArrival && <span className="text-[9px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">Novità</span>}
+                                                            {product.dropDate && new Date(product.dropDate) > new Date() && <span className="text-[9px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wide flex items-center gap-1"><Lock size={8}/> Locked</span>}
+                                                        </div>
                                                         <p className="text-[10px] font-mono text-slate-500 font-bold">{product.articleCode}</p>
                                                     </div>
                                                 </div>
@@ -720,7 +756,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     </div>
                 )}
 
-                {/* --- ORDERS --- */}
+                {/* ... (Orders, Promotions, etc. remain unchanged) ... */}
                 {activeTab === 'orders' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4">
                          <Card title="Gestione Ordini" subtitle="Spedizioni e Tracking" icon={Truck}>
@@ -845,8 +881,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         </Card>
                     </div>
                 )}
-
-                {/* --- PROMOTIONS --- */}
+                {/* ... (Other Tabs are fine) ... */}
                 {activeTab === 'promotions' && (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-in fade-in slide-in-from-bottom-4">
                         <Card title="Nuova Promo" subtitle="Crea coupon o sconti automatici" icon={Tag}>
@@ -945,8 +980,8 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         </Card>
                     </div>
                 )}
-
-                {/* --- SETTINGS: SHIPPING --- */}
+                
+                {/* ... (Other Tabs: shipping, payments, contacts, faq remain same) ... */}
                 {activeTab === 'shipping' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4">
                         <Card title="Configurazione Spedizioni" icon={Truck}>
@@ -977,8 +1012,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                     </div>
                 )}
 
-                {/* --- SETTINGS: PAYMENTS --- */}
-                {activeTab === 'payments' && (
+                 {activeTab === 'payments' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4">
                         <Card title="Configurazione Stripe" subtitle="Gestisci chiavi API" icon={CreditCard}>
                             <div className="space-y-6 max-w-2xl mx-auto">
@@ -1025,9 +1059,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         </Card>
                     </div>
                 )}
-
-                {/* --- SETTINGS: CONTACTS --- */}
-                {activeTab === 'contacts' && (
+                 {activeTab === 'contacts' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4">
                         <Card title="Canali di Contatto" subtitle="Configurazione EmailJS & WhatsApp" icon={Mail}>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -1065,9 +1097,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                         </Card>
                     </div>
                 )}
-
-                {/* --- SETTINGS: FAQ --- */}
-                {activeTab === 'faq' && (
+                 {activeTab === 'faq' && (
                     <div className="grid grid-cols-1 gap-8 animate-in fade-in slide-in-from-bottom-4">
                         <Card title="Aggiungi FAQ" icon={HelpCircle}>
                             <div className="space-y-4 max-w-2xl mx-auto">

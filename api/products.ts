@@ -35,9 +35,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const imagesJson = JSON.stringify(p.images || [p.imageUrl]);
 
         await client.query(
-            `INSERT INTO products (id, article_code, title, brand, kit_type, year, season, price, image_url, images, condition, description, is_sold_out, tags, instagram_url, drop_date)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
-            [newId, articleCode, p.title, p.brand, p.kitType, p.year, p.season, priceNum, p.imageUrl, imagesJson, p.condition, p.description, p.isSoldOut, p.tags, p.instagramUrl, p.dropDate || null]
+            `INSERT INTO products (id, article_code, title, brand, kit_type, year, season, price, image_url, images, condition, description, is_sold_out, tags, instagram_url, drop_date, is_new_arrival)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+            [newId, articleCode, p.title, p.brand, p.kitType, p.year, p.season, priceNum, p.imageUrl, imagesJson, p.condition, p.description, p.isSoldOut, p.tags, p.instagramUrl, p.dropDate || null, p.isNewArrival || false]
         );
 
         if (p.variants && p.variants.length > 0) {
