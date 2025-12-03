@@ -161,7 +161,7 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
             <div className="md:hidden flex flex-col gap-4 w-full pb-2">
                 
                 {/* Row 1: Categories (Text Pills - Horizontal Scroll) */}
-                <div className="flex overflow-x-auto no-scrollbar gap-2 px-4 w-full snap-x items-center">
+                <div className="flex overflow-x-auto overflow-y-hidden no-scrollbar gap-2 px-4 w-full snap-x items-center touch-pan-x overscroll-x-contain py-2">
                     {[{value: 'all', label: 'Tutti'}, ...categories.map(c => ({value: c, label: c}))].map((opt) => {
                          const isActive = filterType === opt.value;
                          return (
@@ -172,6 +172,7 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
                                     flex-shrink-0 snap-start
                                     px-5 py-2.5 rounded-full 
                                     text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border
+                                    whitespace-nowrap
                                     ${isActive 
                                         ? 'bg-slate-900 text-white border-slate-900 shadow-md transform scale-105' 
                                         : 'bg-white text-slate-500 border-slate-200'}
@@ -184,7 +185,7 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
                 </div>
 
                 {/* Row 2: Sizes (Circles - Horizontal Scroll) */}
-                <div className="flex overflow-x-auto no-scrollbar gap-3 px-4 w-full items-center snap-x">
+                <div className="flex overflow-x-auto overflow-y-hidden no-scrollbar gap-3 px-4 w-full items-center snap-x touch-pan-x overscroll-x-contain py-2">
                     {sizeOptions.map((opt) => {
                         const isActive = filterSize === opt.value;
                         return (
