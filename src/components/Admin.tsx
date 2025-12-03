@@ -510,7 +510,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                 {/* --- PRODUCTS --- */}
                 {activeTab === 'products' && (
                     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
-                        <Card title="Nuovo Articolo" subtitle="Inserisci i dettagli streetwear" icon={Plus}>
+                        <Card title="Nuovo Articolo" subtitle="Inserisci i dettagli" icon={Plus}>
                             <form onSubmit={handleProductSubmit} className="h-full flex flex-col gap-8">
                                 
                                 {/* TOP SECTION: INFO + GALLERY */}
@@ -551,7 +551,6 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     <div className="lg:col-span-1 flex flex-col">
                                         <div className="flex justify-between items-center mb-2 h-4"> {/* Aligned with InputGroup label */}
                                             <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest pl-1">Galleria</span>
-                                            <span className="text-[9px] font-bold bg-white px-2 py-1 rounded text-slate-400 border border-slate-200">{uploadImages.length} Foto</span>
                                         </div>
                                         
                                         <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 flex-grow flex flex-col relative">
