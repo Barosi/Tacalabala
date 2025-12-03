@@ -1,205 +1,142 @@
 
-import React, { useState, useRef } from 'react';
-import { Send, MessageCircle, Clock, CheckCircle2, Loader2, Info } from 'lucide-react';
-import { useStore } from '../store/useStore';
-import * as emailjs from '@emailjs/browser';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { PenTool, LayoutTemplate } from 'lucide-react';
 
-const Contact: React.FC = () => {
-  const { supportConfig, mailConfig } = useStore();
-  const formRef = useRef<HTMLFormElement>(null);
-  
-  const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState<{type: 'success'|'error', msg: string} | null>(null);
-  const [privacyAccepted, setPrivacyAccepted] = useState(false);
-
-  const handleWhatsapp = () => {
-      if (!supportConfig.whatsappNumber) {
-          alert('Numero WhatsApp non configurato.');
-          return;
-      }
-      const num = supportConfig.whatsappNumber.replace(/[^0-9]/g, '');
-      window.open(`https://wa.me/${num}`, '_blank');
-  };
-
-  const sendEmail = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!privacyAccepted) {
-        setFeedback({ type: 'error', msg: 'Devi accettare la Privacy Policy per inviare il messaggio.' });
-        return;
-    }
-
-    // 1. Validazione Configurazione
-    if (!mailConfig.serviceId || !mailConfig.templateId || !mailConfig.publicKey) {
-        setFeedback({ type: 'error', msg: 'Configurazione Email mancante nel pannello Admin.' });
-        return;
-    }
-
-    setLoading(true);
-    setFeedback(null);
-
-    // 2. Invio con EmailJS usando i parametri dello Store
-    emailjs.sendForm(
-        mailConfig.serviceId, 
-        mailConfig.templateId, 
-        formRef.current!, 
-        mailConfig.publicKey
-    )
-      .then((result) => {
-          setFeedback({ type: 'success', msg: 'Messaggio inviato con successo! Ti risponderemo presto.' });
-          if(formRef.current) formRef.current.reset(); // Pulisce il form
-          setPrivacyAccepted(false);
-      }, (error) => {
-          console.error(error);
-          setFeedback({ type: 'error', msg: 'Errore nell\'invio. Riprova o scrivici su WhatsApp.' });
-      })
-      .finally(() => {
-          setLoading(false);
-      });
-  };
-
+const ChiSiamo: React.FC = () => {
   return (
-    <section id="contact" className="pt-36 md:pt-48 pb-24 bg-white border-t border-slate-100 relative overflow-hidden">
+    <section id="chi-siamo" className="pt-32 md:pt-48 pb-24 relative overflow-hidden bg-slate-50">
       
-       {/* Background Pattern */}
-       <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style={{
-          backgroundImage: `radial-gradient(#0066b2 1px, transparent 1px)`,
-          backgroundSize: '32px 32px'
-      }}></div>
+      {/* BACKGROUND: Pitch Lines + Central Fade */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+           {/* Center Circle Graphic - ONLY RING, NO DOT */}
+            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-slate-200 rounded-full opacity-60"></div>
+            
+            {/* Axis Line with Gradient Fade & Dashed Style */}
+            <div className="absolute inset-0 flex justify-center">
+                <div 
+                    className="w-px h-full bg-transparent border-l border-dashed border-slate-300"
+                    style={{ 
+                        maskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)',
+                        WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)'
+                    }}
+                ></div>
+            </div>
+            
+            {/* Horizontal Line (Midfield) */}
+            <div className="absolute top-1/3 left-0 w-full h-px bg-slate-100"></div>
+      </div>
 
       <div className="container mx-auto px-6 max-w-5xl relative z-10">
         
-         <div className="text-center mb-16">
-            <h2 className="font-oswald text-5xl md:text-6xl font-bold uppercase mb-4 text-slate-900">
-                Supporto <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Clienti</span>
-             </h2>
-             <p className="text-slate-500">Siamo qui per ogni tifoso nerazzurro.</p>
-        </div>
-   
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-            
-            {/* --- COLONNA SINISTRA (WhatsApp) --- */}
-            <div className="bg-white p-8 md:p-12 rounded-[2rem] border border-slate-100 shadow-lg flex flex-col justify-between h-full">
-                <div>
-                     <h3 className="font-oswald text-2xl uppercase text-slate-900 mb-6 flex items-center gap-2">
-                        <MessageCircle size={24} className="text-[#25D366]" /> Chatta con noi 
-                     </h3>
-                     <p className="text-slate-500 mb-8 leading-relaxed">
-                        Hai bisogno di una risposta veloce su taglie, spedizioni o dettagli dei prodotti? Il modo più rapido è scriverci su WhatsApp.
-                     </p>
-                     <div className="space-y-4 mb-8">
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center gap-4">
-                            <div className="w-10 h-10 bg-blue-100 text-[#0066b2] rounded-full flex items-center justify-center flex-shrink-0">
-                                <Clock size={20} />
-                            </div>
-                            <div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">Disponibilità</span>
-                                <span className="text-slate-900 font-medium text-sm">Lun - Ven: 9:00 - 18:00</span>
-                            </div>
-                        </div>
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center gap-4">
-                             <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center flex-shrink-0">
-                                <CheckCircle2 size={20} />
-                            </div>
-                            <div>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">Tempo di risposta</span>
-                                <span className="text-slate-900 font-medium text-sm">Di solito entro 1 ora</span>
-                            </div>
-                        </div>
-                     </div>
+        {/* --- 1. TITOLO (FUORI DAL CONTAINER) --- */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-center mb-12"
+        >
+             <h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase text-slate-900 leading-[1.1] tracking-tight">
+                In trasferta e <br className="hidden md:block" />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">giù in Città</span>
+            </h2>
+        </motion.div>
+
+        {/* --- 2. DESCRIZIONE (NEL CONTAINER GLASS) --- */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          className="mb-16" 
+        >
+             <div className="bg-white/60 backdrop-blur-md rounded-[3rem] p-8 md:p-12 border border-white/60 shadow-xl shadow-slate-200/40 text-center relative overflow-hidden max-w-4xl mx-auto">
+                
+                <div className="text-slate-600 text-base md:text-lg font-light leading-relaxed space-y-6 relative z-10">
+                    <p>
+                        <strong className="text-slate-900 font-medium">Tacalabala</strong> non è solo un brand, è un manifesto d'appartenenza. Nati tra i gradoni di San Siro e cresciuti nelle strade di Milano.
+                    </p>
+                    <p>
+                        La nostra missione è semplice ma ambiziosa: prendere l'estetica sacra della maglia nerazzurra e fonderla con i codici del design urbano contemporaneo. <span className="font-semibold text-[#0066b2]">Non facciamo repliche, creiamo visioni.</span>
+                    </p>
                 </div>
-                <div className="pt-2 flex justify-center">
-                    <button 
-                        onClick={handleWhatsapp}
-                        className="w-auto min-w-[260px] relative overflow-hidden group/btn bg-white border border-[#25D366] text-[#25D366] hover:text-white font-bold uppercase tracking-widest py-4 px-10 rounded-full transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-green-500/20 active:scale-95 transform-gpu"
-                    >
-                        <span className="absolute inset-0 bg-[#25D366] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
-                        <span className="relative z-10 flex items-center gap-2">
-                             <MessageCircle size={18} /> Apri Chat WhatsApp
-                        </span>
-                    </button>
-                </div>
-            </div>
+             </div>
+        </motion.div>
 
-            {/* --- COLONNA DESTRA (Email Form CON LOGICA) --- */}
-            <div className="bg-white p-8 md:p-12 rounded-[2rem] border border-slate-100 shadow-lg flex flex-col justify-between h-full">
-                 
-                 <div className="w-full">
-                     <h3 className="font-oswald text-2xl uppercase text-slate-900 mb-6 flex items-center gap-2">
-                         <Send size={24} className="text-[#0066b2]" /> Inviaci un messaggio
-                     </h3>
-                     
-                     {/* Il form è collegato alla funzione sendEmail */}
-                     <form ref={formRef} onSubmit={sendEmail} className="space-y-5">
-                        <div className="grid grid-cols-2 gap-5">
-                             <div className="space-y-1">
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Nome</label>
-                                <input required name="user_name" type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-900 focus:border-[#0066b2] outline-none transition-colors" placeholder="Nome" />
-                             </div>
-                             <div className="space-y-1">
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Cognome</label>
-                                <input name="user_surname" type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-900 focus:border-[#0066b2] outline-none transition-colors" placeholder="Cognome" />
-                             </div>
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Email</label>
-                            <input required name="user_email" type="email" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-900 focus:border-[#0066b2] outline-none transition-colors" placeholder="nome@email.com" />
-                        </div>
-                        <div className="space-y-1 w-full">
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Messaggio</label>
-                            <textarea 
-                                required
-                                name="message"
-                                rows={4} 
-                                className="w-full min-h-[140px] bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-900 focus:border-[#0066b2] outline-none transition-colors resize-none" 
-                                placeholder="Come possiamo aiutarti?"
-                            ></textarea>
-                        </div>
-                        
-                        {/* PRIVACY CHECKBOX */}
-                        <div className="flex items-start gap-3 pt-2">
-                            <input 
-                                type="checkbox" 
-                                id="privacy-check" 
-                                required
-                                checked={privacyAccepted}
-                                onChange={(e) => setPrivacyAccepted(e.target.checked)}
-                                className="mt-1 w-4 h-4 text-[#0066b2] border-slate-300 rounded focus:ring-[#0066b2] cursor-pointer"
-                            />
-                            <label htmlFor="privacy-check" className="text-xs text-slate-500 cursor-pointer select-none">
-                                Ho letto e accetto la <span className="font-bold underline text-slate-700">Privacy Policy</span>. Acconsento al trattamento dei dati.
-                            </label>
-                        </div>
+        {/* --- 3. FORMAZIONE SECTION --- */}
+        <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="pt-4" 
+        >
+             <div className="flex flex-col items-center text-center mb-10">
+                 <span className="inline-block py-1 px-4 border border-[#0066b2] rounded-full bg-white text-[#0066b2] font-bold tracking-[0.2em] text-[10px] uppercase mb-4 shadow-sm">
+                    Staff Tecnico
+                 </span>
+                 <h2 className="font-oswald text-4xl md:text-5xl font-bold uppercase text-slate-900">La <span className="text-[#0066b2]">Formazione</span></h2>
+             </div>
 
-                        {/* Messaggi di Feedback */}
-                        {feedback && (
-                            <div className={`text-xs font-bold p-3 rounded-lg ${feedback.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                                {feedback.msg}
-                            </div>
-                        )}
-                     </form>
-                 </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                
+                {/* Player Card 1 */}
+                <motion.div 
+                    whileHover={{ y: -10 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                    className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50 relative overflow-hidden group"
+                >
+                    <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+                        <PenTool size={100} />
+                    </div>
+                    
+                    <div className="flex items-center gap-4 mb-6">
+                        {/* NUMBER COLOR CHANGED TO TACALABALA BLUE */}
+                        <div className="w-16 h-16 bg-[#0066b2] text-white rounded-2xl flex items-center justify-center font-oswald font-bold text-2xl border-2 border-[#0066b2] group-hover:bg-white group-hover:text-[#0066b2] transition-colors">
+                            7
+                        </div>
+                        <div>
+                            <h4 className="font-oswald text-2xl uppercase font-bold text-slate-900 leading-none">Lorenzo Demitri</h4>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-[#0066b2] mt-1">Founder & Creative Director</p>
+                        </div>
+                    </div>
+                    <p className="text-slate-500 font-light text-sm leading-relaxed border-t border-slate-100 pt-4">
+                        Visionario e tifoso. Ha trasformato la sua ossessione per i dettagli delle maglie storiche in un nuovo linguaggio visivo.
+                    </p>
+                </motion.div>
 
-                 <div className="pt-6 flex justify-center">
-                    <button 
-                        type="button" 
-                        // Importante: onClick triggera il submit del form esterno se non è dentro
-                        onClick={() => formRef.current?.requestSubmit()} 
-                        disabled={loading || !privacyAccepted}
-                        className="w-auto min-w-[260px] relative overflow-hidden group/btn bg-white border border-slate-900 text-slate-900 hover:text-white disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 font-bold uppercase tracking-widest py-4 px-10 rounded-full transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-blue-900/20 active:scale-95 transform-gpu"
-                    >
-                        <span className="absolute inset-0 bg-slate-900 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span>
-                        <span className="relative z-10 flex items-center gap-2">
-                             {loading ? <Loader2 className="animate-spin" /> : <><Send size={16} /> Invia Messaggio</>}
-                        </span>
-                    </button>
-                 </div>
-            </div>
+                {/* Player Card 2 */}
+                <motion.div 
+                    whileHover={{ y: -10 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                    className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50 relative overflow-hidden group"
+                >
+                    <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+                        <LayoutTemplate size={100} />
+                    </div>
+                    
+                    <div className="flex items-center gap-4 mb-6">
+                        {/* NUMBER COLOR CHANGED TO TACALABALA BLUE */}
+                        <div className="w-16 h-16 bg-[#0066b2] text-white rounded-2xl flex items-center justify-center font-oswald font-bold text-2xl border-2 border-[#0066b2] group-hover:bg-white group-hover:text-[#0066b2] transition-colors">
+                          10  
+                        </div>
+                        <div>
+                            <h4 className="font-oswald text-2xl uppercase font-bold text-slate-900 leading-none">Andrea Agnelli</h4>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-[#0066b2] mt-1">Head of Operations</p>
+                        </div>
+                    </div>
+                    <p className="text-slate-500 font-light text-sm leading-relaxed border-t border-slate-100 pt-4">
+                        Il motore della logistica. Assicura che ogni pacco parta puntuale e che l'esperienza cliente sia impeccabile.
+                    </p>
+                </motion.div>
 
-        </div>
+             </div>
+        </motion.div>
+
       </div>
     </section>
   );
 };
 
-export default Contact;
+export default ChiSiamo;
