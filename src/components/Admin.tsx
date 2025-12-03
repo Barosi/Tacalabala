@@ -511,20 +511,19 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                 {activeTab === 'products' && (
                     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4">
                         <Card title="Nuovo Articolo" subtitle="Inserisci i dettagli streetwear" icon={Plus}>
-                            <form onSubmit={handleProductSubmit} className="h-full flex flex-col space-y-8">
+                            <form onSubmit={handleProductSubmit} className="h-full flex flex-col gap-8">
                                 
-                                {/* 1. Top Section: Info (Left) + Compact Images (Right) */}
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                                {/* TOP SECTION: INFO + GALLERY */}
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
                                     
-                                    {/* Left Column: Info Fields */}
-                                    <div className="lg:col-span-2 space-y-6">
-                                         <InputGroup label="Titolo Prodotto">
+                                    {/* Left: Product Info (2/3) */}
+                                    <div className="lg:col-span-2 flex flex-col gap-6">
+                                        <InputGroup label="Titolo Prodotto">
                                             <StyledInput value={newProduct.title} onChange={e => setNewProduct({...newProduct, title: e.target.value})} placeholder="Es. Milano Concrete Tee" required />
                                         </InputGroup>
                                         
-                                        {/* SKU + Price Row */}
                                         <div className="grid grid-cols-2 gap-6">
-                                             <InputGroup label="SKU (Codice)">
+                                            <InputGroup label="SKU (Codice)">
                                                 <StyledInput value={newProduct.articleCode} onChange={e => setNewProduct({...newProduct, articleCode: e.target.value})} placeholder="TC-001" required />
                                             </InputGroup>
                                             <InputGroup label="Prezzo">
@@ -542,43 +541,50 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             </InputGroup>
                                         </div>
 
-                                        {/* Kit Type + Year Row */}
                                         <div className="grid grid-cols-2 gap-6">
                                             <InputGroup label="Kit Type"><StyledInput value={newProduct.kitType} onChange={e => setNewProduct({...newProduct, kitType: e.target.value})} placeholder="Home" /></InputGroup>
                                             <InputGroup label="Anno"><StyledInput value={newProduct.year} onChange={e => setNewProduct({...newProduct, year: e.target.value})} placeholder="2024" /></InputGroup>
                                         </div>
                                     </div>
 
-                                    {/* Right Column: Compact Images */}
-                                    <div className="lg:col-span-1 bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200">
-                                         <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-4 block pl-1">Media (Max 1MB)</span>
-                                         <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
-                                         
-                                         <div className="grid grid-cols-3 gap-2">
-                                            {/* Add Button */}
-                                            <div onClick={() => fileInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 hover:text-[#0066b2] hover:border-[#0066b2] hover:bg-white cursor-pointer transition-all gap-1 group">
-                                                <div className="p-2 bg-white rounded-full shadow-sm group-hover:shadow-md transition-shadow">
-                                                    <Upload size={16} />
-                                                </div>
+                                    {/* Right: Gallery (1/3) - Fits Height */}
+                                    <div className="lg:col-span-1 h-full">
+                                        <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 h-full flex flex-col">
+                                            <div className="flex justify-between items-center mb-4">
+                                                <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest pl-1">Galleria</span>
+                                                <span className="text-[9px] font-bold bg-white px-2 py-1 rounded text-slate-400 border border-slate-100">{uploadImages.length} Foto</span>
                                             </div>
-
-                                            {/* Previews */}
-                                            {uploadImages.map((img, i) => (
-                                                <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group bg-white shadow-sm">
-                                                    <img src={img} className="w-full h-full object-cover" alt="" />
-                                                    <button type="button" onClick={() => setUploadImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={16}/></button>
+                                            
+                                            <input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
+                                            
+                                            {/* Compact Grid */}
+                                            <div className="grid grid-cols-3 gap-2 flex-grow content-start">
+                                                {/* Add Button */}
+                                                <div onClick={() => fileInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 hover:text-[#0066b2] hover:border-[#0066b2] hover:bg-white cursor-pointer transition-all gap-1 group">
+                                                    <div className="p-2 bg-white rounded-full shadow-sm group-hover:shadow-md transition-shadow">
+                                                        <Upload size={14} />
+                                                    </div>
                                                 </div>
-                                            ))}
-                                         </div>
+
+                                                {/* Previews */}
+                                                {uploadImages.map((img, i) => (
+                                                    <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 group bg-white shadow-sm">
+                                                        <img src={img} className="w-full h-full object-cover" alt="" />
+                                                        <button type="button" onClick={() => setUploadImages(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14}/></button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <p className="text-[9px] text-slate-400 mt-4 text-center">Max 1MB per immagine.</p>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* 2. Middle Section: Drop/New + Stock (Side by Side) */}
+                                {/* MIDDLE SECTION: DROP & STOCK - ALIGNED */}
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
                                     
-                                    {/* Left: Drop Date & New Arrival */}
-                                    <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 flex flex-col justify-between h-full space-y-4">
-                                         <InputGroup label="Data Drop (Opzionale)" helpText="Se futura, il prodotto sarà 'Locked'.">
+                                    {/* Left: Drop & News */}
+                                    <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 flex flex-col justify-between gap-6">
+                                        <InputGroup label="Data Drop (Opzionale)" helpText="Se futura, il prodotto sarà 'Locked'.">
                                             <div className="relative">
                                                 <StyledInput 
                                                     type="datetime-local" 
@@ -590,41 +596,44 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                             </div>
                                         </InputGroup>
                                         
-                                        {/* Styled New Arrival Toggle */}
+                                        {/* Styled Toggle Card */}
                                         <div 
                                             className={`
-                                                relative p-4 rounded-2xl border transition-all duration-300 cursor-pointer group flex items-center justify-between
+                                                flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 cursor-pointer
                                                 ${newProduct.isNewArrival 
                                                     ? 'bg-white border-[#0066b2] shadow-md shadow-blue-100' 
-                                                    : 'bg-white border-slate-200 hover:border-slate-300'}
+                                                    : 'bg-slate-100 border-slate-200 hover:bg-white hover:border-slate-300'}
                                             `}
                                             onClick={() => setNewProduct({...newProduct, isNewArrival: !newProduct.isNewArrival})}
                                         >
                                             <div className="flex items-center gap-3">
-                                                 <div className={`p-2 rounded-full ${newProduct.isNewArrival ? 'bg-blue-50 text-[#0066b2]' : 'bg-slate-100 text-slate-300'}`}>
-                                                     <Star size={18} className={newProduct.isNewArrival ? 'fill-[#0066b2]' : ''} />
-                                                 </div>
-                                                 <div>
-                                                     <p className={`text-xs font-bold uppercase ${newProduct.isNewArrival ? 'text-slate-900' : 'text-slate-500'}`}>Segna come Novità</p>
-                                                     <p className="text-[10px] text-slate-400">Appare in alto nello store</p>
-                                                 </div>
+                                                <div className={`p-2.5 rounded-full ${newProduct.isNewArrival ? 'bg-blue-50 text-[#0066b2]' : 'bg-slate-200 text-slate-400'}`}>
+                                                    <Star size={18} className={newProduct.isNewArrival ? 'fill-[#0066b2]' : ''} />
+                                                </div>
+                                                <div>
+                                                    <p className={`text-xs font-bold uppercase ${newProduct.isNewArrival ? 'text-slate-900' : 'text-slate-500'}`}>Segna come Novità</p>
+                                                </div>
                                             </div>
-                                            <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-300 ${newProduct.isNewArrival ? 'bg-[#0066b2]' : 'bg-slate-200'}`}>
-                                                <div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${newProduct.isNewArrival ? 'translate-x-4' : 'translate-x-0'}`} />
+                                            
+                                            <div className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${newProduct.isNewArrival ? 'bg-[#0066b2]' : 'bg-slate-300'}`}>
+                                                <div className={`absolute top-1 left-1 bg-white w-5 h-5 rounded-full shadow-sm transform transition-transform duration-300 ${newProduct.isNewArrival ? 'translate-x-5' : 'translate-x-0'}`} />
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Right: Stock Management */}
-                                    <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 h-full">
-                                        <span className="block text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-4 pl-1">Gestione Stock per Taglia</span>
-                                        <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 flex flex-col h-full">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <span className="text-[10px] font-bold uppercase text-slate-400 tracking-widest pl-1">Inventario Taglie</span>
+                                            <span className="text-[10px] text-slate-400 font-bold bg-white px-2 py-1 rounded border border-slate-100">Quantità</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4 flex-grow content-center">
                                             {variantsState.map((v, idx) => (
                                                 <div key={v.size} className={`flex items-center gap-3 bg-white p-3 rounded-2xl border shadow-sm transition-all ${v.enabled ? 'border-slate-200 opacity-100' : 'border-slate-100 opacity-60 grayscale'}`}>
-                                                    <input type="checkbox" checked={v.enabled} onChange={(e) => {const up = [...variantsState]; up[idx].enabled = e.target.checked; setVariantsState(up);}} className="w-5 h-5 accent-[#0066b2] rounded cursor-pointer"/>
+                                                    <input type="checkbox" checked={v.enabled} onChange={(e) => {const up = [...variantsState]; up[idx].enabled = e.target.checked; setVariantsState(up);}} className="w-5 h-5 accent-[#0066b2] rounded-md cursor-pointer"/>
                                                     <span className="font-bold text-sm w-6 text-center">{v.size}</span>
                                                     <div className="flex-1 border-l border-slate-100 pl-3">
-                                                         <input 
+                                                        <input 
                                                             type="number" 
                                                             disabled={!v.enabled} 
                                                             value={v.stock} 
@@ -639,14 +648,15 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
                                     </div>
                                 </div>
 
-                                {/* 3. Bottom Section: Description */}
-                                <InputGroup label="Descrizione">
-                                    <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-32 resize-none" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} placeholder="Descrivi il fit e i dettagli..." />
-                                </InputGroup>
+                                {/* BOTTOM: DESC + SUBMIT */}
+                                <div className="space-y-8">
+                                    <InputGroup label="Descrizione">
+                                        <textarea className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-slate-900 focus:border-[#0066b2] outline-none transition-colors text-sm font-medium h-32 resize-none" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} placeholder="Descrivi il fit e i dettagli..." />
+                                    </InputGroup>
 
-                                {/* Submit Action */}
-                                <div className="pt-4 flex justify-center">
-                                     <LiquidButton type="submit" label="Salva Articolo" icon={Save} variant="primary" className="w-full md:w-auto min-w-[200px]" />
+                                    <div className="flex justify-center">
+                                        <LiquidButton type="submit" label="Salva Articolo" icon={Save} variant="primary" className="w-full md:w-auto min-w-[240px]" />
+                                    </div>
                                 </div>
 
                             </form>

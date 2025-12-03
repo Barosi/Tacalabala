@@ -77,8 +77,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             )
         `);
         
-        // Step 2: Add columns sequentially. We use separate queries to ensure even if one fails (e.g. exists but different type - rare in this context), others try to run.
-        // Although 'IF NOT EXISTS' handles existence, putting them in block helps readability.
+        // Step 2: Add columns sequentially. We ensure target_product_ids is TEXT to accept JSON string.
         const columns = [
             "ADD COLUMN IF NOT EXISTS code TEXT",
             "ADD COLUMN IF NOT EXISTS discount_type TEXT DEFAULT 'automatic'",
@@ -86,7 +85,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             "ADD COLUMN IF NOT EXISTS start_date TIMESTAMP",
             "ADD COLUMN IF NOT EXISTS end_date TIMESTAMP",
             "ADD COLUMN IF NOT EXISTS target_type TEXT",
-            "ADD COLUMN IF NOT EXISTS target_product_ids TEXT",
+            "ADD COLUMN IF NOT EXISTS target_product_ids TEXT", // MUST BE TEXT to store JSON.stringify result
             "ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE"
         ];
 
@@ -97,6 +96,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 console.warn(`Failed to add discount column: ${colSql}`, colErr);
             }
         }
+        
+        // Step 3: Ensure data types are correct (Optional but good for robustness if manual tinkering happened)
+        // We catch errors here in case columns don't exist yet (though they should) or conversion fails.
+        try {
+             await pool.query("ALTER TABLE discounts ALTER COLUMN target_product_ids TYPE TEXT");
+        } catch(e) { /* ignore if already text or conversion not needed */ }
 
     } catch (e) { console.warn("Discounts table creation/migration failed", e); }
 
