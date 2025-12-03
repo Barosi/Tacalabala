@@ -407,7 +407,7 @@ const Admin: React.FC<AdminProps> = ({ onLogout }) => {
     };
 
     return (
-        <section className="pt-32 md:pt-48 pb-16 md:pb-24 bg-slate-50 min-h-screen relative overflow-hidden">
+        <section className="pt-36 md:pt-48 pb-16 md:pb-24 bg-slate-50 min-h-screen relative overflow-hidden">
             
             {/* Toast Container - Fixed Bottom Right */}
             <div className="fixed bottom-6 right-6 z-[120] flex flex-col gap-3 pointer-events-none">

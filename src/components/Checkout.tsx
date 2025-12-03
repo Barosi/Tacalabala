@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { ArrowLeft, CheckCircle, Loader2, Globe, Lock, AlertCircle, Truck, FileText, CreditCard, ShieldCheck, Edit2, Tag } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Loader2, Globe, Lock, AlertCircle, Truck, FileText, CreditCard, ShieldCheck, Edit2, Tag, ChevronDown, ChevronUp, ShoppingBag } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { sendOrderConfirmationEmail } from '../utils/emailSender';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CheckoutProps {
   onBack: () => void;
@@ -66,6 +67,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [couponMsg, setCouponMsg] = useState('');
+  const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false); // New state for mobile toggle
 
   const [form, setForm] = useState({ email: '', firstName: '', lastName: '', address: '', city: '', zip: '', phone: '', taxId: '', vatNumber: '', sdiCode: '' });
 
@@ -116,6 +118,41 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
       setIsSuccess(true); window.scrollTo(0,0);
   };
 
+  // Reusable Summary Content
+  const SummaryContent = () => (
+      <>
+          <div className="space-y-6 mb-8 max-h-[300px] md:max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+              {cart.map(item => (
+                  <div key={item.cartId} className="flex items-start gap-4 group">
+                      <div className="w-16 h-20 bg-slate-50 rounded-xl overflow-hidden flex-shrink-0 border border-slate-200"><img src={item.imageUrl} className="w-full h-full object-contain" alt={item.title} /></div>
+                      <div className="flex-grow pt-1"><p className="font-bold text-sm text-slate-900 uppercase leading-tight mb-1 line-clamp-2">{item.title}</p><p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">{item.selectedSize} • Q.tà: {item.quantity}</p><p className="font-oswald font-bold text-[#0066b2] text-sm mt-1">{item.price}</p></div>
+                  </div>
+              ))}
+          </div>
+          
+          {/* COUPON SECTION */}
+          <div className="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <p className="text-[10px] font-bold uppercase text-slate-400 mb-2 flex items-center gap-2"><Tag size={12}/> Hai un codice sconto?</p>
+              <div className="flex gap-2 mb-2">
+                  <input type="text" value={couponCode} onChange={e => setCouponCode(e.target.value.toUpperCase())} disabled={!!appliedCoupon} className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold uppercase outline-none focus:border-[#0066b2]" placeholder="CODICE" />
+                  {appliedCoupon ? (
+                      <button onClick={() => {removeCoupon(); setCouponCode(''); setCouponMsg('');}} className="relative overflow-hidden group/btn bg-white text-red-600 border border-red-400 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-red-900/10 flex items-center justify-center transform-gpu active:scale-95"><span className="absolute inset-0 bg-red-600 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span><span className="relative z-10 group-hover/btn:text-white transition-colors duration-500">Rimuovi</span></button>
+                  ) : (
+                      <button onClick={handleApplyCoupon} className="relative overflow-hidden group/btn bg-white text-[#0066b2] py-2 px-4 rounded-full font-bold uppercase tracking-widest text-[9px] transition-all duration-300 shadow-sm hover:shadow-blue-900/20 border border-[#0066b2] flex items-center justify-center gap-2 transform-gpu active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"><span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span><span className="relative z-10 group-hover/btn:text-white transition-colors duration-500">Applica</span></button>
+                  )}
+              </div>
+              {couponMsg && <p className={`text-[10px] font-bold ${appliedCoupon ? 'text-green-600' : 'text-red-500'}`}>{couponMsg}</p>}
+          </div>
+
+          <div className="space-y-3 pt-6 border-t border-slate-100">
+                <div className="flex justify-between items-center text-sm"><span className="text-slate-500 font-bold uppercase text-xs tracking-wide">Subtotale (Promo Incluse)</span><span className="font-bold text-slate-800">€{(subTotal + discountVal).toFixed(2)}</span></div>
+                {appliedCoupon && <div className="flex justify-between items-center text-sm text-green-600"><span className="font-bold uppercase text-xs tracking-wide">Coupon {appliedCoupon.code}</span><span className="font-bold">-€{discountVal.toFixed(2)}</span></div>}
+                <div className="flex justify-between items-center text-sm"><span className="text-slate-500 font-bold uppercase text-xs tracking-wide">Spedizione</span><span className={shippingCost === 0 ? "text-green-600 font-bold text-[10px] uppercase bg-green-50 px-2 py-0.5 rounded" : "font-bold text-slate-800"}>{shippingCost === 0 ? 'Gratis' : `€${shippingCost.toFixed(2)}`}</span></div>
+          </div>
+          <div className="flex justify-between items-end mt-6 pt-6 border-t-2 border-slate-900"><span className="font-oswald text-lg uppercase font-bold text-slate-900">Totale</span><div className="text-right"><span className="font-oswald text-3xl font-bold text-[#0066b2] block leading-none">€{grandTotal.toFixed(2)}</span><span className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">IVA Inclusa</span></div></div>
+      </>
+  );
+
   if (isSuccess) return (
       <div className="pt-40 pb-20 min-h-screen flex flex-col items-center justify-center text-center px-6 bg-white animate-in fade-in zoom-in duration-300">
         <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-8 shadow-xl shadow-green-100"><CheckCircle size={48} /></div>
@@ -126,37 +163,72 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
   );
 
   if (cart.length === 0 && !orderId) return (<div className="pt-64 pb-20 text-center min-h-screen flex flex-col items-center bg-slate-50"><h2 className="font-oswald text-2xl uppercase font-bold text-slate-300 mb-4">Spogliatoi Vuoti.</h2><button onClick={onBack} className="text-[#0066b2] font-bold uppercase tracking-wider text-xs border-b-2 border-[#0066b2] pb-1 hover:text-black hover:border-black transition-colors">Torna allo Shop</button></div>);
-  const inputClass = "w-full bg-white border border-slate-200 p-4 rounded-xl focus:border-[#0066b2] outline-none transition-colors text-slate-900 placeholder:text-slate-300 text-sm font-medium shadow-sm";
+  
+  // Input class with text-base for mobile to prevent zoom
+  const inputClass = "w-full bg-white border border-slate-200 p-3 md:p-4 rounded-xl focus:border-[#0066b2] outline-none transition-colors text-slate-900 placeholder:text-slate-300 text-base md:text-sm font-medium shadow-sm appearance-none";
   const labelClass = "block text-[10px] uppercase font-bold text-slate-400 mb-1.5 tracking-wider pl-1";
 
   return (
-    <section className="pt-32 md:pt-48 pb-16 md:pb-24 bg-slate-50 min-h-screen">
-      <div className="container mx-auto px-6 max-w-7xl">
-        <div className="text-center mb-16"><h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase mb-4 text-slate-900 leading-[1.1]">Zona <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Cesarini</span></h2><p className="text-slate-500 text-lg max-w-2xl mx-auto font-light">Ultimi minuti per chiudere la partita. Inserisci i dati e porta a casa il risultato.</p></div>
+    <section className="pt-36 md:pt-48 pb-16 md:pb-24 bg-slate-50 min-h-screen">
+      <div className="container mx-auto px-4 md:px-6 max-w-7xl">
+        <div className="text-center mb-10 md:mb-16"><h2 className="font-oswald text-5xl md:text-7xl font-bold uppercase mb-4 text-slate-900 leading-[1.1]">Zona <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-[#0066b2] to-[#0066b2]">Cesarini</span></h2><p className="text-slate-500 text-lg max-w-2xl mx-auto font-light">Ultimi minuti per chiudere la partita. Inserisci i dati e porta a casa il risultato.</p></div>
         {serverError && <div className="max-w-3xl mx-auto mb-10 bg-red-50 border border-red-200 text-red-700 p-6 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-top-4 shadow-sm"><div className="p-3 bg-red-100 text-red-600 rounded-full"><AlertCircle size={24} /></div><div><p className="font-bold uppercase text-xs tracking-wider mb-1">Attenzione</p><p className="text-sm font-medium">{serverError}</p></div></div>}
+        
+        {/* --- MOBILE ACCORDION SUMMARY (Top of Page) --- */}
+        <div className="block lg:hidden mb-8">
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                <button 
+                    onClick={() => setIsMobileSummaryOpen(!isMobileSummaryOpen)}
+                    className="w-full flex items-center justify-between p-5 bg-slate-50/50"
+                >
+                    <div className="flex items-center gap-2 text-sm font-bold text-[#0066b2] uppercase tracking-wide">
+                        <ShoppingBag size={18} /> 
+                        <span>{isMobileSummaryOpen ? 'Nascondi Riepilogo' : 'Mostra Riepilogo Ordine'}</span>
+                        {isMobileSummaryOpen ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+                    </div>
+                    <span className="font-oswald font-bold text-xl text-slate-900">€{grandTotal.toFixed(2)}</span>
+                </button>
+                <AnimatePresence>
+                    {isMobileSummaryOpen && (
+                        <motion.div 
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="border-t border-slate-100"
+                        >
+                            <div className="p-5">
+                                <SummaryContent />
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          <div className="lg:col-span-7 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
+          
+          {/* FORMS */}
+          <div className="lg:col-span-7 space-y-6 md:space-y-8">
              {/* STEP 1 */}
-             <div className={`bg-white p-8 md:p-10 rounded-[2.5rem] shadow-xl shadow-blue-900/5 border transition-all duration-500 ${step === 1 ? 'border-[#0066b2] ring-4 ring-blue-50' : 'border-slate-100 opacity-60'}`}>
-                 <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-100">
+             <div className={`bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-xl shadow-blue-900/5 border transition-all duration-500 ${step === 1 ? 'border-[#0066b2] ring-4 ring-blue-50' : 'border-slate-100 opacity-60'}`}>
+                 <div className="flex items-center justify-between mb-6 md:mb-8 pb-4 md:pb-6 border-b border-slate-100">
                     <h2 className="font-oswald text-2xl font-bold uppercase flex items-center gap-4 text-slate-900"><span className={`w-10 h-10 flex items-center justify-center rounded-2xl text-sm font-bold shadow-md text-white transition-colors ${step > 1 ? 'bg-green-500' : 'bg-[#0066b2]'}`}>{step > 1 ? <CheckCircle size={20}/> : '1'}</span> Consegna</h2>
                     {step === 2 && <button onClick={() => {setStep(1); setOrderId(null); setClientSecret(null);}} className="flex items-center gap-2 text-xs font-bold uppercase text-slate-500 hover:text-[#0066b2] bg-slate-100 hover:bg-white px-3 py-1.5 rounded-lg border border-transparent hover:border-slate-200 transition-all"><Edit2 size={12} /> Modifica</button>}
                  </div>
                  {step === 1 && (
-                     <form id="address-form" onSubmit={handleAddressSubmit} className="space-y-6 animate-in slide-in-from-left-2">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div><label className={labelClass}>Email *</label><input required type="email" className={inputClass} value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="nome@email.com" /></div><div><label className={labelClass}>Telefono *</label><input required type="tel" className={inputClass} value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+39 333 0000000" /></div></div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div><label className={labelClass}>Nome *</label><input required type="text" className={inputClass} value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})} placeholder="Mario" /></div><div><label className={labelClass}>Cognome *</label><input required type="text" className={inputClass} value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})} placeholder="Rossi" /></div></div>
+                     <form id="address-form" onSubmit={handleAddressSubmit} className="space-y-4 md:space-y-6 animate-in slide-in-from-left-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><label className={labelClass}>Email *</label><input required type="email" className={inputClass} value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="nome@email.com" /></div><div><label className={labelClass}>Telefono *</label><input required type="tel" className={inputClass} value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+39 333 0000000" /></div></div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><label className={labelClass}>Nome *</label><input required type="text" className={inputClass} value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})} placeholder="Mario" /></div><div><label className={labelClass}>Cognome *</label><input required type="text" className={inputClass} value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})} placeholder="Rossi" /></div></div>
                         <div><label className={labelClass}>Indirizzo *</label><input required type="text" className={inputClass} value={form.address} onChange={e => setForm({...form, address: e.target.value})} placeholder="Via Manzoni 10" /></div>
-                        <div className="grid grid-cols-2 gap-6"><div><label className={labelClass}>Città *</label><input required type="text" className={inputClass} value={form.city} onChange={e => setForm({...form, city: e.target.value})} placeholder="Milano" /></div><div><label className={labelClass}>CAP *</label><input required type="text" className={inputClass} value={form.zip} onChange={e => setForm({...form, zip: e.target.value})} placeholder="20121" /></div></div>
+                        <div className="grid grid-cols-2 gap-4 md:gap-6"><div><label className={labelClass}>Città *</label><input required type="text" className={inputClass} value={form.city} onChange={e => setForm({...form, city: e.target.value})} placeholder="Milano" /></div><div><label className={labelClass}>CAP *</label><input required type="number" inputMode="numeric" className={inputClass} value={form.zip} onChange={e => setForm({...form, zip: e.target.value})} placeholder="20121" /></div></div>
                         <div><label className={`${labelClass} text-[#0066b2]`}>Paese *</label><div className="relative"><select value={countryCode} onChange={(e) => setCountryCode(e.target.value)} className={`${inputClass} appearance-none cursor-pointer font-bold text-slate-700 bg-slate-50`}>{COUNTRIES.map(c => (<option key={c.code} value={c.code}>{c.name}</option>))}</select><Globe size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" /></div></div>
                         <div className="pt-6 border-t border-slate-100">
                              <div className="flex items-center gap-3 cursor-pointer group mb-6" onClick={() => setWantInvoice(!wantInvoice)}><div className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 flex items-center ${wantInvoice ? 'bg-[#0066b2]' : 'bg-slate-200'}`}><div className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform duration-300 ${wantInvoice ? 'translate-x-6' : 'translate-x-0'}`} /></div><div className="flex items-center gap-2 text-slate-700 font-bold uppercase text-xs tracking-wider"><FileText size={16} /> Richiedi Fattura</div></div>
                              {wantInvoice && <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 animate-in fade-in space-y-4"><p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-2 flex items-center gap-2"><AlertCircle size={12}/> Compila i dati fiscali</p><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label className={labelClass}>Codice Fiscale</label><input type="text" className={inputClass} value={form.taxId} onChange={e => setForm({...form, taxId: e.target.value})} placeholder="RSSMRA80A01H501U" /></div><div><label className={labelClass}>Partita IVA</label><input type="text" className={inputClass} value={form.vatNumber} onChange={e => setForm({...form, vatNumber: e.target.value})} placeholder="IT12345678901" /></div></div><div><label className={labelClass}>Codice SDI / PEC</label><input type="text" className={inputClass} value={form.sdiCode} onChange={e => setForm({...form, sdiCode: e.target.value})} placeholder="0000000 o nome@pec.it" /></div></div>}
                         </div>
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
-                            <div className="flex items-start gap-3"><input type="checkbox" required checked={privacyAccepted} onChange={e => setPrivacyAccepted(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[#0066b2] cursor-pointer" id="chk-privacy" /><label htmlFor="chk-privacy" className="text-xs text-slate-500 cursor-pointer leading-tight">Accetto <span className="font-bold underline text-slate-700">Privacy Policy</span> *</label></div>
-                            <div className="flex items-start gap-3"><input type="checkbox" required checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} className="mt-0.5 w-4 h-4 accent-[#0066b2] cursor-pointer" id="chk-terms" /><label htmlFor="chk-terms" className="text-xs text-slate-500 cursor-pointer leading-tight">Accetto <span className="font-bold underline text-slate-700">Termini</span> *</label></div>
+                            <div className="flex items-start gap-3"><input type="checkbox" required checked={privacyAccepted} onChange={e => setPrivacyAccepted(e.target.checked)} className="mt-0.5 w-5 h-5 accent-[#0066b2] cursor-pointer" id="chk-privacy" /><label htmlFor="chk-privacy" className="text-xs text-slate-500 cursor-pointer leading-tight">Accetto <span className="font-bold underline text-slate-700">Privacy Policy</span> *</label></div>
+                            <div className="flex items-start gap-3"><input type="checkbox" required checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} className="mt-0.5 w-5 h-5 accent-[#0066b2] cursor-pointer" id="chk-terms" /><label htmlFor="chk-terms" className="text-xs text-slate-500 cursor-pointer leading-tight">Accetto <span className="font-bold underline text-slate-700">Termini</span> *</label></div>
                         </div>
                         <div className="pt-2"><button type="submit" disabled={isProcessing || !privacyAccepted || !termsAccepted} className={btnLiquidClass}><span className={btnLiquidHover}></span><span className={btnLiquidContent}>{isProcessing ? <Loader2 className="animate-spin" size={18} /> : <><Truck size={18} /> Vai al Pagamento</>}</span></button></div>
                      </form>
@@ -164,7 +236,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
              </div>
 
              {/* STEP 2 */}
-             <div className={`bg-white p-8 md:p-10 rounded-[2.5rem] shadow-xl border transition-all duration-500 ${step === 2 ? 'border-[#0066b2] shadow-blue-900/10' : 'border-slate-100 opacity-60'}`}>
+             <div className={`bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] shadow-xl border transition-all duration-500 ${step === 2 ? 'border-[#0066b2] shadow-blue-900/10' : 'border-slate-100 opacity-60'}`}>
                  <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-100"><h2 className={`font-oswald text-2xl font-bold uppercase flex items-center gap-4 ${step === 2 ? 'text-slate-900' : 'text-slate-300'}`}><span className={`w-10 h-10 flex items-center justify-center rounded-2xl text-sm font-bold shadow-md transition-colors ${step === 2 ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-400'}`}>2</span> Pagamento</h2></div>
                  {step === 2 && clientSecret && stripePromise && (
                      <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8">
@@ -177,38 +249,12 @@ const Checkout: React.FC<CheckoutProps> = ({ onBack }) => {
              </div>
           </div>
 
-          <div className="lg:col-span-5 sticky top-32">
-             <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl shadow-blue-900/10 border border-slate-100">
-                <div className="flex items-center gap-3 mb-8 pb-4 border-b border-slate-100"><CreditCard className="text-[#0066b2]" size={24} /><h3 className="font-oswald text-2xl font-bold uppercase text-slate-900">Riepilogo</h3></div>
-                <div className="space-y-6 mb-8 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                    {cart.map(item => (
-                        <div key={item.cartId} className="flex items-start gap-4 group">
-                            <div className="w-16 h-20 bg-slate-50 rounded-xl overflow-hidden flex-shrink-0 border border-slate-200"><img src={item.imageUrl} className="w-full h-full object-cover" alt={item.title} /></div>
-                            <div className="flex-grow pt-1"><p className="font-bold text-sm text-slate-900 uppercase leading-tight mb-1 line-clamp-2">{item.title}</p><p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">{item.selectedSize} • Q.tà: {item.quantity}</p><p className="font-oswald font-bold text-[#0066b2] text-sm mt-1">{item.price}</p></div>
-                        </div>
-                    ))}
-                </div>
+          {/* SUMMARY: Hidden on Mobile (Used Accordion at top instead), Visible on Desktop */}
+          <div className="hidden lg:block lg:col-span-5 lg:sticky lg:top-24">
+             <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl shadow-blue-900/10 border border-slate-100">
+                <div className="flex items-center gap-3 mb-6 md:mb-8 pb-4 border-b border-slate-100"><CreditCard className="text-[#0066b2]" size={24} /><h3 className="font-oswald text-2xl font-bold uppercase text-slate-900">Riepilogo</h3></div>
                 
-                {/* COUPON SECTION */}
-                <div className="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <p className="text-[10px] font-bold uppercase text-slate-400 mb-2 flex items-center gap-2"><Tag size={12}/> Hai un codice sconto?</p>
-                    <div className="flex gap-2 mb-2">
-                        <input type="text" value={couponCode} onChange={e => setCouponCode(e.target.value.toUpperCase())} disabled={!!appliedCoupon} className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold uppercase outline-none focus:border-[#0066b2]" placeholder="CODICE" />
-                        {appliedCoupon ? (
-                            <button onClick={() => {removeCoupon(); setCouponCode(''); setCouponMsg('');}} className="relative overflow-hidden group/btn bg-white text-red-600 border border-red-400 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-red-900/10 flex items-center justify-center transform-gpu active:scale-95"><span className="absolute inset-0 bg-red-600 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span><span className="relative z-10 group-hover/btn:text-white transition-colors duration-500">Rimuovi</span></button>
-                        ) : (
-                            <button onClick={handleApplyCoupon} className="relative overflow-hidden group/btn bg-white text-[#0066b2] py-2 px-4 rounded-full font-bold uppercase tracking-widest text-[9px] transition-all duration-300 shadow-sm hover:shadow-blue-900/20 border border-[#0066b2] flex items-center justify-center gap-2 transform-gpu active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"><span className="absolute inset-0 bg-[#0066b2] translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] z-0"></span><span className="relative z-10 group-hover/btn:text-white transition-colors duration-500">Applica</span></button>
-                        )}
-                    </div>
-                    {couponMsg && <p className={`text-[10px] font-bold ${appliedCoupon ? 'text-green-600' : 'text-red-500'}`}>{couponMsg}</p>}
-                </div>
-
-                <div className="space-y-3 pt-6 border-t border-slate-100">
-                     <div className="flex justify-between items-center text-sm"><span className="text-slate-500 font-bold uppercase text-xs tracking-wide">Subtotale (Promo Incluse)</span><span className="font-bold text-slate-800">€{(subTotal + discountVal).toFixed(2)}</span></div>
-                     {appliedCoupon && <div className="flex justify-between items-center text-sm text-green-600"><span className="font-bold uppercase text-xs tracking-wide">Coupon {appliedCoupon.code}</span><span className="font-bold">-€{discountVal.toFixed(2)}</span></div>}
-                     <div className="flex justify-between items-center text-sm"><span className="text-slate-500 font-bold uppercase text-xs tracking-wide">Spedizione</span><span className={shippingCost === 0 ? "text-green-600 font-bold text-[10px] uppercase bg-green-50 px-2 py-0.5 rounded" : "font-bold text-slate-800"}>{shippingCost === 0 ? 'Gratis' : `€${shippingCost.toFixed(2)}`}</span></div>
-                </div>
-                <div className="flex justify-between items-end mt-6 pt-6 border-t-2 border-slate-900"><span className="font-oswald text-lg uppercase font-bold text-slate-900">Totale</span><div className="text-right"><span className="font-oswald text-3xl font-bold text-[#0066b2] block leading-none">€{grandTotal.toFixed(2)}</span><span className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">IVA Inclusa</span></div></div>
+                <SummaryContent />
              </div>
           </div>
         </div>

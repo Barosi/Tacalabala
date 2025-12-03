@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, Shield, Lock, Eye, Server, Cookie } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -9,7 +9,7 @@ interface PrivacyPolicyProps {
 
 const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
   return (
-    <section className="pt-32 md:pt-48 pb-24 bg-white min-h-screen relative">
+    <section className="pt-36 md:pt-48 pb-24 bg-white min-h-screen relative">
       <div className="container mx-auto px-6 max-w-4xl">
         
         {/* Header */}

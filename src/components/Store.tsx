@@ -11,21 +11,22 @@ interface StoreProps {
 }
 
 // Componente isolato per i segmenti di filtro
-// LayoutGroup con ID univoco garantisce che l'animazione sia confinata a questo gruppo
 const StoreSegmentedControl = ({ 
     options, 
     value, 
     onChange, 
-    uniqueKey 
+    uniqueKey,
+    isCircle = false
 }: { 
     options: { value: string, label: string | React.ReactNode }[], 
     value: string, 
     onChange: (val: string) => void, 
-    uniqueKey: string 
+    uniqueKey: string,
+    isCircle?: boolean
 }) => {
     return (
         <LayoutGroup id={uniqueKey}>
-            <div className="flex items-center gap-1 p-1">
+            <div className={`flex items-center ${isCircle ? 'gap-3' : 'gap-1'} p-1`}>
                 {options.map((opt) => {
                     const isActive = value === opt.value;
                     return (
@@ -33,12 +34,15 @@ const StoreSegmentedControl = ({
                             key={opt.value}
                             onClick={() => onChange(opt.value)}
                             className={`
-                                relative px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest z-10 flex items-center justify-center min-w-[70px]
-                                transition-colors duration-300 outline-none
-                                ${isActive ? 'text-white' : 'text-slate-500 hover:text-[#0066b2]'}
+                                relative 
+                                ${isCircle ? 'w-10 h-10 rounded-full border border-slate-200' : 'px-4 md:px-5 py-2.5 rounded-full min-w-fit md:min-w-[70px]'}
+                                text-[10px] font-bold uppercase tracking-widest z-10 flex items-center justify-center
+                                transition-all duration-300 outline-none whitespace-nowrap
+                                ${isActive ? (isCircle ? 'bg-slate-900 text-white border-slate-900' : 'text-white') : 'text-slate-500 hover:text-[#0066b2]'}
+                                ${isCircle && !isActive ? 'bg-white' : ''}
                             `}
                         >
-                            {isActive && (
+                            {!isCircle && isActive && (
                                 <motion.div
                                     layoutId="activePill"
                                     className="absolute inset-0 bg-[#0066b2] rounded-full shadow-md"
@@ -99,22 +103,17 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
   ];
 
   return (
-    <section className="pt-32 md:pt-48 pb-24 bg-white min-h-screen relative overflow-hidden">
+    <section className="pt-36 md:pt-48 pb-24 bg-white min-h-screen relative overflow-hidden">
        
        {/* BACKGROUND: Pitch Lines + Central Fade */}
        <div className="absolute inset-0 pointer-events-none z-0">
-           {/* Center Circle Graphic */}
             <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-slate-100 rounded-full opacity-60"></div>
-            
-            {/* Axis Line with Gradient Fade */}
             <div className="absolute inset-0 flex justify-center">
                 <div 
                     className="w-px h-full bg-slate-200 border-l border-dashed border-slate-300"
                     style={{ maskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)' }}
                 ></div>
             </div>
-            
-            {/* Horizontal Line (Midfield) */}
             <div className="absolute top-1/3 left-0 w-full h-px bg-slate-100"></div>
       </div>
 
@@ -134,32 +133,80 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
             <p className="text-slate-500 uppercase tracking-widest text-xs font-bold">La collezione completa</p>
         </motion.div>
 
-        {/* --- TOOLBAR --- */}
-        <div className="sticky top-24 z-30 mb-12 flex justify-center w-full transition-all duration-300">
-            <div className="overflow-x-auto no-scrollbar pb-1 pt-1 max-w-full">
-                <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md border border-slate-200 p-2 rounded-full shadow-lg shadow-slate-200/50 min-w-max">
-                    
-                    {/* Gruppo 1: Collezione */}
-                    <StoreSegmentedControl 
-                        options={collectionOptions} 
-                        value={filterType} 
-                        onChange={setFilterType} 
-                        uniqueKey="collection-filter" 
-                    />
-
-                    {/* Divisore Verticale */}
-                    <div className="w-px h-8 bg-slate-200"></div>
-
-                    {/* Gruppo 2: Taglie */}
-                    <StoreSegmentedControl 
-                        options={sizeOptions} 
-                        value={filterSize} 
-                        onChange={setFilterSize} 
-                        uniqueKey="size-filter" 
-                    />
-
+        {/* --- TOOLBAR (Sticky) --- */}
+        <div className="sticky top-28 md:top-24 z-30 mb-8 md:mb-12 transition-all duration-300">
+            
+            {/* DESKTOP VIEW: Unified Glass Pill */}
+            <div className="hidden md:flex justify-center w-full">
+                <div className="overflow-x-auto no-scrollbar py-2 px-4">
+                    <div className="flex items-center gap-2 bg-white/95 backdrop-blur-md border border-slate-200 p-2 rounded-full shadow-lg shadow-slate-200/50 min-w-max mx-auto">
+                        <StoreSegmentedControl 
+                            options={collectionOptions} 
+                            value={filterType} 
+                            onChange={setFilterType} 
+                            uniqueKey="desktop-collection-filter" 
+                        />
+                        <div className="w-px h-8 bg-slate-200 mx-1"></div>
+                        <StoreSegmentedControl 
+                            options={sizeOptions} 
+                            value={filterSize} 
+                            onChange={setFilterSize} 
+                            uniqueKey="desktop-size-filter" 
+                        />
+                    </div>
                 </div>
             </div>
+
+            {/* MOBILE VIEW: Text Pills + Circles (Scrollable) */}
+            <div className="md:hidden flex flex-col gap-4 w-full pb-2">
+                
+                {/* Row 1: Categories (Text Pills - Horizontal Scroll) */}
+                <div className="flex overflow-x-auto no-scrollbar gap-2 px-4 w-full snap-x items-center">
+                    {[{value: 'all', label: 'Tutti'}, ...categories.map(c => ({value: c, label: c}))].map((opt) => {
+                         const isActive = filterType === opt.value;
+                         return (
+                             <button
+                                key={opt.value}
+                                onClick={() => setFilterType(opt.value)}
+                                className={`
+                                    flex-shrink-0 snap-start
+                                    px-5 py-2.5 rounded-full 
+                                    text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border
+                                    ${isActive 
+                                        ? 'bg-slate-900 text-white border-slate-900 shadow-md transform scale-105' 
+                                        : 'bg-white text-slate-500 border-slate-200'}
+                                `}
+                            >
+                                {opt.label}
+                            </button>
+                         )
+                    })}
+                </div>
+
+                {/* Row 2: Sizes (Circles - Horizontal Scroll) */}
+                <div className="flex overflow-x-auto no-scrollbar gap-3 px-4 w-full items-center snap-x">
+                    {sizeOptions.map((opt) => {
+                        const isActive = filterSize === opt.value;
+                        return (
+                             <button
+                                key={opt.value}
+                                onClick={() => setFilterSize(opt.value)}
+                                className={`
+                                    flex-shrink-0 snap-start
+                                    w-11 h-11 rounded-full flex items-center justify-center text-[10px] font-bold uppercase transition-all border
+                                    ${isActive 
+                                        ? 'bg-[#0066b2] text-white border-[#0066b2] shadow-md shadow-blue-500/30' 
+                                        : 'bg-white text-slate-400 border-slate-200'}
+                                `}
+                            >
+                                {opt.label}
+                            </button>
+                        );
+                    })}
+                </div>
+
+            </div>
+
         </div>
 
         {/* Products Grid */}
@@ -172,7 +219,7 @@ const Store: React.FC<StoreProps> = ({ onProductClick }) => {
                 </button>
             </div>
         ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8 md:gap-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 md:gap-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
                 {filteredProducts.map(product => (
                     <div key={product.id} className="h-full">
                         <ProductCard product={product} onClick={() => onProductClick?.(product)} />

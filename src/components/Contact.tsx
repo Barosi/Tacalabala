@@ -59,7 +59,7 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <section id="contact" className="pt-64 pb-24 bg-white border-t border-slate-100 relative overflow-hidden">
+    <section id="contact" className="pt-36 md:pt-48 pb-24 bg-white border-t border-slate-100 relative overflow-hidden">
       
        {/* Background Pattern */}
        <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style={{

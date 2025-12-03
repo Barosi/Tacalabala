@@ -9,7 +9,7 @@ interface TermsAndConditionsProps {
 
 const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({ onBack }) => {
   return (
-    <section className="pt-32 md:pt-48 pb-24 bg-white min-h-screen relative">
+    <section className="pt-36 md:pt-48 pb-24 bg-white min-h-screen relative">
       <div className="container mx-auto px-6 max-w-4xl">
         
         {/* Header */}
